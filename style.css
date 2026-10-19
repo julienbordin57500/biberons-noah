@@ -10,6 +10,18 @@
   --trunk: #7a4a24;
   --giraffe: #f2b544;
   --giraffe-spot: #a8611f;
+  --giraffe-dark: #d99b34;
+  --muzzle: #f9dc9c;
+  --elephant: #b4b2c6;
+  --elephant-dark: #9896ae;
+  --ear-in: #eab3b3;
+  --meerkat: #cfa66c;
+  --meerkat-belly: #f1d7a6;
+  --pond: #6fb6d9;
+  --pond-shine: #d4f0ff;
+  --bird: #6b4a2c;
+  --milk: #e8742c;
+  --breast: #c4638f;
 
   --card: rgba(255, 252, 244, 0.92);
   --card-border: #f1d9a8;
@@ -40,8 +52,20 @@
     --hill-front: #2b253d;
     --acacia: #2f3a2b;
     --trunk: #2a2230;
-    --giraffe: #5a4a4a;
-    --giraffe-spot: #3c302f;
+    --giraffe: #b48d55;
+    --giraffe-spot: #6e4a2a;
+    --giraffe-dark: #96733f;
+    --muzzle: #cdb07a;
+    --elephant: #85849f;
+    --elephant-dark: #6c6b88;
+    --ear-in: #a98494;
+    --meerkat: #a07f52;
+    --meerkat-belly: #c2a77a;
+    --pond: #3e5d8f;
+    --pond-shine: #9fb8e8;
+    --bird: #c4bce0;
+    --milk: #f0a04b;
+    --breast: #e58fb4;
 
     --card: rgba(38, 36, 70, 0.9);
     --card-border: #4b4880;
@@ -71,8 +95,20 @@
   --hill-front: #2b253d;
   --acacia: #2f3a2b;
   --trunk: #2a2230;
-  --giraffe: #5a4a4a;
-  --giraffe-spot: #3c302f;
+  --giraffe: #b48d55;
+  --giraffe-spot: #6e4a2a;
+  --giraffe-dark: #96733f;
+  --muzzle: #cdb07a;
+  --elephant: #85849f;
+  --elephant-dark: #6c6b88;
+  --ear-in: #a98494;
+  --meerkat: #a07f52;
+  --meerkat-belly: #c2a77a;
+  --pond: #3e5d8f;
+  --pond-shine: #9fb8e8;
+  --bird: #c4bce0;
+  --milk: #f0a04b;
+  --breast: #e58fb4;
   --card: rgba(38, 36, 70, 0.9);
   --card-border: #4b4880;
   --ink: #fdf3dc;
@@ -152,16 +188,10 @@ body {
 .hill-front { fill: var(--hill-front); }
 .acacia ellipse { fill: var(--acacia); }
 .acacia path { stroke: var(--trunk); }
-.giraffe .g-body { fill: var(--giraffe); }
-.giraffe .g-spot { fill: var(--giraffe-spot); }
-.giraffe .g-horn { stroke: var(--giraffe-spot); }
-.giraffe .g-eye { fill: var(--ink); }
-.giraffe { animation: nod 5s ease-in-out infinite; transform-box: fill-box; }
 .grass path { fill: none; stroke: var(--acacia); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(110vw); } }
-@keyframes nod { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
 
 /* ---------- Mise en page ---------- */
 .app {
@@ -210,6 +240,20 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .stat .big { margin: 0; font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
 .stat .unit { font-size: 1rem; font-weight: 500; color: var(--ink-soft); }
+.stat .detail { margin: 4px 0 0; color: var(--ink-soft); font-size: 1rem; white-space: nowrap; }
+
+/* Choix biberon / allaitement */
+.mode { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.mode-btn {
+  font: inherit; font-size: 1.15rem; font-weight: 700; color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--chip); border: 3px solid var(--card-border); border-radius: 18px;
+  padding: 10px 6px; min-height: 76px; cursor: pointer; transition: background .2s, border-color .2s, color .2s;
+}
+.mode-btn .emoji { font-size: 1.9rem; line-height: 1.1; }
+.mode-btn[data-mode="biberon"][aria-selected="true"] { background: var(--milk); border-color: var(--milk); color: #fff; }
+.mode-btn[data-mode="allaitement"][aria-selected="true"] { background: var(--breast); border-color: var(--breast); color: #fff; }
+.panel .label { margin-top: 2px; }
 
 /* Ajout */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 14px; }
@@ -241,13 +285,10 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 }
 .add-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); }
 .add-btn:disabled { opacity: .6; cursor: wait; }
-.add-btn svg { width: 26px; height: 40px; flex: none; }
-.add-btn .teat { fill: #f5b38a; }
-.add-btn .ring { fill: #7cb6e8; }
-.add-btn .bottle { fill: rgba(255, 255, 255, .85); }
-.add-btn .milk { fill: #fff7e6; }
-.add-btn .marks { stroke: #7cb6e8; }
-.add-btn.pop svg { animation: pop .5s ease; }
+.add-btn .emoji { font-size: 1.8rem; line-height: 1; }
+.add-btn[data-mode="allaitement"] { background: var(--breast); box-shadow: 0 6px 0 color-mix(in srgb, var(--breast) 60%, #000); }
+.add-btn[data-mode="allaitement"]:active { box-shadow: 0 2px 0 color-mix(in srgb, var(--breast) 60%, #000); }
+.add-btn.pop .emoji { animation: pop .5s ease; }
 @keyframes pop { 30% { transform: scale(1.3) rotate(-12deg); } 60% { transform: scale(.95) rotate(6deg); } }
 
 /* Historique */
@@ -258,7 +299,10 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 }
 .history li:first-child { border-top: 0; }
 .history .h-time { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 4.2ch; }
-.history .h-ml { flex: 1; color: var(--ink-soft); font-size: 1.05rem; }
+.history .h-emoji { font-size: 1.4rem; width: 1.6rem; text-align: center; flex: none; }
+.history .h-info { flex: 1; display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.history .h-type { font-weight: 600; }
+.history .h-det { color: var(--ink-soft); font-size: .95rem; }
 .history .h-ago { color: var(--ink-soft); font-size: .9rem; }
 .del {
   font: inherit; width: 40px; height: 40px; border-radius: 50%;
@@ -284,3 +328,58 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Animaux de la savane ---------- */
+.landscape .walker { will-change: transform; }
+.animal, .birds, .meerkat { visibility: hidden; }
+.animal.on, .birds.on, .meerkat.on { visibility: visible; }
+
+.giraffe .fur { fill: var(--giraffe); }
+.giraffe .fur-dark { fill: var(--giraffe-dark); }
+.giraffe .spot { fill: var(--giraffe-spot); }
+.giraffe .hoof { fill: var(--giraffe-spot); }
+.giraffe .muzzle { fill: var(--muzzle); }
+.giraffe .neck-line { fill: none; stroke: var(--giraffe); stroke-width: 10; stroke-linecap: round; }
+.giraffe .mane { fill: none; stroke: var(--giraffe-spot); stroke-width: 2.4; stroke-linecap: round; }
+.giraffe .horn { fill: none; stroke: var(--giraffe-spot); stroke-width: 2; stroke-linecap: round; }
+.giraffe .tail { fill: none; stroke: var(--giraffe-spot); stroke-width: 1.6; stroke-linecap: round; }
+.landscape .ink { fill: #4a2c14; }
+.landscape .happy-eye { fill: none; stroke: #4a2c14; stroke-width: 1.4; stroke-linecap: round; }
+.landscape .blush { fill: var(--cheek); opacity: .7; }
+
+.elephant .skin { fill: var(--elephant); }
+.elephant .skin-dark { fill: var(--elephant-dark); }
+.elephant .ear-in { fill: var(--ear-in); }
+.elephant .trunk-line { fill: none; stroke: var(--elephant); stroke-width: 6.5; stroke-linecap: round; }
+.elephant .tusk { fill: none; stroke: #fffaf0; stroke-width: 2.2; stroke-linecap: round; }
+.elephant .tail { fill: none; stroke: var(--elephant-dark); stroke-width: 1.6; stroke-linecap: round; }
+.elephant.left .facing { transform: scaleX(-1); }
+
+.meerkat .m-body { fill: var(--meerkat); }
+.meerkat .m-belly { fill: var(--meerkat-belly); }
+.meerkat .m-dark { fill: #3b2614; }
+.meerkat .m-arms { fill: none; stroke: #8a6a3f; stroke-width: 1.4; stroke-linecap: round; }
+
+.pond { fill: var(--pond); }
+.pond-shine { fill: var(--pond-shine); opacity: .7; }
+
+.birds .flap { fill: none; stroke: var(--bird); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; animation: flap .35s ease-in-out infinite alternate; }
+.birds .f2 { animation-delay: -.12s; }
+.birds .f3 { animation-delay: -.24s; }
+@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-.5); } }
+
+/* Marche : les pattes se balancent, le corps rebondit */
+.walking .leg-a { animation: swing .7s ease-in-out infinite alternate; }
+.walking .leg-b { animation: swing .7s ease-in-out infinite alternate-reverse; }
+.walking .bob { animation: bob .35s ease-in-out infinite alternate; }
+.elephant.walking .leg-a, .elephant.walking .leg-b { animation-duration: .9s; }
+.elephant.walking .bob { animation-duration: .45s; }
+.elephant .trunk { animation: sway 2.4s ease-in-out infinite alternate; }
+@keyframes swing { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-1.2px); } }
+@keyframes sway { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+
+/* La girafe baisse le cou pour boire */
+.giraffe .neck, .giraffe .head { transition: transform 1.6s ease-in-out; }
+.giraffe.drinking .neck { transform: rotate(125deg); }
+.giraffe.drinking .head { transform: rotate(-50deg); }

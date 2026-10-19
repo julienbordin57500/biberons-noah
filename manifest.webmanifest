@@ -1,6 +1,6 @@
 {
-  "name": "Les biberons de Noah",
-  "short_name": "Biberons",
+  "name": "Les repas de Noah",
+  "short_name": "Noah",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

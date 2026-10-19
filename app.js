@@ -2,18 +2,35 @@
 const SUPABASE_URL = "https://jybymeodrcjdxqxvvggm.supabase.co";
 const SUPABASE_KEY = "sb_publishable_KnZB8Lh0snCPuAPphixPGw_QoNmXlrF";
 const API = `${SUPABASE_URL}/rest/v1/biberons`;
+const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min";
 
 const QUANTITES = [60, 90, 120, 150, 180, 210, 240];
+const COTES = ["gauche", "droite", "les deux"];
+const DUREES = [5, 10, 15, 20, 30];
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Couleur du minuteur : vert, puis orange, puis rouge
 const WARN_MS = 2.5 * 60 * 60 * 1000;
 const LATE_MS = 3.5 * 60 * 60 * 1000;
 
+const MODES = {
+  biberon: { emoji: "🍼", bouton: "Nouveau biberon", nom: "Biberon" },
+  allaitement: { emoji: "🤱", bouton: "Nouvel allaitement", nom: "Allaitement" },
+};
+
 const $ = (id) => document.getElementById(id);
 
-let biberons = []; // dernières 24 h, du plus récent au plus ancien
-let dernier = null; // le tout dernier biberon, même s'il date de plus de 24 h
-let quantite = loadQuantite();
+let repas = []; // dernières 24 h, du plus récent au plus ancien
+let dernier = null; // le tout dernier repas, même s'il date de plus de 24 h
+
+// Choix retenus sur ce téléphone
+const choix = {
+  quantite: lire("quantite", 150, (v) => v === null || QUANTITES.includes(v)),
+  cote: lire("cote", null, (v) => v === null || COTES.includes(v)),
+  duree: lire("duree", null, (v) => v === null || DUREES.includes(v)),
+};
+// La nuit (21 h – 7 h), on propose l'allaitement par défaut
+const heure = new Date().getHours();
+let mode = heure >= 21 || heure < 7 ? "allaitement" : "biberon";
 
 // ---------- API ----------
 async function api(path = "", options = {}) {
@@ -33,16 +50,16 @@ async function api(path = "", options = {}) {
 async function charger() {
   try {
     const depuis = new Date(Date.now() - DAY_MS).toISOString();
-    biberons = await api(`?select=id,pris_le,quantite_ml&pris_le=gte.${encodeURIComponent(depuis)}&order=pris_le.desc`);
-    if (biberons.length) {
-      dernier = biberons[0];
+    repas = await api(`?select=${COLONNES}&pris_le=gte.${encodeURIComponent(depuis)}&order=pris_le.desc`);
+    if (repas.length) {
+      dernier = repas[0];
     } else {
-      const [d] = await api("?select=id,pris_le,quantite_ml&order=pris_le.desc&limit=1");
+      const [d] = await api(`?select=${COLONNES}&order=pris_le.desc&limit=1`);
       dernier = d || null;
     }
     afficherErreur(null);
   } catch (e) {
-    afficherErreur("Impossible de charger les biberons. Vérifie la connexion internet.");
+    afficherErreur("Impossible de charger les repas. Vérifie la connexion internet.");
   }
   rendre();
 }
@@ -51,16 +68,20 @@ async function ajouter() {
   const btn = $("add-btn");
   btn.disabled = true;
   try {
-    const pris_le = heureChoisie().toISOString();
-    await api("", { method: "POST", body: JSON.stringify({ pris_le, quantite_ml: quantite }) });
+    const ligne =
+      mode === "biberon"
+        ? { type: "biberon", quantite_ml: choix.quantite }
+        : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
+    ligne.pris_le = heureChoisie().toISOString();
+    await api("", { method: "POST", body: JSON.stringify(ligne) });
     btn.classList.remove("pop");
     void btn.offsetWidth;
     btn.classList.add("pop");
-    toast(quantite ? `Biberon de ${quantite} ml ajouté !` : "Biberon ajouté !");
+    toast(`${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
     $("when-time").value = "";
     await charger();
   } catch (e) {
-    afficherErreur("Le biberon n'a pas pu être enregistré. Réessaie.");
+    afficherErreur("Le repas n'a pas pu être enregistré. Réessaie.");
   } finally {
     btn.disabled = false;
   }
@@ -69,7 +90,7 @@ async function ajouter() {
 async function supprimer(id) {
   try {
     await api(`?id=eq.${id}`, { method: "DELETE" });
-    toast("Biberon supprimé");
+    toast("Repas supprimé");
     await charger();
   } catch (e) {
     afficherErreur("Suppression impossible. Réessaie.");
@@ -108,6 +129,15 @@ function fmtIlYa(ms) {
   return `il y a ${h} h${min % 60 ? " " + pad(min % 60) : ""}`;
 }
 
+// « 150 ml » ou « gauche · 15 min »
+function details(r) {
+  if (r.type === "allaitement") {
+    const morceaux = [r.cote, r.duree_min && `${r.duree_min} min`].filter(Boolean);
+    return morceaux.join(" · ");
+  }
+  return r.quantite_ml ? `${r.quantite_ml} ml` : "";
+}
+
 // ---------- Affichage ----------
 function tick() {
   const el = $("timer");
@@ -125,77 +155,95 @@ function rendre() {
   // Minuteur
   if (dernier) {
     const d = new Date(dernier.pris_le);
+    const m = MODES[dernier.type] || MODES.biberon;
     const jour = d.toDateString() === new Date().toDateString() ? "" : " (" + d.toLocaleDateString("fr-FR", { weekday: "long" }) + ")";
-    $("last-info").textContent = `à ${fmtHeure(d)}${jour}` + (dernier.quantite_ml ? ` · ${dernier.quantite_ml} ml` : "");
+    const det = details(dernier);
+    $("last-info").textContent = `${m.emoji} ${m.nom} à ${fmtHeure(d)}${jour}` + (det ? ` · ${det}` : "");
   } else {
-    $("last-info").textContent = "Pas encore de biberon enregistré";
+    $("last-info").textContent = "Pas encore de repas enregistré";
   }
   tick();
 
   // Totaux
   const minuit = new Date();
   minuit.setHours(0, 0, 0, 0);
-  const aujourdhui = biberons.filter((b) => new Date(b.pris_le) >= minuit);
-  remplirStat("today", aujourdhui);
-  remplirStat("day", biberons);
+  remplirStat("today", repas.filter((r) => new Date(r.pris_le) >= minuit));
+  remplirStat("day", repas);
 
   // Liste
-  const ul = $("list");
-  ul.replaceChildren(
-    ...biberons.map((b) => {
-      const li = document.createElement("li");
-      const d = new Date(b.pris_le);
-      li.innerHTML = `
-        <span class="h-time">${fmtHeure(d)}</span>
-        <span class="h-ml">${b.quantite_ml ? b.quantite_ml + " ml" : "quantité ?"}</span>
-        <span class="h-ago">${fmtIlYa(Date.now() - d.getTime())}</span>`;
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "del";
+  $("list").replaceChildren(...repas.map(ligneHistorique));
+  $("empty").hidden = repas.length > 0;
+}
+
+function ligneHistorique(r) {
+  const li = document.createElement("li");
+  const d = new Date(r.pris_le);
+  const m = MODES[r.type] || MODES.biberon;
+  li.className = r.type;
+  const det = details(r);
+  li.innerHTML = `
+    <span class="h-emoji" aria-hidden="true">${m.emoji}</span>
+    <span class="h-time">${fmtHeure(d)}</span>
+    <span class="h-info"><span class="h-type">${m.nom}</span>${det ? `<span class="h-det">${det}</span>` : ""}</span>
+    <span class="h-ago">${fmtIlYa(Date.now() - d.getTime())}</span>`;
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "del";
+  del.textContent = "✕";
+  del.setAttribute("aria-label", `Supprimer le repas de ${fmtHeure(d)}`);
+  del.addEventListener("click", () => {
+    // Deux appuis pour supprimer, pour éviter les erreurs
+    if (del.classList.contains("confirm")) return supprimer(r.id);
+    del.classList.add("confirm");
+    del.textContent = "Supprimer ?";
+    setTimeout(() => {
+      del.classList.remove("confirm");
       del.textContent = "✕";
-      del.setAttribute("aria-label", `Supprimer le biberon de ${fmtHeure(d)}`);
-      del.addEventListener("click", () => {
-        // Deux appuis pour supprimer, pour éviter les erreurs
-        if (del.classList.contains("confirm")) return supprimer(b.id);
-        del.classList.add("confirm");
-        del.textContent = "Supprimer ?";
-        setTimeout(() => {
-          del.classList.remove("confirm");
-          del.textContent = "✕";
-        }, 3000);
-      });
-      li.append(del);
-      return li;
-    })
-  );
-  $("empty").hidden = biberons.length > 0;
+    }, 3000);
+  });
+  li.append(del);
+  return li;
 }
 
 function remplirStat(prefix, liste) {
-  const ml = liste.reduce((t, b) => t + (b.quantite_ml || 0), 0);
+  const bib = liste.filter((r) => r.type !== "allaitement");
+  const all = liste.filter((r) => r.type === "allaitement");
+  const ml = bib.reduce((t, r) => t + (r.quantite_ml || 0), 0);
+  const min = all.reduce((t, r) => t + (r.duree_min || 0), 0);
   $(`${prefix}-count`).textContent = liste.length;
-  $(`${prefix}-plural`).textContent = liste.length > 1 ? "s" : "";
-  $(`${prefix}-ml`).textContent = `${ml} ml bus`;
+  $(`${prefix}-bib`).textContent = `🍼 ${bib.length}` + (ml ? ` · ${ml} ml` : "");
+  $(`${prefix}-all`).textContent = `🤱 ${all.length}` + (min ? ` · ${min} min` : "");
 }
 
-function rendreChips() {
-  const options = [...QUANTITES, null];
-  $("chips").replaceChildren(
-    ...options.map((q) => {
+// ---------- Choix ----------
+function rendreChips(id, options, cle, libelle) {
+  $(id).replaceChildren(
+    ...[...options, null].map((v) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "chip";
       b.setAttribute("role", "radio");
-      b.setAttribute("aria-checked", String(q === quantite));
-      b.textContent = q ? `${q} ml` : "Je ne sais pas";
+      b.setAttribute("aria-checked", String(v === choix[cle]));
+      b.textContent = v === null ? "Je ne sais pas" : libelle(v);
       b.addEventListener("click", () => {
-        quantite = q;
-        saveQuantite(q);
-        rendreChips();
+        choix[cle] = v;
+        ecrire(cle, v);
+        rendreChips(id, options, cle, libelle);
       });
       return b;
     })
   );
+}
+
+function rendreMode() {
+  document.querySelectorAll(".mode-btn").forEach((b) => {
+    b.setAttribute("aria-selected", String(b.dataset.mode === mode));
+  });
+  $("panel-biberon").hidden = mode !== "biberon";
+  $("panel-allaitement").hidden = mode !== "allaitement";
+  $("add-emoji").textContent = MODES[mode].emoji;
+  $("add-label").textContent = MODES[mode].bouton;
+  $("add-btn").dataset.mode = mode;
 }
 
 function afficherErreur(msg) {
@@ -212,26 +260,36 @@ function toast(msg) {
   toastTimer = setTimeout(() => (t.hidden = true), 2200);
 }
 
-// La dernière quantité choisie est retenue sur ce téléphone
-function loadQuantite() {
+function lire(cle, defaut, valide) {
   try {
-    const v = localStorage.getItem("quantite");
-    if (v === "null") return null;
-    if (v && QUANTITES.includes(Number(v))) return Number(v);
+    const brut = localStorage.getItem(cle);
+    if (brut !== null) {
+      const v = JSON.parse(brut);
+      if (valide(v)) return v;
+    }
   } catch (e) {}
-  return 150;
+  return defaut;
 }
-function saveQuantite(q) {
+function ecrire(cle, v) {
   try {
-    localStorage.setItem("quantite", String(q));
+    localStorage.setItem(cle, JSON.stringify(v));
   } catch (e) {}
 }
 
 // ---------- Démarrage ----------
+document.querySelectorAll(".mode-btn").forEach((b) =>
+  b.addEventListener("click", () => {
+    mode = b.dataset.mode;
+    rendreMode();
+  })
+);
 $("add-btn").addEventListener("click", ajouter);
 $("when-now").addEventListener("click", () => ($("when-time").value = ""));
 
-rendreChips();
+rendreChips("chips-ml", QUANTITES, "quantite", (v) => `${v} ml`);
+rendreChips("chips-cote", COTES, "cote", (v) => v[0].toUpperCase() + v.slice(1));
+rendreChips("chips-duree", DUREES, "duree", (v) => `${v} min`);
+rendreMode();
 charger();
 setInterval(tick, 1000);
 setInterval(charger, 60 * 1000);
