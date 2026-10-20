@@ -1,0 +1,165 @@
+// Page Repas : biberons et allaitements (table « biberons »)
+(() => {
+  const TABLE = "biberons";
+  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min";
+  const QUANTITES = [60, 90, 120, 150, 180, 210, 240];
+  const COTES = ["gauche", "droite", "les deux"];
+  const DUREES = [5, 10, 15, 20, 30];
+  const WARN_MS = 2.5 * 60 * 60 * 1000;
+  const LATE_MS = 3.5 * 60 * 60 * 1000;
+
+  const MODES = {
+    biberon: { emoji: "🍼", bouton: "Nouveau biberon", nom: "Biberon" },
+    allaitement: { emoji: "🤱", bouton: "Nouvel allaitement", nom: "Allaitement" },
+  };
+
+  let repas = []; // dernières 24 h, du plus récent au plus ancien
+  let dernier = null; // le tout dernier repas, même s'il date de plus de 24 h
+
+  const choix = {
+    quantite: lire("quantite", 150, (v) => v === null || QUANTITES.includes(v)),
+    cote: lire("cote", null, (v) => v === null || COTES.includes(v)),
+    duree: lire("duree", null, (v) => v === null || DUREES.includes(v)),
+  };
+  // La nuit (21 h – 7 h), on propose l'allaitement par défaut
+  const heure = new Date().getHours();
+  let mode = heure >= 21 || heure < 7 ? "allaitement" : "biberon";
+
+  async function charger() {
+    try {
+      repas = await api(TABLE, `?select=${COLONNES}&pris_le=gte.${encodeURIComponent(ilYa24h())}&order=pris_le.desc`);
+      if (repas.length) {
+        dernier = repas[0];
+      } else {
+        const [d] = await api(TABLE, `?select=${COLONNES}&order=pris_le.desc&limit=1`);
+        dernier = d || null;
+      }
+      afficherErreur(null);
+    } catch (e) {
+      afficherErreur("Impossible de charger les données. Vérifie la connexion internet.");
+    }
+    rendre();
+  }
+
+  async function ajouter() {
+    const btn = $("repas-btn");
+    btn.disabled = true;
+    try {
+      const ligne =
+        mode === "biberon"
+          ? { type: "biberon", quantite_ml: choix.quantite }
+          : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
+      ligne.pris_le = heureChoisie("repas-heure").toISOString();
+      await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
+      animerBouton(btn);
+      toast(`${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
+      $("repas-heure").value = "";
+      await charger();
+    } catch (e) {
+      afficherErreur("Le repas n'a pas pu être enregistré. Réessaie.");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function supprimer(id) {
+    try {
+      await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
+      toast("Repas supprimé");
+      await charger();
+    } catch (e) {
+      afficherErreur("Suppression impossible. Réessaie.");
+    }
+  }
+
+  // « 150 ml » ou « gauche · 15 min »
+  function details(r) {
+    if (r.type === "allaitement") return [r.cote, r.duree_min && `${r.duree_min} min`].filter(Boolean).join(" · ");
+    return r.quantite_ml ? `${r.quantite_ml} ml` : "";
+  }
+
+  function tick() {
+    const el = $("repas-timer");
+    if (!dernier) {
+      el.textContent = "--:--";
+      return;
+    }
+    const ecart = Date.now() - new Date(dernier.pris_le).getTime();
+    el.textContent = fmtDuree(ecart);
+    couleurMinuteur(el, ecart, WARN_MS, LATE_MS);
+  }
+
+  function rendre() {
+    if (dernier) {
+      const m = MODES[dernier.type] || MODES.biberon;
+      const det = details(dernier);
+      $("repas-info").textContent =
+        `${m.emoji} ${m.nom} à ${fmtHeure(dernier.pris_le)}${jourSiPasAujourdhui(dernier.pris_le)}` + (det ? ` · ${det}` : "");
+    } else {
+      $("repas-info").textContent = "Pas encore de repas enregistré";
+    }
+    tick();
+
+    const debutJour = minuit();
+    remplirStat("today", repas.filter((r) => new Date(r.pris_le) >= debutJour));
+    remplirStat("day", repas);
+
+    $("repas-list").replaceChildren(...repas.map(ligneHistorique));
+    $("repas-empty").hidden = repas.length > 0;
+    contenuChange();
+  }
+
+  function ligneHistorique(r) {
+    const li = document.createElement("li");
+    const m = MODES[r.type] || MODES.biberon;
+    const det = details(r);
+    li.innerHTML = `
+      <span class="h-emoji" aria-hidden="true">${m.emoji}</span>
+      <span class="h-time">${fmtHeure(r.pris_le)}</span>
+      <span class="h-info"><span class="h-type">${m.nom}</span>${det ? `<span class="h-det">${det}</span>` : ""}</span>
+      <span class="h-ago">${fmtIlYa(Date.now() - new Date(r.pris_le).getTime())}</span>`;
+    li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id)));
+    return li;
+  }
+
+  function remplirStat(prefix, liste) {
+    const bib = liste.filter((r) => r.type !== "allaitement");
+    const all = liste.filter((r) => r.type === "allaitement");
+    const ml = bib.reduce((t, r) => t + (r.quantite_ml || 0), 0);
+    const min = all.reduce((t, r) => t + (r.duree_min || 0), 0);
+    $(`repas-${prefix}-count`).textContent = liste.length;
+    $(`repas-${prefix}-bib`).textContent = `🍼 ${bib.length}` + (ml ? ` · ${ml} ml` : "");
+    $(`repas-${prefix}-all`).textContent = `🤱 ${all.length}` + (min ? ` · ${min} min` : "");
+  }
+
+  function rendreMode() {
+    document.querySelectorAll("#page-repas .mode-btn").forEach((b) => {
+      b.setAttribute("aria-selected", String(b.dataset.mode === mode));
+    });
+    $("panel-biberon").hidden = mode !== "biberon";
+    $("panel-allaitement").hidden = mode !== "allaitement";
+    $("repas-btn-emoji").textContent = MODES[mode].emoji;
+    $("repas-btn-label").textContent = MODES[mode].bouton;
+    $("repas-btn").dataset.mode = mode;
+    contenuChange();
+  }
+
+  document.querySelectorAll("#page-repas .mode-btn").forEach((b) =>
+    b.addEventListener("click", () => {
+      mode = b.dataset.mode;
+      rendreMode();
+    })
+  );
+  $("repas-btn").addEventListener("click", ajouter);
+
+  const setter = (cle) => (v) => {
+    choix[cle] = v;
+    ecrire(cle, v);
+  };
+  rendreChips("chips-ml", QUANTITES, () => choix.quantite, setter("quantite"), (v) => `${v} ml`);
+  rendreChips("chips-cote", COTES, () => choix.cote, setter("cote"), (v) => v[0].toUpperCase() + v.slice(1));
+  rendreChips("chips-duree", DUREES, () => choix.duree, setter("duree"), (v) => `${v} min`);
+  rendreMode();
+
+  enregistrerRubrique({ charger, tick });
+})();

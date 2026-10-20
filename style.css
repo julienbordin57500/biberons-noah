@@ -19,7 +19,16 @@
   --meerkat-belly: #f1d7a6;
   --pond: #6fb6d9;
   --pond-shine: #d4f0ff;
-  --bird: #6b4a2c;
+  --bird-body: #3f9bd6;
+  --bird-belly: #d9b8f0;
+  --bird-wing: #2563a8;
+  --bird-wing-back: #1d4f87;
+  --bird2-body: #f08a3c;
+  --bird2-wing: #c45e1c;
+  --bird2-wing-back: #9e4a14;
+  --sleep: #7a6fd6;
+  --wake: #f2b632;
+  --couche: #4fa3a0;
   --milk: #e8742c;
   --breast: #c4638f;
 
@@ -63,7 +72,16 @@
     --meerkat-belly: #c2a77a;
     --pond: #3e5d8f;
     --pond-shine: #9fb8e8;
-    --bird: #c4bce0;
+    --bird-body: #5b86b3;
+    --bird-belly: #a993c4;
+    --bird-wing: #3f6491;
+    --bird-wing-back: #324f73;
+    --bird2-body: #b9805a;
+    --bird2-wing: #8f5d3e;
+    --bird2-wing-back: #714930;
+    --sleep: #9d93f0;
+    --wake: #f3c24f;
+    --couche: #6cc2bf;
     --milk: #f0a04b;
     --breast: #e58fb4;
 
@@ -106,7 +124,16 @@
   --meerkat-belly: #c2a77a;
   --pond: #3e5d8f;
   --pond-shine: #9fb8e8;
-  --bird: #c4bce0;
+  --bird-body: #5b86b3;
+  --bird-belly: #a993c4;
+  --bird-wing: #3f6491;
+  --bird-wing-back: #324f73;
+  --bird2-body: #b9805a;
+  --bird2-wing: #8f5d3e;
+  --bird2-wing-back: #714930;
+  --sleep: #9d93f0;
+  --wake: #f3c24f;
+  --couche: #6cc2bf;
   --milk: #f0a04b;
   --breast: #e58fb4;
   --card: rgba(38, 36, 70, 0.9);
@@ -228,7 +255,7 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 .sub { margin: 4px 0 0; color: var(--ink-soft); font-size: 1rem; }
 
 /* Minuteur */
-.timer-card { text-align: center; padding: 20px 18px; margin-top: -34px; position: relative; z-index: 2; }
+.timer-card { text-align: center; padding: 20px 18px; }
 .timer {
   margin: 0; font-size: clamp(3rem, 15vw, 4.4rem); font-weight: 700; line-height: 1.05;
   font-variant-numeric: tabular-nums; color: var(--good); transition: color .4s;
@@ -363,10 +390,20 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 .pond { fill: var(--pond); }
 .pond-shine { fill: var(--pond-shine); opacity: .7; }
 
-.birds .flap { fill: none; stroke: var(--bird); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; animation: flap .35s ease-in-out infinite alternate; }
-.birds .f2 { animation-delay: -.12s; }
-.birds .f3 { animation-delay: -.24s; }
-@keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-.5); } }
+.bird .b-body { fill: var(--bird-body); }
+.bird .b-belly { fill: var(--bird-belly); }
+.bird .b-tail { fill: var(--bird-wing); }
+.bird .b-wing path { fill: var(--bird-wing); }
+.bird .b-wing.back path { fill: var(--bird-wing-back); }
+.bird .b-beak { fill: #f5a524; }
+.bird.b2 { --bird-body: var(--bird2-body); --bird-wing: var(--bird2-wing); --bird-wing-back: var(--bird2-wing-back); }
+.birds.on .b-wing { animation: wing .32s ease-in-out infinite alternate; }
+.birds.on .b-wing.back { animation-delay: -.08s; }
+.birds.on .bird-fly { animation: glide 1.4s ease-in-out infinite alternate; }
+.birds.on .b2 .b-wing { animation-duration: .28s; }
+.birds.on .b2 .bird-fly { animation-delay: -.7s; }
+@keyframes wing { from { transform: rotate(-30deg); } to { transform: rotate(75deg); } }
+@keyframes glide { from { transform: translateY(-2px); } to { transform: translateY(2px); } }
 
 /* Marche : les pattes se balancent, le corps rebondit */
 .walking .leg-a { animation: swing .7s ease-in-out infinite alternate; }
@@ -383,3 +420,70 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 .giraffe .neck, .giraffe .head { transition: transform 1.6s ease-in-out; }
 .giraffe.drinking .neck { transform: rotate(125deg); }
 .giraffe.drinking .head { transform: rotate(-50deg); }
+
+/* ---------- Onglets et pages qui glissent ---------- */
+.tabs {
+  position: sticky; top: 0; z-index: 4; margin-top: -30px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px;
+  background: var(--card); border: 2px solid var(--card-border); border-radius: 999px;
+  box-shadow: var(--shadow); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.tab {
+  font: inherit; font-size: 1rem; font-weight: 700; color: var(--ink-soft);
+  background: none; border: 0; border-radius: 999px; padding: 10px 4px; min-height: 44px; cursor: pointer;
+  transition: background .2s, color .2s; white-space: nowrap;
+}
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+body[data-page="1"] .tab[aria-selected="true"] { background: var(--couche); color: #fff; }
+body[data-page="2"] .tab[aria-selected="true"] { background: var(--sleep); color: #fff; }
+
+.pages {
+  display: flex; align-items: flex-start; margin: 0 -16px;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  scrollbar-width: none; overscroll-behavior-x: contain; transition: height .25s ease;
+}
+.pages::-webkit-scrollbar { display: none; }
+.page {
+  flex: 0 0 100%; scroll-snap-align: start; scroll-snap-stop: always;
+  padding: 0 16px 6px; display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ---------- Couches ---------- */
+.mini-timer {
+  display: flex; justify-content: center; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin: 14px auto 0; padding: 10px 14px; border-radius: 16px; background: var(--chip);
+}
+.mini-label { font-weight: 600; color: var(--ink-soft); }
+.mini-value { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sub.small { font-size: .95rem; margin-top: 6px; }
+
+.mode-btn.toggle[aria-pressed="true"] { color: #fff; }
+#t-pipi[aria-pressed="true"] { background: #4ea5d9; border-color: #4ea5d9; }
+#t-caca[aria-pressed="true"] { background: #a0703f; border-color: #a0703f; }
+.sizes .chip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; }
+.sizes .chip::before { content: "💩"; line-height: 1; }
+.sizes .chip:nth-child(1)::before { font-size: .9rem; }
+.sizes .chip:nth-child(2)::before { font-size: 1.3rem; }
+.sizes .chip:nth-child(3)::before { font-size: 1.8rem; }
+.add-btn.couche { background: var(--couche); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--couche) 60%, #000); }
+
+/* ---------- Sommeil ---------- */
+.sleep-card .timer { color: var(--ink); }
+.sleep-card.sleeping { background: color-mix(in srgb, var(--sleep) 22%, var(--card)); border-color: var(--sleep); }
+.sleep-card.sleeping .timer { color: var(--sleep); }
+.add-btn.sleep { background: var(--sleep); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--sleep) 60%, #000); }
+.add-btn.sleep.wake { background: var(--wake); color: #3a2508; box-shadow: 0 6px 0 color-mix(in srgb, var(--wake) 60%, #000); }
+
+/* Quand Noah dort, le lion ferme les yeux */
+.lion { position: relative; }
+.lion .eyes-closed { display: none; }
+.noah-dort .lion .eyes-open { display: none; }
+.noah-dort .lion .eyes-closed { display: inline; }
+.zzz { position: absolute; top: 0; left: 2px; display: none; font-weight: 700; color: var(--ink-soft); }
+.noah-dort .zzz { display: block; }
+.zzz span { position: absolute; opacity: 0; animation: zzz 2.4s ease-in infinite; }
+.zzz span:nth-child(1) { font-size: .7rem; }
+.zzz span:nth-child(2) { font-size: .9rem; animation-delay: .8s; }
+.zzz span:nth-child(3) { font-size: 1.1rem; animation-delay: 1.6s; }
+@keyframes zzz { 0% { transform: translate(0, 10px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(-6px, -20px); opacity: 0; } }
+.noah-dort .lion { animation-duration: 8s; }
