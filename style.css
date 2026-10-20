@@ -558,3 +558,11 @@ li.fait .h-type { opacity: .65; }
 
 .fiche li { padding: 6px 0; line-height: 1.35; overflow-wrap: anywhere; }
 .fiche a { color: var(--sante); font-weight: 700; text-decoration: none; }
+
+/* Calendrier repliable + champs date/heure qui ne débordent pas sur iPhone */
+.cal-next { margin: 4px 0 0; padding: 10px 12px; border-radius: 14px; background: var(--chip); line-height: 1.35; }
+.cal-box > summary { color: var(--sante); }
+.field input[type="date"], .field input[type="time"] {
+  -webkit-appearance: none; appearance: none; display: block; max-width: 100%; text-align: left;
+}
+.field input::-webkit-date-and-time-value { text-align: left; }

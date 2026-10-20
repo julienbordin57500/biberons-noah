@@ -215,6 +215,14 @@
 
   function rendreCalendrier() {
     $("cal-hint").hidden = !!profil.date_naissance;
+    const prochain = [...VACCINS, ...EXAMENS, ...EXAMENS_TARD]
+      .filter((i) => !faits[i.cle] && echeance(i))
+      .sort((a, b) => echeance(a) - echeance(b))[0];
+    $("cal-next").hidden = !prochain;
+    if (prochain) {
+      const d = echeance(prochain);
+      $("cal-next").innerHTML = `${prochain.cle.startsWith("v") ? "💉" : "📋"} <strong>À venir :</strong> ${esc(prochain.nom)}, vers le ${fmtDate(d, { day: "numeric", month: "long" })}`;
+    }
     $("cal-vaccins").replaceChildren(...VACCINS.map((v) => ligneCalendrier(v, true)));
     $("cal-examens").replaceChildren(...EXAMENS.map((e) => ligneCalendrier(e, false)));
     $("cal-examens-tard").replaceChildren(...EXAMENS_TARD.map((e) => ligneCalendrier(e, false)));
@@ -296,13 +304,12 @@
           quand: quand.toISOString(),
           type: typeRdv,
           titre: $("rdv-titre").value.trim() || null,
-          lieu: $("rdv-lieu").value.trim() || null,
           notes: $("rdv-notes").value.trim() || null,
         }),
       });
       animerBouton(btn);
       toast("📅 Rendez-vous ajouté !");
-      ["rdv-date", "rdv-heure", "rdv-titre", "rdv-lieu", "rdv-notes"].forEach((id) => ($(id).value = ""));
+      ["rdv-date", "rdv-heure", "rdv-titre", "rdv-notes"].forEach((id) => ($(id).value = ""));
       afficherErreur(null);
       await charger();
     } catch (e) {
@@ -356,7 +363,6 @@
     rendreTypes();
     $("rdv-titre").value = item.nom.slice(0, 120);
     if (d && d > new Date()) $("rdv-date").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    if (profil.pediatre_nom && !$("rdv-lieu").value) $("rdv-lieu").value = profil.pediatre_nom;
     $("rdv-form").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -426,6 +432,8 @@
   $("rdv-btn").addEventListener("click", ajouterRdv);
   $("m-btn").addEventListener("click", ajouterMesure);
   $("f-btn").addEventListener("click", enregistrerFiche);
+  $("cal-box").open = lire("cal-ouvert", false, (v) => typeof v === "boolean");
+  $("cal-box").addEventListener("toggle", () => ecrire("cal-ouvert", $("cal-box").open));
   document.querySelectorAll("#page-sante details").forEach((d) => d.addEventListener("toggle", contenuChange));
 
   // Le décompte « dans X jours » se met à jour toutes les minutes avec charger()

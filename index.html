@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <!-- Ciel -->
@@ -371,10 +371,9 @@
           <p class="label">Nouveau rendez-vous</p>
           <div class="chips" id="chips-rdv" role="radiogroup" aria-label="Type de rendez-vous"></div>
           <div class="fields">
-            <label class="field"><span>Date</span><input type="date" id="rdv-date" required></label>
-            <label class="field"><span>Heure</span><input type="time" id="rdv-heure"></label>
+            <label class="field wide"><span>Date</span><input type="date" id="rdv-date" required></label>
+            <label class="field wide"><span>Heure</span><input type="time" id="rdv-heure"></label>
             <label class="field wide"><span>Pour quoi ?</span><input type="text" id="rdv-titre" maxlength="120" placeholder="Ex. vaccins des 2 mois"></label>
-            <label class="field wide"><span>Avec qui / où ?</span><input type="text" id="rdv-lieu" maxlength="200" placeholder="Ex. Dr Martin, cabinet du centre"></label>
             <label class="field wide"><span>Questions à poser, notes</span><textarea id="rdv-notes" maxlength="1000" rows="2" placeholder="Ex. demander pour les régurgitations"></textarea></label>
           </div>
           <button type="button" class="add-btn sante" id="rdv-btn">
@@ -395,6 +394,9 @@
         <section class="card">
           <p class="label">Vaccins et examens obligatoires</p>
           <p class="hint" id="cal-hint">Renseigne la date de naissance dans la fiche santé (en bas) pour voir les dates prévues.</p>
+          <p class="cal-next" id="cal-next" hidden></p>
+          <details class="more cal-box" id="cal-box">
+          <summary>Voir le calendrier complet</summary>
           <div class="cal-legend"><span class="tag oblig">obligatoire</span><span class="tag reco">recommandé</span></div>
           <h3 class="cal-title">💉 Vaccins</h3>
           <ul class="cal" id="cal-vaccins"></ul>
@@ -404,6 +406,7 @@
             <summary>Examens de 3 à 16 ans</summary>
             <ul class="cal" id="cal-examens-tard"></ul>
           </details>
+          </details>
           <p class="hint small">Repères indicatifs d'après le calendrier des vaccinations 2026 (Santé publique France) et les 20 examens obligatoires de l'enfant. Le pédiatre et le carnet de santé font foi.</p>
         </section>
 
@@ -411,7 +414,7 @@
           <p class="label">Croissance</p>
           <div class="growth" id="growth-last"></div>
           <div class="fields">
-            <label class="field"><span>Date</span><input type="date" id="m-date"></label>
+            <label class="field wide"><span>Date</span><input type="date" id="m-date"></label>
             <label class="field"><span>Poids (kg)</span><input type="text" id="m-poids" inputmode="decimal" autocomplete="off" placeholder="4,250"></label>
             <label class="field"><span>Taille (cm)</span><input type="text" id="m-taille" inputmode="decimal" autocomplete="off" placeholder="55,5"></label>
             <label class="field"><span>Tour de tête (cm)</span><input type="text" id="m-pc" inputmode="decimal" autocomplete="off" placeholder="38"></label>
@@ -428,8 +431,8 @@
           <details class="more" id="fiche-box">
             <summary>Modifier la fiche</summary>
             <div class="fields">
-              <label class="field"><span>Date de naissance</span><input type="date" id="f-date_naissance"></label>
-              <label class="field"><span>Heure de naissance</span><input type="time" id="f-heure_naissance"></label>
+              <label class="field wide"><span>Date de naissance</span><input type="date" id="f-date_naissance"></label>
+              <label class="field wide"><span>Heure de naissance</span><input type="time" id="f-heure_naissance"></label>
               <label class="field"><span>Poids de naissance (g)</span><input type="text" id="f-poids_naissance_g" inputmode="numeric" autocomplete="off" placeholder="3400"></label>
               <label class="field"><span>Taille de naissance (cm)</span><input type="text" id="f-taille_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="50"></label>
               <label class="field"><span>Tour de tête naissance (cm)</span><input type="text" id="f-pc_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="35"></label>
@@ -461,12 +464,12 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
-  <script src="scene.js?v=4"></script>
-  <script src="commun.js?v=4"></script>
-  <script src="repas.js?v=4"></script>
-  <script src="couches.js?v=4"></script>
-  <script src="sommeil.js?v=4"></script>
-  <script src="sante.js?v=4"></script>
-  <script src="pages.js?v=4"></script>
+  <script src="scene.js?v=5"></script>
+  <script src="commun.js?v=5"></script>
+  <script src="repas.js?v=5"></script>
+  <script src="couches.js?v=5"></script>
+  <script src="sommeil.js?v=5"></script>
+  <script src="sante.js?v=5"></script>
+  <script src="pages.js?v=5"></script>
 </body>
 </html>
