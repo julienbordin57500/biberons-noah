@@ -663,3 +663,5 @@ li.fait .h-type { opacity: .65; }
 .sheet-options:empty { display: none; }
 .sheet-actions { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; gap: 10px; }
 .sheet-actions .g-btn { flex: 0 1 auto; padding: 8px 22px; }
+
+.who-btn.parents { grid-column: 1 / -1; border-style: dashed; color: var(--ink-soft); }

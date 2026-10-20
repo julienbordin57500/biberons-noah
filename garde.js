@@ -11,8 +11,10 @@
   };
   const EMOJI_CONNUS = { Nounou: "👩", Mamou: "👵", "Mamie Domi": "👵", Papou: "👴", "Papi Éric": "👴" };
 
-  // Qui tient ce téléphone : { nom, emoji } ou null
-  let moi = lire("gardien-telephone", null, (v) => v && typeof v.nom === "string" && typeof v.emoji === "string");
+  // Qui tient ce téléphone : { nom, emoji } (ou { parent: true } pour les parents), ou null
+  let tel = lire("gardien-telephone", null, (v) => v && typeof v.nom === "string" && typeof v.emoji === "string");
+  // Celui qui peut noter : la nounou ou un grand-parent (les parents consultent seulement)
+  let moi = tel && !tel.parent ? tel : null;
 
   let jour = minuit(); // jour affiché
   let notes = []; // notes du jour, une par personne
@@ -50,9 +52,9 @@
   // ---------- Affichage ----------
   function rendre() {
     // Qui utilise ce téléphone
-    $("g-who-choose").hidden = !!moi;
-    $("g-who-set").hidden = !moi;
-    if (moi) $("g-who-name").textContent = `Ce téléphone : ${moi.emoji} ${moi.nom}`;
+    $("g-who-choose").hidden = !!tel;
+    $("g-who-set").hidden = !tel;
+    if (tel) $("g-who-name").textContent = tel.parent ? `Ce téléphone : ${tel.emoji} Parents · consultation` : `Ce téléphone : ${tel.emoji} ${tel.nom}`;
 
     // Jour
     const nom = jour.toLocaleDateString("fr-FR", { weekday: "long" });
@@ -89,6 +91,9 @@
     document.querySelectorAll("#page-garde [data-today-only]").forEach((el) => (el.hidden = !moi || !aujourdhui));
     document.querySelectorAll("#page-garde [data-writer-only]").forEach((el) => (el.hidden = !moi));
     $("g-read-hint").hidden = !!moi;
+    $("g-read-hint").textContent = tel?.parent
+      ? "👀 Mode parents : vous voyez tout ce que la nounou et les grands-parents notent."
+      : "👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.";
     $("g-past-hint").hidden = !moi || aujourdhui;
 
     // Récap
@@ -187,13 +192,20 @@
   }
 
   async function choisir(categorie) {
+    if (categorie === "Parents") {
+      tel = { nom: "Parents", emoji: "👨‍👩‍👦", parent: true };
+      moi = null;
+      ecrire("gardien-telephone", tel);
+      toast("👀 Mode parents : vous voyez tout ce qui est noté");
+      return charger();
+    }
     const c = CHOIX[categorie];
     let nom = categorie;
     if (Array.isArray(c.noms)) nom = await demander(`${c.emoji} Quelle ${categorie === "Papi" ? "papi" : "mamie"} ?`, c.noms, false);
     else if (c.noms === "prenom") nom = await demander("🙂 Qui garde Noah ?", null, true);
     if (!nom) return;
-    moi = { nom, emoji: c.emoji };
-    ecrire("gardien-telephone", moi);
+    moi = tel = { nom, emoji: c.emoji };
+    ecrire("gardien-telephone", tel);
     noteModifiee = false;
     toast(`${moi.emoji} Bonjour ${nom} !`);
     await charger();
@@ -303,7 +315,7 @@
 
   document.querySelectorAll("#page-garde [data-who]").forEach((b) => b.addEventListener("click", () => choisir(b.dataset.who)));
   $("g-who-change").addEventListener("click", () => {
-    moi = null;
+    moi = tel = null;
     ecrire("gardien-telephone", null);
     noteModifiee = false;
     charger();
