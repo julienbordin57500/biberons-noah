@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Carnet de Noah</title>
-  <meta name="description" content="Suivre les repas, les couches et le sommeil de Noah.">
+  <meta name="description" content="Suivre les repas, les couches, le sommeil et la santé de Noah.">
   <meta name="theme-color" content="#f6b24a" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1c2347" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <!-- Ciel -->
@@ -184,9 +184,10 @@
     </header>
 
     <nav class="tabs" role="tablist" aria-label="Rubriques">
-      <button type="button" class="tab" role="tab" data-page="0"><span aria-hidden="true">🍼</span> Repas</button>
-      <button type="button" class="tab" role="tab" data-page="1"><span aria-hidden="true">🧷</span> Couches</button>
-      <button type="button" class="tab" role="tab" data-page="2"><span aria-hidden="true">🌙</span> Sommeil</button>
+      <button type="button" class="tab" role="tab" data-page="0"><span class="tab-emoji" aria-hidden="true">🍼</span><span>Repas</span></button>
+      <button type="button" class="tab" role="tab" data-page="1"><span class="tab-emoji" aria-hidden="true">👶</span><span>Couches</span></button>
+      <button type="button" class="tab" role="tab" data-page="2"><span class="tab-emoji" aria-hidden="true">🌙</span><span>Sommeil</span></button>
+      <button type="button" class="tab" role="tab" data-page="3"><span class="tab-emoji" aria-hidden="true">🩺</span><span>Santé</span></button>
     </nav>
 
     <div class="pages" id="pages">
@@ -305,7 +306,7 @@
           </div>
 
           <button type="button" class="add-btn couche" id="couche-btn">
-            <span class="emoji" aria-hidden="true">🧷</span>
+            <span class="emoji" aria-hidden="true">👶</span>
             <span id="couche-btn-label">Couche changée</span>
           </button>
         </section>
@@ -356,6 +357,103 @@
           <p class="empty" id="sleep-empty" hidden>Aucun dodo sur les dernières 24 heures.</p>
         </section>
       </div>
+
+      <!-- ================= SANTÉ ================= -->
+      <div class="page" id="page-sante" role="tabpanel" aria-label="Santé">
+        <section class="card timer-card rdv-card">
+          <p class="age" id="sante-age"></p>
+          <p class="label">Prochain rendez-vous</p>
+          <p class="rdv-when" id="rdv-next-when">Aucun rendez-vous prévu</p>
+          <p class="sub" id="rdv-next-info">Ajoute-le juste en dessous 👇</p>
+        </section>
+
+        <section class="card add-card" id="rdv-form">
+          <p class="label">Nouveau rendez-vous</p>
+          <div class="chips" id="chips-rdv" role="radiogroup" aria-label="Type de rendez-vous"></div>
+          <div class="fields">
+            <label class="field"><span>Date</span><input type="date" id="rdv-date" required></label>
+            <label class="field"><span>Heure</span><input type="time" id="rdv-heure"></label>
+            <label class="field wide"><span>Pour quoi ?</span><input type="text" id="rdv-titre" maxlength="120" placeholder="Ex. vaccins des 2 mois"></label>
+            <label class="field wide"><span>Avec qui / où ?</span><input type="text" id="rdv-lieu" maxlength="200" placeholder="Ex. Dr Martin, cabinet du centre"></label>
+            <label class="field wide"><span>Questions à poser, notes</span><textarea id="rdv-notes" maxlength="1000" rows="2" placeholder="Ex. demander pour les régurgitations"></textarea></label>
+          </div>
+          <button type="button" class="add-btn sante" id="rdv-btn">
+            <span class="emoji" aria-hidden="true">📅</span><span>Ajouter le rendez-vous</span>
+          </button>
+        </section>
+
+        <section class="card history">
+          <p class="label">Rendez-vous à venir</p>
+          <ul id="rdv-list" class="rdv-list"></ul>
+          <p class="empty" id="rdv-empty" hidden>Aucun rendez-vous à venir.</p>
+          <details class="more" id="rdv-past-box" hidden>
+            <summary>Rendez-vous passés</summary>
+            <ul id="rdv-past" class="rdv-list"></ul>
+          </details>
+        </section>
+
+        <section class="card">
+          <p class="label">Vaccins et examens obligatoires</p>
+          <p class="hint" id="cal-hint">Renseigne la date de naissance dans la fiche santé (en bas) pour voir les dates prévues.</p>
+          <div class="cal-legend"><span class="tag oblig">obligatoire</span><span class="tag reco">recommandé</span></div>
+          <h3 class="cal-title">💉 Vaccins</h3>
+          <ul class="cal" id="cal-vaccins"></ul>
+          <h3 class="cal-title">📋 Examens de santé</h3>
+          <ul class="cal" id="cal-examens"></ul>
+          <details class="more">
+            <summary>Examens de 3 à 16 ans</summary>
+            <ul class="cal" id="cal-examens-tard"></ul>
+          </details>
+          <p class="hint small">Repères indicatifs d'après le calendrier des vaccinations 2026 (Santé publique France) et les 20 examens obligatoires de l'enfant. Le pédiatre et le carnet de santé font foi.</p>
+        </section>
+
+        <section class="card">
+          <p class="label">Croissance</p>
+          <div class="growth" id="growth-last"></div>
+          <div class="fields">
+            <label class="field"><span>Date</span><input type="date" id="m-date"></label>
+            <label class="field"><span>Poids (kg)</span><input type="text" id="m-poids" inputmode="decimal" autocomplete="off" placeholder="4,250"></label>
+            <label class="field"><span>Taille (cm)</span><input type="text" id="m-taille" inputmode="decimal" autocomplete="off" placeholder="55,5"></label>
+            <label class="field"><span>Tour de tête (cm)</span><input type="text" id="m-pc" inputmode="decimal" autocomplete="off" placeholder="38"></label>
+          </div>
+          <button type="button" class="add-btn sante small" id="m-btn">
+            <span class="emoji" aria-hidden="true">📏</span><span>Enregistrer la mesure</span>
+          </button>
+          <ul id="m-list" class="m-list"></ul>
+        </section>
+
+        <section class="card">
+          <p class="label">Fiche santé</p>
+          <ul class="fiche" id="fiche-resume"></ul>
+          <details class="more" id="fiche-box">
+            <summary>Modifier la fiche</summary>
+            <div class="fields">
+              <label class="field"><span>Date de naissance</span><input type="date" id="f-date_naissance"></label>
+              <label class="field"><span>Heure de naissance</span><input type="time" id="f-heure_naissance"></label>
+              <label class="field"><span>Poids de naissance (g)</span><input type="text" id="f-poids_naissance_g" inputmode="numeric" autocomplete="off" placeholder="3400"></label>
+              <label class="field"><span>Taille de naissance (cm)</span><input type="text" id="f-taille_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="50"></label>
+              <label class="field"><span>Tour de tête naissance (cm)</span><input type="text" id="f-pc_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="35"></label>
+              <label class="field"><span>Groupe sanguin</span>
+                <select id="f-groupe_sanguin">
+                  <option value="">Je ne sais pas</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </label>
+              <label class="field wide"><span>Allergies</span><input type="text" id="f-allergies" maxlength="500" placeholder="Aucune connue"></label>
+              <label class="field wide"><span>Traitements en cours (vitamine D…)</span><input type="text" id="f-traitements" maxlength="500" placeholder="Ex. vitamine D, 1 goutte/jour"></label>
+              <label class="field wide"><span>Pédiatre / médecin</span><input type="text" id="f-pediatre_nom" maxlength="120" placeholder="Dr …"></label>
+              <label class="field"><span>Téléphone</span><input type="tel" id="f-pediatre_tel" maxlength="30" placeholder="01 23 45 67 89"></label>
+              <label class="field wide"><span>Adresse du cabinet</span><input type="text" id="f-pediatre_adresse" maxlength="200"></label>
+              <label class="field wide"><span>Notes (antécédents, maternité…)</span><textarea id="f-notes" maxlength="1000" rows="3"></textarea></label>
+            </div>
+            <button type="button" class="add-btn sante small" id="f-btn">
+              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer la fiche</span>
+            </button>
+          </details>
+          <p class="hint small">En cas d'urgence : <a href="tel:15">15</a> (Samu) ou <a href="tel:112">112</a>. Médecin de garde le soir et le week-end : <a href="tel:116117">116 117</a> (selon la région).</p>
+        </section>
+      </div>
     </div>
 
     <p class="error" id="error" role="alert" hidden></p>
@@ -363,11 +461,12 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
-  <script src="scene.js?v=3"></script>
-  <script src="commun.js?v=3"></script>
-  <script src="repas.js?v=3"></script>
-  <script src="couches.js?v=3"></script>
-  <script src="sommeil.js?v=3"></script>
-  <script src="pages.js?v=3"></script>
+  <script src="scene.js?v=4"></script>
+  <script src="commun.js?v=4"></script>
+  <script src="repas.js?v=4"></script>
+  <script src="couches.js?v=4"></script>
+  <script src="sommeil.js?v=4"></script>
+  <script src="sante.js?v=4"></script>
+  <script src="pages.js?v=4"></script>
 </body>
 </html>

@@ -188,3 +188,7 @@ function demarrerRafraichissement() {
 
 // Prévient pages.js que la hauteur d'une page a pu changer
 const contenuChange = () => window.dispatchEvent(new Event("contenu-change"));
+
+// Échappe un texte saisi avant de l'insérer dans du HTML
+const esc = (t) =>
+  String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);

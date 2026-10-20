@@ -40,7 +40,7 @@
       };
       await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
       animerBouton(btn);
-      toast(`🧷 Couche changée${choix.caca ? " 💩" : choix.pipi ? " 💧" : ""}`);
+      toast(`👶 Couche changée${choix.caca ? " 💩" : choix.pipi ? " 💧" : ""}`);
       $("couche-heure").value = "";
       choix.pipi = true;
       choix.caca = false;
