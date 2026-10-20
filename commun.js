@@ -197,3 +197,80 @@ const contenuChange = () => window.dispatchEvent(new Event("contenu-change"));
 // Échappe un texte saisi avant de l'insérer dans du HTML
 const esc = (t) =>
   String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// ---------- Fenêtre de modification ----------
+// champs : [{ cle, label, type: "time" | "select" | "check", valeur, options: [[valeur, libellé], …] }]
+// Renvoie les nouvelles valeurs, ou null si on annule.
+function editer(titre, champs) {
+  const dlg = $("edit-dialog");
+  $("edit-title").textContent = titre;
+  $("edit-fields").replaceChildren(
+    ...champs.map((c) => {
+      const label = document.createElement("label");
+      label.className = "field" + (c.type === "check" ? " check-field" : " wide");
+      const span = document.createElement("span");
+      span.textContent = c.label;
+      let input;
+      if (c.type === "select") {
+        input = document.createElement("select");
+        c.options.forEach(([v, l]) => {
+          const o = document.createElement("option");
+          o.value = v === null ? "" : String(v);
+          o.textContent = l;
+          input.append(o);
+        });
+        input.value = c.valeur === null || c.valeur === undefined ? "" : String(c.valeur);
+      } else {
+        input = document.createElement("input");
+        input.type = c.type === "check" ? "checkbox" : c.type;
+        if (c.type === "check") input.checked = !!c.valeur;
+        else input.value = c.valeur || "";
+      }
+      input.dataset.cle = c.cle;
+      if (c.type === "check") label.append(input, span);
+      else label.append(span, input);
+      return label;
+    })
+  );
+  return new Promise((resolve) => {
+    dlg.addEventListener(
+      "close",
+      () => {
+        if (dlg.returnValue !== "ok") return resolve(null);
+        const r = {};
+        $("edit-fields").querySelectorAll("[data-cle]").forEach((el) => {
+          r[el.dataset.cle] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.value;
+        });
+        resolve(r);
+      },
+      { once: true }
+    );
+    dlg.returnValue = "";
+    dlg.showModal();
+  });
+}
+
+// « 14:05 » d'une date
+const hhmm = (d) => {
+  d = new Date(d);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+// Remplace l'heure d'une date en gardant son jour ; si ça tombe dans le futur, c'est la veille
+function memeJourA(dateOrigine, heure) {
+  const [h, m] = heure.split(":").map(Number);
+  const d = new Date(dateOrigine);
+  d.setHours(h, m, 0, 0);
+  if (d.getTime() > Date.now() + 60 * 1000) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+// Rend une ligne d'historique touchable pour la modifier (le bouton ✕ garde son rôle)
+function rendreModifiable(li, onEdit) {
+  li.classList.add("editable");
+  li.setAttribute("title", "Toucher pour modifier");
+  li.addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    onEdit();
+  });
+}

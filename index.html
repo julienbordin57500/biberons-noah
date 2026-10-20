@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
   <!-- Ciel -->
@@ -372,6 +372,23 @@
 
       <!-- ================= SANTÉ ================= -->
       <div class="page" id="page-sante" role="tabpanel" aria-label="Santé">
+        <section class="card med-card" aria-live="polite">
+          <div class="med-head">
+            <span class="med-title">💊 Médicaments</span>
+            <button type="button" class="med-add" id="med-toggle" aria-expanded="false">+ Prise</button>
+          </div>
+          <ul class="med-list" id="med-list"></ul>
+          <div class="med-form" id="med-form" hidden>
+            <div class="chips small-chips" id="med-noms"></div>
+            <div class="med-fields">
+              <input type="text" id="med-nom" maxlength="60" placeholder="Médicament" aria-label="Nom du médicament" list="med-suggest">
+              <datalist id="med-suggest"></datalist>
+              <input type="text" id="med-dose" maxlength="40" placeholder="Dose (facultatif)" aria-label="Dose">
+              <input type="time" id="med-heure" aria-label="Heure (vide = maintenant)">
+            </div>
+            <button type="button" class="g-btn med-save" id="med-btn">💊 Enregistrer la prise</button>
+          </div>
+        </section>
         <section class="card timer-card rdv-card">
           <p class="age" id="sante-age"></p>
           <p class="label">Prochain rendez-vous</p>
@@ -470,19 +487,19 @@
         </section>
       </div>
 
-      <!-- ================= GARDE (nounou, mamies) ================= -->
+      <!-- ================= GARDE (Mamita, grands-parents) ================= -->
       <div class="page" id="page-garde" role="tabpanel" aria-label="Garde">
         <section class="card whoami" id="g-whoami">
           <p class="label">📱 Qui utilise ce téléphone ?</p>
           <div id="g-who-choose">
             <div class="who-grid">
-              <button type="button" class="who-btn" data-who="Nounou"><span class="emoji" aria-hidden="true">👩</span><span>Nounou</span></button>
+              <button type="button" class="who-btn" data-who="Mamita"><span class="emoji" aria-hidden="true">👩</span><span>Mamita</span></button>
               <button type="button" class="who-btn" data-who="Mamie"><span class="emoji" aria-hidden="true">👵</span><span>Mamie</span></button>
               <button type="button" class="who-btn" data-who="Papi"><span class="emoji" aria-hidden="true">👴</span><span>Papi</span></button>
               <button type="button" class="who-btn" data-who="Autre"><span class="emoji" aria-hidden="true">🙂</span><span>Autre</span></button>
               <button type="button" class="who-btn parents" data-who="Parents"><span class="emoji" aria-hidden="true">👨‍👩‍👦</span><span>Parents · je consulte</span></button>
             </div>
-            <p class="hint small">Nounou et grands-parents notent. Les parents choisissent « Parents » : ils voient tout, sans rien mélanger.</p>
+            <p class="hint small">Mamita et les grands-parents notent. Les parents choisissent « Parents » : ils voient tout, sans rien mélanger.</p>
           </div>
           <div class="who-set" id="g-who-set" hidden>
             <span class="who-name" id="g-who-name"></span>
@@ -521,7 +538,7 @@
             <div class="pills" id="g-repas-list"></div>
             <div class="g-add" data-today-only>
               <select id="g-ml" aria-label="Quantité">
-                <option value="">? ml</option><option>60</option><option>90</option><option>120</option><option selected>150</option><option>180</option><option>210</option><option>240</option>
+                <option value="">? ml</option><option>30</option><option>60</option><option>90</option><option>120</option><option selected>150</option><option>180</option><option>210</option><option>240</option>
               </select>
               <select id="g-lait" aria-label="Type de lait">
                 <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
@@ -565,6 +582,18 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
+  <!-- Fenêtre de modification d'une entrée (repas, couche, dodo) -->
+  <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
+    <form method="dialog" id="edit-form">
+      <p class="sheet-title" id="edit-title">Modifier</p>
+      <div class="fields" id="edit-fields"></div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn">Enregistrer</button>
+        <button type="submit" value="annuler" class="link">Annuler</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog class="sheet" id="g-dialog" aria-labelledby="g-dialog-title">
     <form method="dialog" id="g-dialog-form">
       <p class="sheet-title" id="g-dialog-title"></p>
@@ -580,13 +609,14 @@
     </form>
   </dialog>
 
-  <script src="scene.js?v=9"></script>
-  <script src="commun.js?v=9"></script>
-  <script src="repas.js?v=9"></script>
-  <script src="couches.js?v=9"></script>
-  <script src="sommeil.js?v=9"></script>
-  <script src="sante.js?v=9"></script>
-  <script src="garde.js?v=9"></script>
-  <script src="pages.js?v=9"></script>
+  <script src="scene.js?v=10"></script>
+  <script src="commun.js?v=10"></script>
+  <script src="repas.js?v=10"></script>
+  <script src="couches.js?v=10"></script>
+  <script src="sommeil.js?v=10"></script>
+  <script src="sante.js?v=10"></script>
+  <script src="medicaments.js?v=10"></script>
+  <script src="garde.js?v=10"></script>
+  <script src="pages.js?v=10"></script>
 </body>
 </html>

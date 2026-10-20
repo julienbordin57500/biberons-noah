@@ -54,6 +54,29 @@
     }
   }
 
+  async function modifier(c) {
+    const v = await editer("👶 Modifier la couche", [
+      { cle: "heure", label: "Heure", type: "time", valeur: hhmm(c.change_le) },
+      { cle: "pipi", label: "💧 Pipi", type: "check", valeur: c.pipi },
+      { cle: "caca", label: "💩 Caca", type: "check", valeur: c.caca },
+      { cle: "caca_taille", label: "Taille du caca", type: "select", valeur: c.caca_taille, options: [[null, "—"], ...TAILLES.map((t) => [t, t[0].toUpperCase() + t.slice(1)])] },
+    ]);
+    if (!v) return;
+    const maj = {
+      change_le: v.heure ? memeJourA(c.change_le, v.heure).toISOString() : c.change_le,
+      pipi: v.pipi,
+      caca: v.caca,
+      caca_taille: v.caca ? v.caca_taille || "moyen" : null,
+    };
+    try {
+      await api(TABLE, `?id=eq.${c.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      toast("✏️ Couche modifiée");
+      await charger();
+    } catch (e) {
+      afficherErreur("Modification impossible. Réessaie.");
+    }
+  }
+
   async function supprimer(id) {
     try {
       await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
@@ -114,6 +137,7 @@
       <span class="h-info"><span class="h-type">${contenu(c)}</span></span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(c.change_le).getTime())}</span>`;
     li.append(boutonSupprimer(`Supprimer la couche de ${fmtHeure(c.change_le)}`, () => supprimer(c.id)));
+    rendreModifiable(li, () => modifier(c));
     return li;
   }
 

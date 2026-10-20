@@ -1,19 +1,21 @@
-// Page Garde : espace de la nounou et des mamies (notes du jour + récap simplifié)
+// Page Garde : espace de Mamita et des grands-parents (notes du jour + récap simplifié)
 // Les données sont à part (tables garde_*) et ne se mélangent pas avec celles des parents.
-// Chaque téléphone retient qui le tient (Nounou, Mamou, Papi Éric…) : il peut alors noter.
+// Chaque téléphone retient qui le tient (Mamita, Mamou, Papi Éric…) : il peut alors noter.
 // Sans choix (les parents), on consulte seulement.
 (() => {
   const CHOIX = {
-    Nounou: { emoji: "👩", noms: null },
+    Mamita: { emoji: "👩", noms: null },
     Mamie: { emoji: "👵", noms: ["Mamou", "Mamie Domi"] },
     Papi: { emoji: "👴", noms: ["Papou", "Papi Éric"] },
     Autre: { emoji: "🙂", noms: "prenom" },
   };
-  const EMOJI_CONNUS = { Nounou: "👩", Mamou: "👵", "Mamie Domi": "👵", Papou: "👴", "Papi Éric": "👴" };
+  const EMOJI_CONNUS = { Mamita: "👩", Mamou: "👵", "Mamie Domi": "👵", Papou: "👴", "Papi Éric": "👴" };
 
   // Qui tient ce téléphone : { nom, emoji } (ou { parent: true } pour les parents), ou null
   let tel = lire("gardien-telephone", null, (v) => v && typeof v.nom === "string" && typeof v.emoji === "string");
-  // Celui qui peut noter : la nounou ou un grand-parent (les parents consultent seulement)
+  // La nounou s'appelle désormais Mamita
+  if (tel && tel.nom === "Nounou") ecrire("gardien-telephone", (tel = { ...tel, nom: "Mamita" }));
+  // Celui qui peut noter : Mamita ou un grand-parent (les parents consultent seulement)
   let moi = tel && !tel.parent ? tel : null;
 
   let jour = minuit(); // jour affiché
@@ -92,7 +94,7 @@
     document.querySelectorAll("#page-garde [data-writer-only]").forEach((el) => (el.hidden = !moi));
     $("g-read-hint").hidden = !!moi;
     $("g-read-hint").textContent = tel?.parent
-      ? "👀 Mode parents : vous voyez tout ce que la nounou et les grands-parents notent."
+      ? "👀 Mode parents : vous voyez tout ce que Mamita et les grands-parents notent."
       : "👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.";
     $("g-past-hint").hidden = !moi || aujourdhui;
 

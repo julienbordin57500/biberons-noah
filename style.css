@@ -665,3 +665,43 @@ li.fait .h-type { opacity: .65; }
 .sheet-actions .g-btn { flex: 0 1 auto; padding: 8px 22px; }
 
 .who-btn.parents { grid-column: 1 / -1; border-style: dashed; color: var(--ink-soft); }
+
+/* Lignes d'historique modifiables + fenêtre de modification */
+li.editable { cursor: pointer; border-radius: 12px; transition: background .15s; }
+li.editable:active { background: var(--chip); }
+li.editable:first-child .h-info::after { content: "✏️ toucher pour modifier"; font-size: .72rem; color: var(--ink-soft); opacity: .7; }
+.check-field { flex-direction: row !important; align-items: center; gap: 10px !important; grid-column: auto; }
+.check-field input { width: 24px !important; height: 24px; min-height: 0 !important; accent-color: var(--good); }
+.check-field span { font-size: 1rem !important; color: var(--ink) !important; }
+
+/* Petite carte Médicaments (en haut de Santé) */
+.med-card { padding: 10px 14px; }
+.med-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.med-title { font-weight: 700; color: var(--ink-soft); }
+.med-add {
+  font: inherit; font-size: .9rem; font-weight: 700; color: var(--sante); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 999px; padding: 4px 12px; min-height: 36px; cursor: pointer;
+}
+.med-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.med-list li { display: grid; grid-template-columns: 1fr auto auto; grid-template-areas: "nom timer del" "quand timer del"; column-gap: 8px; align-items: center; padding: 6px 0; border-top: 1px dashed var(--card-border); }
+.med-list li:first-child { border-top: 0; }
+.med-list li.med-vide { display: block; color: var(--ink-soft); font-size: .9rem; padding: 2px 0 0; }
+.med-nom { grid-area: nom; font-weight: 700; overflow-wrap: anywhere; }
+.med-dose { font-weight: 500; color: var(--ink-soft); font-size: .9rem; }
+.med-quand { grid-area: quand; font-size: .82rem; color: var(--ink-soft); }
+.med-timer { grid-area: timer; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--sante); white-space: nowrap; font-size: .95rem; }
+.med-list .del { grid-area: del; width: 32px; height: 32px; font-size: .9rem; }
+.med-list .del.confirm { width: auto; }
+.med-list li.editable .h-info::after { content: none; }
+.med-form { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.small-chips { margin: 0; }
+.small-chips:empty { display: none; }
+.small-chips .chip { min-height: 34px; padding: 4px 10px; font-size: .9rem; }
+.med-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.med-fields input {
+  font: inherit; font-size: 1rem; color: var(--ink); background: var(--chip); width: 100%; min-width: 0;
+  border: 2px solid var(--card-border); border-radius: 12px; padding: 8px 10px; min-height: 44px;
+  -webkit-appearance: none; appearance: none;
+}
+.med-fields #med-nom { grid-column: 1 / -1; }
+.med-save { background: var(--sante); }

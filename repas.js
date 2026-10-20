@@ -3,7 +3,7 @@
   const TABLE = "biberons";
   const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil";
   const REPRISE_MAX_MS = 3 * 60 * 60 * 1000; // au-delà, on ne propose plus de relancer le dodo
-  const QUANTITES = [60, 90, 120, 150, 180, 210, 240];
+  const QUANTITES = [30, 60, 90, 120, 150, 180, 210, 240];
   const LAITS = ["poudre", "maternel"];
   const LAIT_NOM = { poudre: "lait en poudre", maternel: "lait maternel" };
   const COTES = ["gauche", "droite", "les deux"];
@@ -105,6 +105,38 @@
     }
   }
 
+  async function modifier(r) {
+    const champs =
+      r.type === "allaitement"
+        ? [
+            { cle: "heure", label: "Heure", type: "time", valeur: hhmm(r.pris_le) },
+            { cle: "cote", label: "Côté", type: "select", valeur: r.cote, options: [[null, "Je ne sais pas"], ...COTES.map((c) => [c, c[0].toUpperCase() + c.slice(1)])] },
+            { cle: "duree_min", label: "Durée", type: "select", valeur: r.duree_min, options: [[null, "Je ne sais pas"], ...[...new Set([...DUREES, 25, 40, 45, 60, r.duree_min].filter(Boolean))].sort((a, b) => a - b).map((d) => [d, `${d} min`])] },
+          ]
+        : [
+            { cle: "heure", label: "Heure", type: "time", valeur: hhmm(r.pris_le) },
+            { cle: "quantite_ml", label: "Quantité", type: "select", valeur: r.quantite_ml, options: [[null, "Je ne sais pas"], ...[...new Set([...QUANTITES, r.quantite_ml].filter(Boolean))].sort((a, b) => a - b).map((q) => [q, `${q} ml`])] },
+            { cle: "lait", label: "Type de lait", type: "select", valeur: r.lait, options: [[null, "Non précisé"], ["poudre", "Lait en poudre"], ["maternel", "Lait maternel"]] },
+          ];
+    const v = await editer(`${(MODES[r.type] || MODES.biberon).emoji} Modifier le repas`, champs);
+    if (!v) return;
+    const maj = { pris_le: v.heure ? memeJourA(r.pris_le, v.heure).toISOString() : r.pris_le };
+    if (r.type === "allaitement") {
+      maj.cote = v.cote;
+      maj.duree_min = v.duree_min === null ? null : Number(v.duree_min);
+    } else {
+      maj.quantite_ml = v.quantite_ml === null ? null : Number(v.quantite_ml);
+      maj.lait = v.lait;
+    }
+    try {
+      await api(TABLE, `?id=eq.${r.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      toast("✏️ Repas modifié");
+      await charger();
+    } catch (e) {
+      afficherErreur("Modification impossible. Réessaie.");
+    }
+  }
+
   async function supprimer(id) {
     try {
       await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
@@ -170,6 +202,7 @@
       <span class="h-info"><span class="h-type">${m.nom}</span>${det ? `<span class="h-det">${det}</span>` : ""}</span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(r.pris_le).getTime())}</span>`;
     li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id)));
+    rendreModifiable(li, () => modifier(r));
     return li;
   }
 

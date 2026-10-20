@@ -52,6 +52,31 @@
     }
   }
 
+  async function modifier(s) {
+    const champs = [{ cle: "debut", label: "Endormi à", type: "time", valeur: hhmm(s.debut) }];
+    if (s.fin) champs.push({ cle: "fin", label: "Réveillé à", type: "time", valeur: hhmm(s.fin) });
+    const v = await editer("😴 Modifier le dodo", champs);
+    if (!v || !v.debut) return;
+    const debut = memeJourA(s.debut, v.debut);
+    const maj = { debut: debut.toISOString() };
+    if (s.fin && v.fin) {
+      const [h, m] = v.fin.split(":").map(Number);
+      const fin = new Date(debut);
+      fin.setHours(h, m, 0, 0);
+      if (fin <= debut) fin.setDate(fin.getDate() + 1); // ex. 23:00 → 01:30
+      if (fin > new Date(Date.now() + 5 * 60 * 1000)) return afficherErreur("Le réveil ne peut pas être dans le futur.");
+      maj.fin = fin.toISOString();
+    }
+    try {
+      await api(TABLE, `?id=eq.${s.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      toast("✏️ Dodo modifié");
+      afficherErreur(null);
+      await charger();
+    } catch (e) {
+      afficherErreur("Modification impossible : vérifie les heures.");
+    }
+  }
+
   async function supprimer(id) {
     try {
       await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
@@ -124,6 +149,7 @@
       <span class="h-time">${fmtHeure(s.debut)}</span>
       <span class="h-info"><span class="h-type">→ ${fin}</span><span class="h-det">${duree}</span></span>`;
     li.append(boutonSupprimer(`Supprimer le dodo de ${fmtHeure(s.debut)}`, () => supprimer(s.id)));
+    rendreModifiable(li, () => modifier(s));
     return li;
   }
 

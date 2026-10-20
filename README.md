@@ -11,6 +11,6 @@ Petite appli web pour suivre le quotidien de Noah, en cinq pages qu'on fait glis
 Décor savane animé (girafe qui boit, éléphant, oiseaux, suricate), mode nuit automatique.
 
 - Site statique (HTML / CSS / JS), hébergé sur GitHub Pages
-- Données dans Supabase : tables `biberons`, `couches`, `sommeils`, `sante_profil`, `rendez_vous`, `mesures`, `suivi_calendrier`, `garde_jours`, `garde_evenements`
+- Données dans Supabase : tables `biberons`, `couches`, `sommeils`, `sante_profil`, `rendez_vous`, `mesures`, `suivi_calendrier`, `garde_jours`, `garde_evenements`, `medicaments_prises`
 
 La nuit (23 h – 7 h), un repas noté pendant un dodo met le sommeil en pause ; « Fin du repas, il se rendort » le relance.
