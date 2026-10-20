@@ -7,22 +7,118 @@ const SUPABASE_KEY = "sb_publishable_KnZB8Lh0snCPuAPphixPGw_QoNmXlrF";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
+// Jeton de connexion (fourni par auth.js une fois le profil connecté)
+let obtenirJeton = async () => null;
+let surNonConnecte = () => {};
+
+// ---------- File d'attente hors ligne ----------
+// Sans réseau, les ajouts / modifications sont gardés sur le téléphone puis envoyés au retour du réseau.
+const FILE = "file-attente";
+const lireFile = () => lire(FILE, [], Array.isArray);
+function majBadgeAttente() {
+  const n = lireFile().length;
+  const b = document.getElementById("sync-badge");
+  if (!b) return;
+  b.hidden = n === 0 && navigator.onLine;
+  b.textContent = n ? `📶 ${n} en attente` : "📶 Hors ligne";
+}
+function mettreEnAttente(table, path, options) {
+  const file = lireFile();
+  file.push({ table, path, method: options.method, body: options.body, headers: options.headers || {} });
+  ecrire(FILE, file);
+  majBadgeAttente();
+  toast("📶 Pas de réseau : ce sera envoyé dès qu'il revient");
+}
+let envoiEnCours = false;
+async function envoyerFile() {
+  if (envoiEnCours || !navigator.onLine) return;
+  let file = lireFile();
+  if (!file.length) return majBadgeAttente();
+  envoiEnCours = true;
+  let envoye = 0;
+  try {
+    while (file.length) {
+      const it = file[0];
+      let res;
+      try {
+        res = await fetch(`${SUPABASE_URL}/rest/v1/${it.table}${it.path}`, {
+          method: it.method,
+          body: it.body,
+          headers: await entetes(it.headers),
+        });
+      } catch (e) {
+        break; // toujours pas de réseau : on réessaiera
+      }
+      if (res.status === 401) {
+        surNonConnecte();
+        break;
+      }
+      // Réussi, ou refusé pour de bon (ex. dodo déjà lancé ailleurs) : on retire de la file
+      file.shift();
+      ecrire(FILE, file);
+      if (res.ok) envoye++;
+    }
+  } finally {
+    envoiEnCours = false;
+    majBadgeAttente();
+  }
+  if (envoye) {
+    toast(`📶 ${envoye} envoi${envoye > 1 ? "s" : ""} en attente synchronisé${envoye > 1 ? "s" : ""}`);
+    rechargerTout();
+  }
+}
+window.addEventListener("online", envoyerFile);
+window.addEventListener("offline", majBadgeAttente);
+
+async function entetes(extra = {}) {
+  const jeton = await obtenirJeton();
+  return {
+    apikey: SUPABASE_KEY,
+    ...(jeton ? { Authorization: `Bearer ${jeton}` } : {}),
+    "Content-Type": "application/json",
+    Prefer: "return=representation",
+    ...extra,
+  };
+}
+
+// Clé de cache stable : les « depuis 24 h » changent à chaque appel, on les remplace par *
+const cleCache = (url) => "cache:" + url.replace(/\d{4}-\d{2}-\d{2}T[^&),]*?Z/g, "*");
+
 async function api(table, path = "", options = {}) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${path}`, {
-    ...options,
-    headers: {
-      apikey: SUPABASE_KEY,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-      ...options.headers,
-    },
-  });
+  const methode = (options.method || "GET").toUpperCase();
+  const ecriture = methode !== "GET";
+  const url = `${SUPABASE_URL}/rest/v1/${table}${path}`;
+  // Hors ligne, ou d'autres envois attendent déjà : on garde l'ordre
+  if (ecriture && (!navigator.onLine || lireFile().length)) {
+    mettreEnAttente(table, path, options);
+    envoyerFile();
+    return [];
+  }
+  let res;
+  try {
+    res = await fetch(url, { ...options, headers: await entetes(options.headers) });
+  } catch (e) {
+    if (ecriture) {
+      mettreEnAttente(table, path, options);
+      return [];
+    }
+    // Lecture sans réseau : on montre les dernières données connues
+    const cache = lire(cleCache(url), null, () => true);
+    if (cache !== null) {
+      majBadgeAttente();
+      return cache;
+    }
+    throw e;
+  }
+  if (res.status === 401) surNonConnecte();
   if (!res.ok) {
     const err = new Error(`Erreur ${res.status}`);
     err.status = res.status;
     throw err;
   }
-  return res.status === 204 ? null : res.json();
+  const data = res.status === 204 ? null : await res.json();
+  if (!ecriture) ecrire(cleCache(url), data);
+  return data;
 }
 
 const ilYa24h = () => new Date(Date.now() - DAY_MS).toISOString();
@@ -109,6 +205,10 @@ function animerBouton(btn) {
 // Bouton ✕ : deux appuis pour supprimer, pour éviter les erreurs
 function boutonSupprimer(label, onConfirm) {
   const del = document.createElement("button");
+  if (typeof peutModifier === "function" && !peutModifier()) {
+    del.hidden = true;
+    return del;
+  }
   del.type = "button";
   del.className = "del";
   del.textContent = "✕";
@@ -181,9 +281,14 @@ const rechargerTout = () => Promise.all(rubriques.map((r) => r.charger()));
 
 // La nuit, pour l'appli : de 23 h à 7 h
 const estLaNuit = (d = new Date()) => d.getHours() >= 23 || d.getHours() < 7;
-function demarrerRafraichissement() {
-  const toutCharger = () => rubriques.forEach((r) => r.charger());
+async function demarrerRafraichissement() {
+  await connexionPrete; // fourni par auth.js
+  const toutCharger = () => {
+    envoyerFile();
+    rubriques.forEach((r) => r.charger());
+  };
   toutCharger();
+  majBadgeAttente();
   setInterval(() => rubriques.forEach((r) => r.tick && r.tick()), 1000);
   setInterval(toutCharger, 60 * 1000);
   document.addEventListener("visibilitychange", () => {
@@ -267,6 +372,7 @@ function memeJourA(dateOrigine, heure) {
 
 // Rend une ligne d'historique touchable pour la modifier (le bouton ✕ garde son rôle)
 function rendreModifiable(li, onEdit) {
+  if (typeof peutModifier === "function" && !peutModifier()) return;
   li.classList.add("editable");
   li.setAttribute("title", "Toucher pour modifier");
   li.addEventListener("click", (e) => {

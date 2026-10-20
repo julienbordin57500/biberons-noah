@@ -705,3 +705,47 @@ li.editable:first-child .h-info::after { content: "✏️ toucher pour modifier"
 }
 .med-fields #med-nom { grid-column: 1 / -1; }
 .med-save { background: var(--sante); }
+
+/* ---------- Connexion ---------- */
+body.verrouille .app { visibility: hidden; }
+.login {
+  position: fixed; inset: 0; z-index: 50; overflow-y: auto;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  padding: max(24px, env(safe-area-inset-top)) 16px 32px;
+}
+.login-box { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+.login-lion { margin: 8px auto 0; animation: wiggle 4s ease-in-out infinite; }
+.login-titre { font-size: 2rem; margin: 0; }
+.login-sous { margin: 0; font-weight: 600; color: var(--ink-soft); font-size: 1.1rem; }
+.login-grid { margin: 0; }
+.login-grid .who-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+#login-suite { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+#login-suite[hidden] { display: none; }
+.login-erreur { margin: 0; color: var(--late); font-weight: 700; min-height: 1.2em; }
+
+/* Profil connecté + badge hors ligne */
+.moi { margin: 4px 0 0; font-size: .85rem; font-weight: 600; color: var(--ink-soft); }
+.moi .link { font-size: .85rem; padding: 2px 0; }
+.sync-badge {
+  display: inline-block; margin: 4px 0 0; padding: 2px 10px; border-radius: 999px;
+  background: var(--warn); color: #fff; font-size: .8rem; font-weight: 700;
+}
+
+/* ---------- Famille : pages des parents en consultation, grisées ---------- */
+.ro-banner { display: none; }
+.lecture-seule .ro-banner {
+  display: block; margin: 0; padding: 8px 12px; border-radius: 14px; text-align: center;
+  background: var(--chip); color: var(--ink-soft); font-weight: 600; font-size: .92rem;
+}
+.lecture-seule :is(#page-repas, #page-couches, #page-sommeil) .add-card,
+.lecture-seule #nuit-card button,
+.lecture-seule #rdv-form,
+.lecture-seule #m-btn,
+.lecture-seule #page-sante .fields,
+.lecture-seule #fiche-box,
+.lecture-seule .med-add,
+.lecture-seule .cal .check,
+.lecture-seule .del.plan,
+.lecture-seule .rdv-list .del {
+  opacity: .4; filter: grayscale(.7); pointer-events: none; user-select: none;
+}

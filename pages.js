@@ -49,6 +49,14 @@
 
   marquer(actuelle);
   requestAnimationFrame(() => aller(actuelle, false));
+  window.addEventListener("connecte", (e) => {
+    if (e.detail?.premiere) aller(estParent() ? 0 : pages.length - 1, false);
+  });
 
   demarrerRafraichissement();
 })();
+
+// Appli disponible hors ligne (voir sw.js)
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
