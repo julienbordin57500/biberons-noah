@@ -621,3 +621,45 @@ li.fait .h-type { opacity: .65; }
 }
 .g-btn.wide { flex: 1 1 100%; }
 .g-btn.on { background: var(--wake); color: #3a2508; }
+
+/* Garde : qui utilise ce téléphone, notes de chacun, fenêtre de choix */
+.who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 4px; }
+.who-btn {
+  font: inherit; font-size: 1.05rem; font-weight: 700; color: var(--ink);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--chip); border: 2px solid var(--card-border); border-radius: 16px; padding: 10px; min-height: 56px; cursor: pointer;
+}
+.who-btn .emoji { font-size: 1.5rem; }
+.who-btn:active { border-color: var(--garde); }
+.who-set { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.who-name { font-weight: 700; font-size: 1.1rem; color: var(--garde); }
+.garde-by { margin: 0 0 8px; text-align: center; color: var(--ink-soft); }
+.garde-by strong { color: var(--ink); }
+.notes { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.notes:empty { display: none; }
+.note-card { background: var(--chip); border-radius: 16px; padding: 10px 12px; border-left: 5px solid var(--garde); }
+.note-head { margin: 0 0 4px; font-weight: 700; }
+.note-head span { font-weight: 500; color: var(--ink-soft); }
+.note-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.4; }
+.pill.readonly { cursor: default; opacity: 1; }
+.pill.readonly:disabled { color: var(--ink); }
+.g-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px dotted var(--card-border); }
+.g-range .g-btn { grid-column: 1 / -1; }
+.g-btn.alt { background: var(--sleep); }
+.g-add[hidden] { display: none; }
+
+.sheet {
+  border: 0; padding: 0; background: transparent; color: var(--ink);
+  width: min(420px, calc(100% - 32px)); max-width: none; margin: auto;
+}
+.sheet::backdrop { background: rgba(20, 15, 40, .45); }
+.sheet form {
+  background: var(--card); border: 2px solid var(--card-border); border-radius: 24px; padding: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; gap: 12px; background-color: var(--sky-bottom);
+}
+.sheet-title { margin: 0; font-size: 1.25rem; font-weight: 700; text-align: center; }
+.sheet-options { display: grid; gap: 8px; }
+.sheet-options:empty { display: none; }
+.sheet-actions { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; gap: 10px; }
+.sheet-actions .g-btn { flex: 0 1 auto; padding: 8px 22px; }

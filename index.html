@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <!-- Ciel -->
@@ -472,6 +472,23 @@
 
       <!-- ================= GARDE (nounou, mamies) ================= -->
       <div class="page" id="page-garde" role="tabpanel" aria-label="Garde">
+        <section class="card whoami" id="g-whoami">
+          <p class="label">📱 Qui utilise ce téléphone ?</p>
+          <div id="g-who-choose">
+            <div class="who-grid">
+              <button type="button" class="who-btn" data-who="Nounou"><span class="emoji" aria-hidden="true">👩</span><span>Nounou</span></button>
+              <button type="button" class="who-btn" data-who="Mamie"><span class="emoji" aria-hidden="true">👵</span><span>Mamie</span></button>
+              <button type="button" class="who-btn" data-who="Papi"><span class="emoji" aria-hidden="true">👴</span><span>Papi</span></button>
+              <button type="button" class="who-btn" data-who="Autre"><span class="emoji" aria-hidden="true">🙂</span><span>Autre</span></button>
+            </div>
+            <p class="hint small">Les parents n'ont rien à choisir : ils voient tout ce que la nounou et les mamies notent.</p>
+          </div>
+          <div class="who-set" id="g-who-set" hidden>
+            <span class="who-name" id="g-who-name"></span>
+            <button type="button" class="link" id="g-who-change">Changer</button>
+          </div>
+        </section>
+
         <section class="card garde-day">
           <div class="day-nav">
             <button type="button" class="day-arrow" id="g-prev" aria-label="Jour précédent">‹</button>
@@ -481,16 +498,18 @@
             </div>
             <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
           </div>
-          <p class="label">Gardé par</p>
-          <div class="chips" id="chips-gardien" role="radiogroup" aria-label="Gardé par"></div>
-          <label class="field wide note-field">
-            <span>📝 Note du jour</span>
-            <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment il était, ce qu'il faut savoir…"></textarea>
-          </label>
-          <button type="button" class="add-btn garde small" id="g-note-btn">
-            <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer la note</span>
-          </button>
-          <p class="hint small center-text" id="g-note-saved"></p>
+          <p class="garde-by" id="g-by"></p>
+          <ul class="notes" id="g-notes"></ul>
+          <div id="g-my-note" hidden>
+            <label class="field wide note-field">
+              <span id="g-my-note-label">📝 Ma note du jour</span>
+              <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment il était, ce qu'il faut savoir…"></textarea>
+            </label>
+            <button type="button" class="add-btn garde small" id="g-note-btn">
+              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer ma note</span>
+            </button>
+            <p class="hint small center-text" id="g-note-saved"></p>
+          </div>
         </section>
 
         <section class="card garde-recap">
@@ -526,10 +545,16 @@
             <div class="g-add" data-today-only>
               <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Il s'endort</button>
             </div>
+            <div class="g-add g-range" data-writer-only>
+              <label class="field"><span>Endormi à</span><input type="time" id="g-dodo-debut"></label>
+              <label class="field"><span>Réveillé à</span><input type="time" id="g-dodo-fin"></label>
+              <button type="button" class="g-btn wide alt" id="g-dodo-add">+ Ajouter ce dodo</button>
+            </div>
           </div>
 
-          <p class="hint small" id="g-past-hint" hidden>Pour ajouter un repas, une couche ou un dodo, reviens sur aujourd'hui.</p>
-          <p class="hint small">Cet espace est séparé : rien de ce qui est noté ici ne s'ajoute à vos pages Repas, Couches et Sommeil. Touche une pastille deux fois pour l'effacer.</p>
+          <p class="hint small" id="g-read-hint">👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.</p>
+          <p class="hint small" id="g-past-hint" hidden>Pour noter un repas ou une couche, reviens sur aujourd'hui. Un dodo peut être ajouté pour n'importe quel jour.</p>
+          <p class="hint small">Tout est enregistré en ligne : chaque téléphone qui a le lien voit les mêmes notes et le même récap. Rien ne se mélange avec vos pages Repas, Couches et Sommeil. Touche deux fois une de tes pastilles pour l'effacer.</p>
         </section>
       </div>
     </div>
@@ -539,13 +564,28 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
-  <script src="scene.js?v=7"></script>
-  <script src="commun.js?v=7"></script>
-  <script src="repas.js?v=7"></script>
-  <script src="couches.js?v=7"></script>
-  <script src="sommeil.js?v=7"></script>
-  <script src="sante.js?v=7"></script>
-  <script src="garde.js?v=7"></script>
-  <script src="pages.js?v=7"></script>
+  <dialog class="sheet" id="g-dialog" aria-labelledby="g-dialog-title">
+    <form method="dialog" id="g-dialog-form">
+      <p class="sheet-title" id="g-dialog-title"></p>
+      <div class="sheet-options" id="g-dialog-options"></div>
+      <label class="field wide" id="g-dialog-name-box" hidden>
+        <span>Prénom</span>
+        <input type="text" id="g-dialog-name" maxlength="30" autocomplete="off" placeholder="Ex. Julie">
+      </label>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn" id="g-dialog-ok" hidden>Valider</button>
+        <button type="submit" value="annuler" class="link">Annuler</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="scene.js?v=8"></script>
+  <script src="commun.js?v=8"></script>
+  <script src="repas.js?v=8"></script>
+  <script src="couches.js?v=8"></script>
+  <script src="sommeil.js?v=8"></script>
+  <script src="sante.js?v=8"></script>
+  <script src="garde.js?v=8"></script>
+  <script src="pages.js?v=8"></script>
 </body>
 </html>
