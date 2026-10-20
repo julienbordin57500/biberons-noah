@@ -1,8 +1,10 @@
 // Page Repas : biberons et allaitements (table « biberons »)
 (() => {
   const TABLE = "biberons";
-  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min";
+  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait";
   const QUANTITES = [60, 90, 120, 150, 180, 210, 240];
+  const LAITS = ["poudre", "maternel"];
+  const LAIT_NOM = { poudre: "lait en poudre", maternel: "lait maternel" };
   const COTES = ["gauche", "droite", "les deux"];
   const DUREES = [5, 10, 15, 20, 30];
   const WARN_MS = 2.5 * 60 * 60 * 1000;
@@ -17,6 +19,7 @@
   let dernier = null; // le tout dernier repas, même s'il date de plus de 24 h
 
   const choix = {
+    lait: lire("lait", "poudre", (v) => LAITS.includes(v)),
     quantite: lire("quantite", 150, (v) => v === null || QUANTITES.includes(v)),
     cote: lire("cote", null, (v) => v === null || COTES.includes(v)),
     duree: lire("duree", null, (v) => v === null || DUREES.includes(v)),
@@ -47,7 +50,7 @@
     try {
       const ligne =
         mode === "biberon"
-          ? { type: "biberon", quantite_ml: choix.quantite }
+          ? { type: "biberon", lait: choix.lait, quantite_ml: choix.quantite }
           : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
       ligne.pris_le = heureChoisie("repas-heure").toISOString();
       await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
@@ -75,7 +78,7 @@
   // « 150 ml » ou « gauche · 15 min »
   function details(r) {
     if (r.type === "allaitement") return [r.cote, r.duree_min && `${r.duree_min} min`].filter(Boolean).join(" · ");
-    return r.quantite_ml ? `${r.quantite_ml} ml` : "";
+    return [r.quantite_ml && `${r.quantite_ml} ml`, LAIT_NOM[r.lait]].filter(Boolean).join(" · ");
   }
 
   function tick() {
@@ -156,6 +159,7 @@
     choix[cle] = v;
     ecrire(cle, v);
   };
+  rendreChips("chips-lait", LAITS, () => choix.lait, setter("lait"), (v) => (v === "poudre" ? "🥄 Lait en poudre" : "🥛 Lait maternel"), false);
   rendreChips("chips-ml", QUANTITES, () => choix.quantite, setter("quantite"), (v) => `${v} ml`);
   rendreChips("chips-cote", COTES, () => choix.cote, setter("cote"), (v) => v[0].toUpperCase() + v.slice(1));
   rendreChips("chips-duree", DUREES, () => choix.duree, setter("duree"), (v) => `${v} min`);

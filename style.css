@@ -566,3 +566,6 @@ li.fait .h-type { opacity: .65; }
   -webkit-appearance: none; appearance: none; display: block; max-width: 100%; text-align: left;
 }
 .field input::-webkit-date-and-time-value { text-align: left; }
+
+/* Type de lait : deux grandes pastilles côte à côte */
+.chips.lait .chip { flex: 1; }
