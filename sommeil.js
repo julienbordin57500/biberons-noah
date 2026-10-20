@@ -37,11 +37,12 @@
         toast(`☀️ Bon réveil ! Dodo de ${fmtMinutes(quand - new Date(enCours.debut))}`);
       } else {
         await api(TABLE, "", { method: "POST", body: JSON.stringify({ debut: quand.toISOString() }) });
-        toast("🌙 Bonne sieste Noah !");
+        await api("biberons", "?reprise_sommeil=is.true", { method: "PATCH", body: JSON.stringify({ reprise_sommeil: false }) }).catch(() => {});
+        toast(estLaNuit(quand) ? "🌙 Bonne nuit Noah !" : "🌙 Bonne sieste Noah !");
       }
       animerBouton(btn);
       $("sleep-heure").value = "";
-      await charger();
+      await rechargerTout();
     } catch (e) {
       // 409 : un autre téléphone a déjà lancé le dodo
       afficherErreur(e.status === 409 ? "Noah dort déjà (lancé depuis un autre téléphone)." : "Impossible d'enregistrer. Réessaie.");

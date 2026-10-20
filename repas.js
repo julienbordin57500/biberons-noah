@@ -1,7 +1,8 @@
 // Page Repas : biberons et allaitements (table « biberons »)
 (() => {
   const TABLE = "biberons";
-  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait";
+  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil";
+  const REPRISE_MAX_MS = 3 * 60 * 60 * 1000; // au-delà, on ne propose plus de relancer le dodo
   const QUANTITES = [60, 90, 120, 150, 180, 210, 240];
   const LAITS = ["poudre", "maternel"];
   const LAIT_NOM = { poudre: "lait en poudre", maternel: "lait maternel" };
@@ -24,9 +25,8 @@
     cote: lire("cote", null, (v) => v === null || COTES.includes(v)),
     duree: lire("duree", null, (v) => v === null || DUREES.includes(v)),
   };
-  // La nuit (21 h – 7 h), on propose l'allaitement par défaut
-  const heure = new Date().getHours();
-  let mode = heure >= 21 || heure < 7 ? "allaitement" : "biberon";
+  // La nuit (23 h – 7 h), on propose l'allaitement par défaut
+  let mode = estLaNuit() ? "allaitement" : "biberon";
 
   async function charger() {
     try {
@@ -52,16 +52,56 @@
         mode === "biberon"
           ? { type: "biberon", lait: choix.lait, quantite_ml: choix.quantite }
           : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
-      ligne.pris_le = heureChoisie("repas-heure").toISOString();
+      const quand = heureChoisie("repas-heure");
+      ligne.pris_le = quand.toISOString();
+      // La nuit, si Noah dormait, le repas met le dodo en pause
+      const pause = estLaNuit(quand) && (await mettreDodoEnPause(quand));
+      if (pause) ligne.reprise_sommeil = true;
       await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
       animerBouton(btn);
-      toast(`${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
+      toast(pause ? "🌙 Dodo en pause pendant le repas" : `${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
       $("repas-heure").value = "";
-      await charger();
+      await (pause ? rechargerTout() : charger());
     } catch (e) {
       afficherErreur("Le repas n'a pas pu être enregistré. Réessaie.");
     } finally {
       btn.disabled = false;
+    }
+  }
+
+  // Arrête le dodo en cours à l'heure du repas. Renvoie true si un dodo a été arrêté.
+  async function mettreDodoEnPause(quand) {
+    const [enCours] = await api("sommeils", "?select=id,debut&fin=is.null&limit=1");
+    if (!enCours || quand <= new Date(enCours.debut)) return false;
+    await api("sommeils", `?id=eq.${enCours.id}`, { method: "PATCH", body: JSON.stringify({ fin: quand.toISOString() }) });
+    return true;
+  }
+
+  // Repas de nuit en attente : le dernier repas a mis le dodo en pause il y a moins de 3 h
+  const repasDeNuit = () =>
+    dernier && dernier.reprise_sommeil && Date.now() - new Date(dernier.pris_le).getTime() < REPRISE_MAX_MS ? dernier : null;
+
+  // « Fin du repas » : le dodo reprend tout de suite
+  async function finRepasNuit(rendort) {
+    const r = repasDeNuit();
+    if (!r) return;
+    const champs = { reprise_sommeil: false };
+    // Allaitement sans durée notée : on prend la durée réelle du repas
+    const minutes = Math.round((Date.now() - new Date(r.pris_le).getTime()) / 60000);
+    if (r.type === "allaitement" && !r.duree_min) champs.duree_min = Math.min(120, Math.max(1, minutes));
+    try {
+      await api(TABLE, `?id=eq.${r.id}`, { method: "PATCH", body: JSON.stringify(champs) });
+      if (rendort) {
+        try {
+          await api("sommeils", "", { method: "POST", body: JSON.stringify({ debut: new Date().toISOString() }) });
+        } catch (e) {
+          if (e.status !== 409) throw e; // 409 : le dodo a déjà été relancé ailleurs
+        }
+        toast("😴 Bonne nuit Noah, le dodo reprend");
+      }
+      await rechargerTout();
+    } catch (e) {
+      afficherErreur("Impossible de relancer le dodo. Réessaie.");
     }
   }
 
@@ -82,6 +122,8 @@
   }
 
   function tick() {
+    const nuit = repasDeNuit();
+    if (nuit) $("nuit-timer").textContent = fmtDuree(Date.now() - new Date(nuit.pris_le).getTime());
     const el = $("repas-timer");
     if (!dernier) {
       el.textContent = "--:--";
@@ -93,6 +135,12 @@
   }
 
   function rendre() {
+    const nuit = repasDeNuit();
+    $("nuit-card").hidden = !nuit;
+    if (nuit) {
+      const m = MODES[nuit.type] || MODES.biberon;
+      $("nuit-info").textContent = `${m.emoji} ${m.nom} depuis ${fmtHeure(nuit.pris_le)}`;
+    }
     if (dernier) {
       const m = MODES[dernier.type] || MODES.biberon;
       const det = details(dernier);
@@ -154,6 +202,8 @@
     })
   );
   $("repas-btn").addEventListener("click", ajouter);
+  $("nuit-rendort").addEventListener("click", () => finRepasNuit(true));
+  $("nuit-eveille").addEventListener("click", () => finRepasNuit(false));
 
   const setter = (cle) => (v) => {
     choix[cle] = v;

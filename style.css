@@ -30,6 +30,7 @@
   --wake: #f2b632;
   --couche: #4fa3a0;
   --sante: #d9534f;
+  --garde: #c77d2e;
   --milk: #e8742c;
   --breast: #c4638f;
 
@@ -84,6 +85,7 @@
     --wake: #f3c24f;
     --couche: #6cc2bf;
     --sante: #ef7d78;
+    --garde: #e2a35a;
     --milk: #f0a04b;
     --breast: #e58fb4;
 
@@ -137,6 +139,7 @@
   --wake: #f3c24f;
   --couche: #6cc2bf;
   --sante: #ef7d78;
+  --garde: #e2a35a;
   --milk: #f0a04b;
   --breast: #e58fb4;
   --card: rgba(38, 36, 70, 0.9);
@@ -427,12 +430,12 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 /* ---------- Onglets et pages qui glissent ---------- */
 .tabs {
   position: sticky; top: 0; z-index: 4; margin-top: -30px;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 5px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; padding: 5px;
   background: var(--card); border: 2px solid var(--card-border); border-radius: 22px;
   box-shadow: var(--shadow); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .tab {
-  font: inherit; font-size: .85rem; font-weight: 700; color: var(--ink-soft);
+  font: inherit; font-size: .78rem; font-weight: 700; color: var(--ink-soft);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
   background: none; border: 0; border-radius: 17px; padding: 6px 2px; min-height: 52px; min-width: 0; cursor: pointer;
   transition: background .2s, color .2s; white-space: nowrap; overflow: hidden;
@@ -442,6 +445,7 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 body[data-page="1"] .tab[aria-selected="true"] { background: var(--couche); color: #fff; }
 body[data-page="2"] .tab[aria-selected="true"] { background: var(--sleep); color: #fff; }
 body[data-page="3"] .tab[aria-selected="true"] { background: var(--sante); color: #fff; }
+body[data-page="4"] .tab[aria-selected="true"] { background: var(--garde); color: #fff; }
 
 .pages {
   display: flex; align-items: flex-start; margin: 0 -16px;
@@ -569,3 +573,51 @@ li.fait .h-type { opacity: .65; }
 
 /* Type de lait : deux grandes pastilles côte à côte */
 .chips.lait .chip { flex: 1; }
+
+/* Repas de nuit : le dodo est en pause */
+.night-card { text-align: center; background: color-mix(in srgb, var(--sleep) 20%, var(--card)); border-color: var(--sleep); }
+.night-card .night-timer { color: var(--sleep); font-size: clamp(2.4rem, 12vw, 3.2rem); margin-bottom: 4px; }
+.night-card .add-btn { margin-top: 12px; }
+.link.center { display: block; margin: 8px auto 0; }
+
+/* ---------- Garde (nounou, mamies) ---------- */
+.add-btn.garde { background: var(--garde); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--garde) 60%, #000); }
+.day-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.day-arrow {
+  font: inherit; font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--garde);
+  width: 46px; height: 46px; flex: none; border-radius: 50%; border: 2px solid var(--card-border); background: var(--chip); cursor: pointer;
+}
+.day-arrow:disabled { opacity: .35; cursor: default; }
+.day-title { flex: 1; text-align: center; min-width: 0; }
+.day-name { margin: 0; font-size: 1.35rem; font-weight: 700; color: var(--garde); }
+.day-date { margin: 0; color: var(--ink-soft); }
+.note-field { margin: 10px 0 12px; }
+.note-field textarea { min-height: 110px; line-height: 1.4; }
+.center-text { text-align: center; }
+.center-text:empty { display: none; }
+
+.g-row { padding: 12px 0; border-top: 2px dashed var(--card-border); }
+.g-row:first-of-type { border-top: 0; padding-top: 6px; }
+.g-head { display: flex; align-items: center; gap: 8px; }
+.g-emoji { font-size: 1.4rem; }
+.g-title { font-weight: 700; font-size: 1.1rem; flex: 1; }
+.g-sum { font-weight: 700; color: var(--garde); white-space: nowrap; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.pill {
+  font: inherit; font-size: .92rem; font-weight: 600; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--card-border); border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.pill.empty { cursor: default; color: var(--ink-soft); font-weight: 500; border-style: dashed; background: none; }
+.pill.live { border-color: var(--sleep); color: var(--sleep); }
+.pill.confirm { background: var(--late); border-color: var(--late); color: #fff; }
+.g-add { display: flex; gap: 6px; flex-wrap: wrap; }
+.g-add select {
+  font: inherit; font-size: 1rem; color: var(--ink); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 12px; padding: 6px 8px; min-height: 44px; flex: 1; min-width: 0;
+}
+.g-btn {
+  font: inherit; font-size: 1rem; font-weight: 700; color: #fff; background: var(--garde);
+  border: 0; border-radius: 12px; padding: 8px 14px; min-height: 44px; cursor: pointer; flex: 1; white-space: nowrap;
+}
+.g-btn.wide { flex: 1 1 100%; }
+.g-btn.on { background: var(--wake); color: #3a2508; }

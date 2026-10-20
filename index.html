@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <!-- Ciel -->
@@ -188,11 +188,21 @@
       <button type="button" class="tab" role="tab" data-page="1"><span class="tab-emoji" aria-hidden="true">👶</span><span>Couches</span></button>
       <button type="button" class="tab" role="tab" data-page="2"><span class="tab-emoji" aria-hidden="true">🌙</span><span>Sommeil</span></button>
       <button type="button" class="tab" role="tab" data-page="3"><span class="tab-emoji" aria-hidden="true">🩺</span><span>Santé</span></button>
+      <button type="button" class="tab" role="tab" data-page="4"><span class="tab-emoji" aria-hidden="true">👵</span><span>Garde</span></button>
     </nav>
 
     <div class="pages" id="pages">
       <!-- ================= REPAS ================= -->
       <div class="page" id="page-repas" role="tabpanel" aria-label="Repas">
+        <section class="card night-card" id="nuit-card" hidden aria-live="polite">
+          <p class="label">🌙 Repas de nuit en cours · dodo en pause</p>
+          <p class="timer night-timer" id="nuit-timer">0:00:00</p>
+          <p class="sub" id="nuit-info"></p>
+          <button type="button" class="add-btn sleep" id="nuit-rendort">
+            <span class="emoji" aria-hidden="true">😴</span><span>Fin du repas, il se rendort</span>
+          </button>
+          <button type="button" class="link center" id="nuit-eveille">Il reste réveillé</button>
+        </section>
         <section class="card timer-card" aria-live="polite">
           <p class="label">Dernier repas il y a</p>
           <p class="timer" id="repas-timer">--:--</p>
@@ -459,6 +469,69 @@
           <p class="hint small">En cas d'urgence : <a href="tel:15">15</a> (Samu) ou <a href="tel:112">112</a>. Médecin de garde le soir et le week-end : <a href="tel:116117">116 117</a> (selon la région).</p>
         </section>
       </div>
+
+      <!-- ================= GARDE (nounou, mamies) ================= -->
+      <div class="page" id="page-garde" role="tabpanel" aria-label="Garde">
+        <section class="card garde-day">
+          <div class="day-nav">
+            <button type="button" class="day-arrow" id="g-prev" aria-label="Jour précédent">‹</button>
+            <div class="day-title">
+              <p class="day-name" id="g-day-name">Aujourd'hui</p>
+              <p class="day-date" id="g-day-date"></p>
+            </div>
+            <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
+          </div>
+          <p class="label">Gardé par</p>
+          <div class="chips" id="chips-gardien" role="radiogroup" aria-label="Gardé par"></div>
+          <label class="field wide note-field">
+            <span>📝 Note du jour</span>
+            <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment il était, ce qu'il faut savoir…"></textarea>
+          </label>
+          <button type="button" class="add-btn garde small" id="g-note-btn">
+            <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer la note</span>
+          </button>
+          <p class="hint small center-text" id="g-note-saved"></p>
+        </section>
+
+        <section class="card garde-recap">
+          <p class="label">Récap de la journée</p>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">🍼</span><span class="g-title">Repas</span><span class="g-sum" id="g-repas-sum"></span></div>
+            <div class="pills" id="g-repas-list"></div>
+            <div class="g-add" data-today-only>
+              <select id="g-ml" aria-label="Quantité">
+                <option value="">? ml</option><option>60</option><option>90</option><option>120</option><option selected>150</option><option>180</option><option>210</option><option>240</option>
+              </select>
+              <select id="g-lait" aria-label="Type de lait">
+                <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
+              </select>
+              <button type="button" class="g-btn" id="g-repas-btn">+ Biberon</button>
+            </div>
+          </div>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">👶</span><span class="g-title">Couches</span><span class="g-sum" id="g-couche-sum"></span></div>
+            <div class="pills" id="g-couche-list"></div>
+            <div class="g-add" data-today-only>
+              <button type="button" class="g-btn" data-couche="pipi">+ 💧</button>
+              <button type="button" class="g-btn" data-couche="caca">+ 💩</button>
+              <button type="button" class="g-btn" data-couche="les deux">+ 💧💩</button>
+            </div>
+          </div>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">😴</span><span class="g-title">Sommeil</span><span class="g-sum" id="g-sleep-sum"></span></div>
+            <div class="pills" id="g-sleep-list"></div>
+            <div class="g-add" data-today-only>
+              <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Il s'endort</button>
+            </div>
+          </div>
+
+          <p class="hint small" id="g-past-hint" hidden>Pour ajouter un repas, une couche ou un dodo, reviens sur aujourd'hui.</p>
+          <p class="hint small">Cet espace est séparé : rien de ce qui est noté ici ne s'ajoute à vos pages Repas, Couches et Sommeil. Touche une pastille deux fois pour l'effacer.</p>
+        </section>
+      </div>
     </div>
 
     <p class="error" id="error" role="alert" hidden></p>
@@ -466,12 +539,13 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
-  <script src="scene.js?v=6"></script>
-  <script src="commun.js?v=6"></script>
-  <script src="repas.js?v=6"></script>
-  <script src="couches.js?v=6"></script>
-  <script src="sommeil.js?v=6"></script>
-  <script src="sante.js?v=6"></script>
-  <script src="pages.js?v=6"></script>
+  <script src="scene.js?v=7"></script>
+  <script src="commun.js?v=7"></script>
+  <script src="repas.js?v=7"></script>
+  <script src="couches.js?v=7"></script>
+  <script src="sommeil.js?v=7"></script>
+  <script src="sante.js?v=7"></script>
+  <script src="garde.js?v=7"></script>
+  <script src="pages.js?v=7"></script>
 </body>
 </html>

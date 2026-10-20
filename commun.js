@@ -176,6 +176,11 @@ const rubriques = [];
 function enregistrerRubrique(r) {
   rubriques.push(r);
 }
+// Recharge toutes les pages (quand une action sur l'une change les données d'une autre)
+const rechargerTout = () => Promise.all(rubriques.map((r) => r.charger()));
+
+// La nuit, pour l'appli : de 23 h à 7 h
+const estLaNuit = (d = new Date()) => d.getHours() >= 23 || d.getHours() < 7;
 function demarrerRafraichissement() {
   const toutCharger = () => rubriques.forEach((r) => r.charger());
   toutCharger();
