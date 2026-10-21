@@ -9,7 +9,7 @@ const PROFILS = [
   { nom: "Mamie Domi", emoji: "👵", role: "famille" },
   { nom: "Papou", emoji: "👴", role: "famille" },
   { nom: "Papi Éric", emoji: "👴", role: "famille" },
-  { nom: "Autre", emoji: "🙂", role: "famille", prenom: true },
+  { nom: "Autre", emoji: "🙂", role: "famille" },
 ];
 const COMPTES = { parents: "parents.noah@example.com", famille: "famille.noah@example.com" };
 
@@ -52,11 +52,29 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
       })
     );
     const p = PROFILS.find((x) => x.nom === choix);
-    $("login-prenom-box").hidden = !p?.prenom;
     $("login-suite").hidden = !p;
   }
 
+  // La savane de l'en-tête, recopiée en grand sur l'accueil : les animaux y défilent en boucle
+  function decorAccueil() {
+    const cible = $("login-scene");
+    const source = document.querySelector(".scene .landscape");
+    if (cible.firstChild || !source) return;
+    const copie = source.cloneNode(true);
+    copie.removeAttribute("class");
+    copie.classList.add("landscape", "login-landscape");
+    copie.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+    copie.querySelectorAll(".walker").forEach((w) => w.removeAttribute("style"));
+    copie.querySelector(".giraffe")?.classList.add("on", "walking");
+    copie.querySelector(".giraffe")?.classList.remove("drinking");
+    copie.querySelector(".elephant")?.classList.add("on", "walking", "left");
+    copie.querySelector(".birds")?.classList.add("on");
+    copie.querySelector(".meerkat")?.classList.add("on");
+    cible.append(copie);
+  }
+
   function montrerConnexion() {
+    decorAccueil();
     document.body.classList.add("verrouille");
     $("login").hidden = false;
     $("login-erreur").textContent = "";
@@ -69,14 +87,7 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
     const p = PROFILS.find((x) => x.nom === choix);
     if (!p) return;
     const mdp = $("login-mdp").value;
-    let nom = p.nom;
-    if (p.prenom) {
-      nom = $("login-prenom").value.trim().slice(0, 30);
-      if (!nom) {
-        $("login-erreur").textContent = "Écris ton prénom.";
-        return;
-      }
-    }
+    const nom = p.nom;
     if (!mdp) {
       $("login-erreur").textContent = "Tape le mot de passe.";
       return;
@@ -106,7 +117,18 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
     ecrire("profil", pr);
     document.body.classList.remove("verrouille");
     document.body.classList.toggle("lecture-seule", !estParent());
-    $("login").hidden = true;
+    // Transition : l'accueil s'envole en zoomant, l'appli arrive en douceur
+    if (!$("login").hidden && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      $("login").classList.add("sortie");
+      document.body.classList.add("entree");
+      setTimeout(() => {
+        $("login").hidden = true;
+        $("login").classList.remove("sortie");
+        document.body.classList.remove("entree");
+      }, 750);
+    } else {
+      $("login").hidden = true;
+    }
     $("moi-nom").textContent = `${pr.emoji} ${pr.nom}`;
     $("moi").hidden = false;
     window.dispatchEvent(new CustomEvent("connecte", { detail: { premiere } }));

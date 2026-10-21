@@ -16,31 +16,61 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body class="verrouille">
-  <!-- Connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
+  <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
   <div class="login" id="login" hidden>
+    <div class="login-sky" aria-hidden="true">
+      <div class="login-sun"></div>
+      <div class="stars"></div>
+      <svg class="cloud lc1" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+      <svg class="cloud lc2" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+    </div>
+    <div class="login-scene" id="login-scene" aria-hidden="true"></div>
+
     <form class="login-box" id="login-form" autocomplete="on">
-      <img src="icon.svg" alt="" class="login-lion" width="88" height="88">
-      <h1 class="login-titre">Le carnet de Noah</h1>
+      <div class="login-lion" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="52" r="44" class="mane"/>
+          <circle cx="50" cy="54" r="30" class="face"/>
+          <circle cx="28" cy="30" r="9" class="face"/><circle cx="72" cy="30" r="9" class="face"/>
+          <g class="blink"><circle cx="40" cy="50" r="3.6" class="ink"/><circle cx="60" cy="50" r="3.6" class="ink"/></g>
+          <ellipse cx="50" cy="62" rx="6" ry="4.5" class="ink"/>
+          <path d="M42 70 q8 6 16 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke"/>
+          <circle cx="33" cy="62" r="4" class="cheek"/><circle cx="67" cy="62" r="4" class="cheek"/>
+        </svg>
+      </div>
+      <p class="login-hello">Bienvenue dans</p>
+      <h1 class="login-titre">le carnet de <span>Noah</span></h1>
       <p class="login-sous">Qui es-tu ?</p>
       <div class="who-grid login-grid" id="login-profils"></div>
       <div id="login-suite" hidden>
-        <label class="field wide" id="login-prenom-box" hidden>
-          <span>Ton prénom</span>
-          <input type="text" id="login-prenom" maxlength="30" autocomplete="given-name">
-        </label>
         <label class="field wide">
           <span>Mot de passe</span>
           <input type="password" id="login-mdp" autocomplete="current-password" required>
         </label>
-        <button type="submit" class="add-btn" id="login-btn"><span>Entrer</span></button>
+        <button type="submit" class="add-btn" id="login-btn"><span>Entrer</span><span class="emoji" aria-hidden="true">🦁</span></button>
       </div>
       <p class="login-erreur" id="login-erreur" role="alert"></p>
       <p class="hint small">Le mot de passe est à demander aux parents. Il ne se tape qu'une fois sur ce téléphone.</p>
     </form>
   </div>
+
+  <!-- Petit tuto pour Mamita et les grands-parents (première connexion) -->
+  <dialog class="sheet tuto" id="tuto" aria-labelledby="tuto-titre">
+    <form method="dialog" class="tuto-box">
+      <div class="tuto-emoji" id="tuto-emoji" aria-hidden="true">👋</div>
+      <p class="sheet-title" id="tuto-titre"></p>
+      <p class="tuto-texte" id="tuto-texte"></p>
+      <div class="tuto-dots" id="tuto-dots" aria-hidden="true"></div>
+      <div class="sheet-actions">
+        <button type="button" class="g-btn" id="tuto-suivant">Suivant</button>
+        <button type="submit" value="fin" class="link" id="tuto-passer">Passer</button>
+      </div>
+    </form>
+  </dialog>
+
 
   <!-- Ciel -->
   <div class="sky" aria-hidden="true">
@@ -589,6 +619,7 @@
 
           <p class="hint small" id="g-read-hint">👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.</p>
           <p class="hint small" id="g-past-hint" hidden>Pour noter un repas ou une couche, reviens sur aujourd'hui. Un dodo peut être ajouté pour n'importe quel jour.</p>
+          <p class="hint small" id="g-tuto-box" hidden><button type="button" class="link" id="g-tuto">💡 Revoir le petit tuto</button></p>
           <p class="hint small">Tout est enregistré en ligne : chaque téléphone qui a le lien voit les mêmes notes et le même récap. Rien ne se mélange avec vos pages Repas, Couches et Sommeil. Touche deux fois une de tes pastilles pour l'effacer.</p>
         </section>
       </div>
@@ -612,16 +643,17 @@
   </dialog>
 
 
-  <script src="scene.js?v=12"></script>
+  <script src="scene.js?v=13"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=12"></script>
-  <script src="auth.js?v=12"></script>
-  <script src="repas.js?v=12"></script>
-  <script src="couches.js?v=12"></script>
-  <script src="sommeil.js?v=12"></script>
-  <script src="sante.js?v=12"></script>
-  <script src="medicaments.js?v=12"></script>
-  <script src="garde.js?v=12"></script>
-  <script src="pages.js?v=12"></script>
+  <script src="commun.js?v=13"></script>
+  <script src="auth.js?v=13"></script>
+  <script src="repas.js?v=13"></script>
+  <script src="couches.js?v=13"></script>
+  <script src="sommeil.js?v=13"></script>
+  <script src="sante.js?v=13"></script>
+  <script src="medicaments.js?v=13"></script>
+  <script src="garde.js?v=13"></script>
+  <script src="tuto.js?v=13"></script>
+  <script src="pages.js?v=13"></script>
 </body>
 </html>

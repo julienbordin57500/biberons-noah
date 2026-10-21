@@ -1,20 +1,21 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v12";
+const CACHE = "carnet-noah-v13";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=12",
-  "scene.js?v=12",
-  "commun.js?v=12",
-  "auth.js?v=12",
-  "repas.js?v=12",
-  "couches.js?v=12",
-  "sommeil.js?v=12",
-  "medicaments.js?v=12",
-  "sante.js?v=12",
-  "garde.js?v=12",
-  "pages.js?v=12",
+  "style.css?v=13",
+  "scene.js?v=13",
+  "commun.js?v=13",
+  "auth.js?v=13",
+  "repas.js?v=13",
+  "couches.js?v=13",
+  "sommeil.js?v=13",
+  "medicaments.js?v=13",
+  "sante.js?v=13",
+  "garde.js?v=13",
+  "tuto.js?v=13",
+  "pages.js?v=13",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",
