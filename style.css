@@ -833,3 +833,23 @@ body.entree .app { animation: entree .75s cubic-bezier(.2, .8, .2, 1) both; }
 .lecture-seule .rdv-list .del {
   opacity: .4; filter: grayscale(.7); pointer-events: none; user-select: none;
 }
+
+/* Quantité du biberon : « Combien ? » ouvre la roue de l'iPhone, − / + ajustent de 10 ml */
+.ml-row { display: grid; grid-template-columns: 56px 1fr 56px; gap: 8px; align-items: stretch; margin: 6px 0 14px; }
+.ml-step {
+  font: inherit; font-size: 1.8rem; font-weight: 700; line-height: 1; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--card-border); border-radius: 18px; cursor: pointer; min-height: 64px;
+}
+.ml-step:active { transform: scale(.94); }
+.ml-step:disabled { opacity: .35; }
+.ml-picker {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--milk); color: #fff; border-radius: 18px; min-height: 64px; padding: 4px 10px; cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--milk) 60%, #000);
+}
+.ml-label { font-size: .8rem; font-weight: 600; opacity: .9; }
+.ml-value { font-size: 1.7rem; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.ml-value.bump { animation: pop-in .3s cubic-bezier(.2, .9, .3, 1.4); }
+.ml-chevron { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: .85; }
+/* Le vrai menu déroulant est invisible mais couvre tout le bouton : un appui ouvre la roue */
+.ml-picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }

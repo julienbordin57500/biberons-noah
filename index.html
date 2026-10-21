@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -294,7 +294,16 @@
             <p class="label">Type de lait</p>
             <div class="chips lait" id="chips-lait" role="radiogroup" aria-label="Type de lait"></div>
             <p class="label">Quantité</p>
-            <div class="chips" id="chips-ml" role="radiogroup" aria-label="Quantité en ml"></div>
+            <div class="ml-row">
+              <button type="button" class="ml-step" id="ml-moins" aria-label="10 ml de moins">−</button>
+              <label class="ml-picker">
+                <span class="ml-label">Combien ?</span>
+                <span class="ml-value" id="ml-value">150 ml</span>
+                <span class="ml-chevron" aria-hidden="true">▾</span>
+                <select id="ml-select" aria-label="Quantité du biberon"></select>
+              </label>
+              <button type="button" class="ml-step" id="ml-plus" aria-label="10 ml de plus">+</button>
+            </div>
           </div>
 
           <div class="panel" id="panel-allaitement" hidden>
@@ -585,7 +594,7 @@
             <div class="pills" id="g-repas-list"></div>
             <div class="g-add" data-today-only>
               <select id="g-ml" aria-label="Quantité">
-                <option value="">? ml</option><option>30</option><option>60</option><option>90</option><option>120</option><option selected>150</option><option>180</option><option>210</option><option>240</option>
+                <option value="">? ml</option><option value="10">10 ml</option><option value="20">20 ml</option><option value="30">30 ml</option><option value="40">40 ml</option><option value="50">50 ml</option><option value="60">60 ml</option><option value="70">70 ml</option><option value="80">80 ml</option><option value="90">90 ml</option><option value="100">100 ml</option><option value="110">110 ml</option><option value="120">120 ml</option><option value="130">130 ml</option><option value="140">140 ml</option><option value="150" selected>150 ml</option><option value="160">160 ml</option><option value="170">170 ml</option><option value="180">180 ml</option><option value="190">190 ml</option><option value="200">200 ml</option><option value="210">210 ml</option><option value="220">220 ml</option><option value="230">230 ml</option><option value="240">240 ml</option><option value="250">250 ml</option><option value="260">260 ml</option><option value="270">270 ml</option><option value="280">280 ml</option><option value="290">290 ml</option><option value="300">300 ml</option>
               </select>
               <select id="g-lait" aria-label="Type de lait">
                 <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
@@ -643,17 +652,17 @@
   </dialog>
 
 
-  <script src="scene.js?v=14"></script>
+  <script src="scene.js?v=15"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=14"></script>
-  <script src="auth.js?v=14"></script>
-  <script src="repas.js?v=14"></script>
-  <script src="couches.js?v=14"></script>
-  <script src="sommeil.js?v=14"></script>
-  <script src="sante.js?v=14"></script>
-  <script src="medicaments.js?v=14"></script>
-  <script src="garde.js?v=14"></script>
-  <script src="tuto.js?v=14"></script>
-  <script src="pages.js?v=14"></script>
+  <script src="commun.js?v=15"></script>
+  <script src="auth.js?v=15"></script>
+  <script src="repas.js?v=15"></script>
+  <script src="couches.js?v=15"></script>
+  <script src="sommeil.js?v=15"></script>
+  <script src="sante.js?v=15"></script>
+  <script src="medicaments.js?v=15"></script>
+  <script src="garde.js?v=15"></script>
+  <script src="tuto.js?v=15"></script>
+  <script src="pages.js?v=15"></script>
 </body>
 </html>

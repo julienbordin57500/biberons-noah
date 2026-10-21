@@ -3,7 +3,9 @@
   const TABLE = "biberons";
   const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil";
   const REPRISE_MAX_MS = 3 * 60 * 60 * 1000; // au-delà, on ne propose plus de relancer le dodo
-  const QUANTITES = [30, 60, 90, 120, 150, 180, 210, 240];
+  // De 10 à 300 ml, de 10 en 10 (la roue de l'iPhone s'ouvre en touchant « Combien ? »)
+  const QUANTITES = Array.from({ length: 30 }, (_, i) => (i + 1) * 10);
+  const PAS_ML = 10;
   const LAITS = ["poudre", "maternel"];
   const LAIT_NOM = { poudre: "lait en poudre", maternel: "lait maternel" };
   const COTES = ["gauche", "droite", "les deux"];
@@ -243,7 +245,26 @@
     ecrire(cle, v);
   };
   rendreChips("chips-lait", LAITS, () => choix.lait, setter("lait"), (v) => (v === "poudre" ? "🥄 Lait en poudre" : "🥛 Lait maternel"), false);
-  rendreChips("chips-ml", QUANTITES, () => choix.quantite, setter("quantite"), (v) => `${v} ml`);
+  // Sélecteur de quantité : roue native + boutons − / +
+  const selectMl = $("ml-select");
+  selectMl.innerHTML =
+    `<option value="">Je ne sais pas</option>` + QUANTITES.map((q) => `<option value="${q}">${q} ml</option>`).join("");
+  function majQuantite(q) {
+    choix.quantite = q;
+    ecrire("quantite", q);
+    selectMl.value = q === null ? "" : String(q);
+    $("ml-value").textContent = q === null ? "? ml" : `${q} ml`;
+    $("ml-moins").disabled = q !== null && q <= QUANTITES[0];
+    $("ml-plus").disabled = q !== null && q >= QUANTITES[QUANTITES.length - 1];
+    const v = $("ml-value");
+    v.classList.remove("bump");
+    void v.offsetWidth;
+    v.classList.add("bump");
+  }
+  selectMl.addEventListener("change", () => majQuantite(selectMl.value ? Number(selectMl.value) : null));
+  $("ml-moins").addEventListener("click", () => majQuantite(Math.max(QUANTITES[0], (choix.quantite ?? 150) - PAS_ML)));
+  $("ml-plus").addEventListener("click", () => majQuantite(Math.min(QUANTITES[QUANTITES.length - 1], (choix.quantite ?? 150) + PAS_ML)));
+  majQuantite(choix.quantite);
   rendreChips("chips-cote", COTES, () => choix.cote, setter("cote"), (v) => v[0].toUpperCase() + v.slice(1));
   rendreChips("chips-duree", DUREES, () => choix.duree, setter("duree"), (v) => `${v} min`);
   rendreMode();
