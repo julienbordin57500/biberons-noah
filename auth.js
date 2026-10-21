@@ -171,8 +171,8 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
     try {
       session = sb ? (await sb.auth.getSession()).data.session : null;
     } catch (e) {}
-    // Hors ligne avec un profil déjà connecté : on ouvre quand même (les données en cache s'affichent)
-    if (memo && (session || (!navigator.onLine && localStorage.getItem("carnet-noah-auth")))) return activer(memo, false);
+    // Profil déjà connecté (même sans réseau : les données en cache s'affichent)
+    if (memo && (session || localStorage.getItem("carnet-noah-auth"))) return activer(memo, false);
     montrerConnexion();
   })();
 })();

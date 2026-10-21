@@ -812,7 +812,7 @@ body.entree .app { animation: entree .75s cubic-bezier(.2, .8, .2, 1) both; }
 .moi .link { font-size: .85rem; padding: 2px 0; }
 .sync-badge {
   display: inline-block; margin: 4px 0 0; padding: 2px 10px; border-radius: 999px;
-  background: var(--warn); color: #fff; font-size: .8rem; font-weight: 700;
+  background: var(--warn); color: #fff; font-size: .8rem; font-weight: 700; cursor: pointer;
 }
 
 /* ---------- Famille : pages des parents en consultation, grisées ---------- */

@@ -13,14 +13,22 @@ let surNonConnecte = () => {};
 
 // ---------- File d'attente hors ligne ----------
 // Sans réseau, les ajouts / modifications sont gardés sur le téléphone puis envoyés au retour du réseau.
+// On ne se fie pas à navigator.onLine (sur iPhone il reste parfois faux après une mise en veille) :
+// « hors ligne » = une vraie demande au serveur vient d'échouer ; la première qui réussit l'efface.
 const FILE = "file-attente";
 const lireFile = () => lire(FILE, [], Array.isArray);
+let horsLigne = false;
+function signalerReseau(ok) {
+  if (horsLigne === !ok) return;
+  horsLigne = !ok;
+  majBadgeAttente();
+}
 function majBadgeAttente() {
   const n = lireFile().length;
   const b = document.getElementById("sync-badge");
   if (!b) return;
-  b.hidden = n === 0 && navigator.onLine;
-  b.textContent = n ? `📶 ${n} en attente` : "📶 Hors ligne";
+  b.hidden = n === 0 && !horsLigne;
+  b.textContent = n ? `📶 ${n} en attente · toucher pour envoyer` : "📶 Hors ligne";
 }
 function mettreEnAttente(table, path, options) {
   const file = lireFile();
@@ -29,46 +37,50 @@ function mettreEnAttente(table, path, options) {
   majBadgeAttente();
   toast("📶 Pas de réseau : ce sera envoyé dès qu'il revient");
 }
-let envoiEnCours = false;
-async function envoyerFile() {
-  if (envoiEnCours || !navigator.onLine) return;
+let envoiEnCours = null;
+// Envoie les ajouts en attente, dans l'ordre. Renvoie true si la file est vide à la fin.
+function envoyerFile() {
+  if (!envoiEnCours) envoiEnCours = viderFile().finally(() => (envoiEnCours = null));
+  return envoiEnCours;
+}
+async function viderFile() {
   let file = lireFile();
-  if (!file.length) return majBadgeAttente();
-  envoiEnCours = true;
-  let envoye = 0;
-  try {
-    while (file.length) {
-      const it = file[0];
-      let res;
-      try {
-        res = await fetch(`${SUPABASE_URL}/rest/v1/${it.table}${it.path}`, {
-          method: it.method,
-          body: it.body,
-          headers: await entetes(it.headers),
-        });
-      } catch (e) {
-        break; // toujours pas de réseau : on réessaiera
-      }
-      if (res.status === 401) {
-        surNonConnecte();
-        break;
-      }
-      // Réussi, ou refusé pour de bon (ex. dodo déjà lancé ailleurs) : on retire de la file
-      file.shift();
-      ecrire(FILE, file);
-      if (res.ok) envoye++;
-    }
-  } finally {
-    envoiEnCours = false;
+  if (!file.length) {
     majBadgeAttente();
+    return true;
   }
+  let envoye = 0;
+  while (file.length) {
+    const it = file[0];
+    let res;
+    try {
+      res = await fetch(`${SUPABASE_URL}/rest/v1/${it.table}${it.path}`, {
+        method: it.method,
+        body: it.body,
+        headers: await entetes(it.headers),
+      });
+    } catch (e) {
+      signalerReseau(false);
+      break; // toujours pas de réseau : on réessaiera
+    }
+    signalerReseau(true);
+    if (res.status === 401) break; // connexion à refaire : on garde l'envoi pour après
+    // Réussi, ou refusé pour de bon (ex. dodo déjà lancé ailleurs) : on retire de la file
+    file.shift();
+    ecrire(FILE, file);
+    if (res.ok) envoye++;
+  }
+  majBadgeAttente();
   if (envoye) {
-    toast(`📶 ${envoye} envoi${envoye > 1 ? "s" : ""} en attente synchronisé${envoye > 1 ? "s" : ""}`);
+    toast(`📶 ${envoye} ajout${envoye > 1 ? "s" : ""} en attente envoyé${envoye > 1 ? "s" : ""}`);
     rechargerTout();
   }
+  return file.length === 0;
 }
 window.addEventListener("online", envoyerFile);
-window.addEventListener("offline", majBadgeAttente);
+document.addEventListener("click", (e) => {
+  if (e.target.closest("#sync-badge")) envoyerFile().then(() => rechargerTout());
+});
 
 async function entetes(extra = {}) {
   const jeton = await obtenirJeton();
@@ -88,28 +100,26 @@ async function api(table, path = "", options = {}) {
   const methode = (options.method || "GET").toUpperCase();
   const ecriture = methode !== "GET";
   const url = `${SUPABASE_URL}/rest/v1/${table}${path}`;
-  // Hors ligne, ou d'autres envois attendent déjà : on garde l'ordre
-  if (ecriture && (!navigator.onLine || lireFile().length)) {
+  // D'autres ajouts attendent : on essaie d'abord de les envoyer, pour garder l'ordre
+  if (ecriture && lireFile().length && !(await envoyerFile())) {
     mettreEnAttente(table, path, options);
-    envoyerFile();
     return [];
   }
   let res;
   try {
     res = await fetch(url, { ...options, headers: await entetes(options.headers) });
   } catch (e) {
+    signalerReseau(false);
     if (ecriture) {
       mettreEnAttente(table, path, options);
       return [];
     }
     // Lecture sans réseau : on montre les dernières données connues
     const cache = lire(cleCache(url), null, () => true);
-    if (cache !== null) {
-      majBadgeAttente();
-      return cache;
-    }
+    if (cache !== null) return cache;
     throw e;
   }
+  signalerReseau(true);
   if (res.status === 401) surNonConnecte();
   if (!res.ok) {
     const err = new Error(`Erreur ${res.status}`);
