@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -280,6 +280,15 @@
           </div>
         </section>
 
+        <section class="card chart-card" id="chart-repas-card">
+          <div class="chart-head">
+            <p class="label">📈 Lait bu ces 7 jours</p>
+            <p class="chart-moy" id="chart-repas-moy"></p>
+          </div>
+          <div class="chart" id="chart-repas" role="img"></div>
+          <p class="chart-detail" id="chart-repas-detail">Touche une barre pour voir le détail du jour.</p>
+        </section>
+
         <section class="card add-card">
           <div class="mode" role="tablist" aria-label="Type de repas">
             <button type="button" class="mode-btn" role="tab" data-mode="biberon">
@@ -418,6 +427,15 @@
           </div>
         </section>
 
+        <section class="card chart-card" id="chart-sommeil-card">
+          <div class="chart-head">
+            <p class="label">📈 Sommeil ces 7 jours</p>
+            <p class="chart-moy" id="chart-sommeil-moy"></p>
+          </div>
+          <div class="chart" id="chart-sommeil" role="img"></div>
+          <p class="chart-detail" id="chart-sommeil-detail">Touche une barre pour voir le détail du jour.</p>
+        </section>
+
         <section class="card add-card">
           <div class="when">
             <label for="sleep-heure">Heure</label>
@@ -455,6 +473,22 @@
               <input type="time" id="med-heure" aria-label="Heure (vide = maintenant)">
             </div>
             <button type="button" class="g-btn med-save" id="med-btn">💊 Enregistrer la prise</button>
+          </div>
+        </section>
+
+        <section class="card firsts-card">
+          <div class="med-head">
+            <span class="med-title">🌟 Ses premières fois</span>
+            <button type="button" class="med-add" id="firsts-toggle" aria-expanded="false">+ Ajouter</button>
+          </div>
+          <ul class="firsts-list" id="firsts-list"></ul>
+          <div class="med-form" id="firsts-form" hidden>
+            <div class="chips small-chips" id="firsts-choix" role="radiogroup" aria-label="Premières fois"></div>
+            <div class="med-fields">
+              <input type="text" id="first-quoi" maxlength="80" placeholder="Ou écris-le ici" aria-label="Quelle première fois ?">
+              <input type="date" id="first-date" aria-label="Date (vide = aujourd'hui)">
+            </div>
+            <button type="button" class="g-btn med-save" id="first-btn">🎉 Noter et fêter</button>
           </div>
         </section>
         <section class="card timer-card rdv-card">
@@ -639,6 +673,16 @@
 
   <div class="toast" id="toast" role="status" hidden></div>
 
+  <!-- Petite fête (confettis) -->
+  <dialog class="sheet fete" id="fete" aria-labelledby="fete-titre">
+    <form method="dialog" class="fete-box">
+      <div class="fete-emoji" id="fete-emoji" aria-hidden="true">🎉</div>
+      <p class="sheet-title" id="fete-titre"></p>
+      <p class="tuto-texte" id="fete-texte"></p>
+      <button type="submit" value="ok" class="g-btn fete-btn">Trop bien ! 🥳</button>
+    </form>
+  </dialog>
+
   <!-- Diagnostic réseau (en touchant le badge 📶) -->
   <dialog class="sheet" id="diag" aria-labelledby="diag-titre">
     <form method="dialog">
@@ -665,17 +709,19 @@
   </dialog>
 
 
-  <script src="scene.js?v=17"></script>
+  <script src="scene.js?v=19"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=17"></script>
-  <script src="auth.js?v=17"></script>
-  <script src="repas.js?v=17"></script>
-  <script src="couches.js?v=17"></script>
-  <script src="sommeil.js?v=17"></script>
-  <script src="sante.js?v=17"></script>
-  <script src="medicaments.js?v=17"></script>
-  <script src="garde.js?v=17"></script>
-  <script src="tuto.js?v=17"></script>
-  <script src="pages.js?v=17"></script>
+  <script src="commun.js?v=19"></script>
+  <script src="auth.js?v=19"></script>
+  <script src="repas.js?v=19"></script>
+  <script src="couches.js?v=19"></script>
+  <script src="sommeil.js?v=19"></script>
+  <script src="sante.js?v=19"></script>
+  <script src="medicaments.js?v=19"></script>
+  <script src="garde.js?v=19"></script>
+  <script src="graphiques.js?v=19"></script>
+  <script src="fetes.js?v=19"></script>
+  <script src="tuto.js?v=19"></script>
+  <script src="pages.js?v=19"></script>
 </body>
 </html>

@@ -342,6 +342,7 @@
   async function cocher(cle, fait) {
     try {
       if (fait) {
+        if (cle.startsWith("v-")) window.dispatchEvent(new CustomEvent("vaccin-fait", { detail: cle }));
         await api("suivi_calendrier", "", {
           method: "POST",
           headers: { Prefer: "resolution=ignore-duplicates,return=representation" },

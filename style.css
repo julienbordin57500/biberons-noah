@@ -30,6 +30,8 @@
   --wake: #f2b632;
   --couche: #4fa3a0;
   --sante: #d9534f;
+  --chart-repas: #d4621f;
+  --chart-sommeil: #7a6fd6;
   --garde: #c77d2e;
   --milk: #e8742c;
   --breast: #c4638f;
@@ -85,6 +87,8 @@
     --wake: #f3c24f;
     --couche: #6cc2bf;
     --sante: #ef7d78;
+    --chart-repas: #cc7533;
+    --chart-sommeil: #8f84ea;
     --garde: #e2a35a;
     --milk: #f0a04b;
     --breast: #e58fb4;
@@ -139,6 +143,8 @@
   --wake: #f3c24f;
   --couche: #6cc2bf;
   --sante: #ef7d78;
+  --chart-repas: #cc7533;
+  --chart-sommeil: #8f84ea;
   --garde: #e2a35a;
   --milk: #f0a04b;
   --breast: #e58fb4;
@@ -161,6 +167,9 @@
 }
 
 * { box-sizing: border-box; }
+
+/* Un élément marqué « caché » l'est vraiment, même si un style lui donne un affichage */
+[hidden] { display: none !important; }
 
 html, body { margin: 0; }
 
@@ -857,3 +866,42 @@ body.entree .app { animation: entree .75s cubic-bezier(.2, .8, .2, 1) both; }
 .moi-version { font-size: .7rem; opacity: .5; margin-left: 4px; }
 
 .diag-texte { margin: 0; white-space: pre-wrap; font-family: ui-monospace, Menlo, monospace; font-size: .82rem; line-height: 1.5; background: var(--chip); padding: 10px 12px; border-radius: 12px; overflow-wrap: anywhere; }
+
+/* ---------- Graphiques de la semaine ---------- */
+.chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.chart-moy { margin: 0; font-size: .85rem; color: var(--ink-soft); font-weight: 600; }
+.chart-moy:empty { display: none; }
+.chart-svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart-axe { stroke: var(--card-border); stroke-width: 1.5; }
+.chart-bar { transition: opacity .2s; }
+.bar-repas { fill: var(--chart-repas); }
+.bar-sommeil { fill: var(--chart-sommeil); }
+.chart-vide { fill: var(--card-border); }
+.chart-hit { fill: transparent; cursor: pointer; }
+.chart-col.actif .chart-bar { stroke: var(--ink); stroke-width: 1.5; }
+.chart-val { font-size: 11px; font-weight: 700; fill: var(--ink); }
+.chart-jour { font-size: 10.5px; font-weight: 600; fill: var(--ink-soft); }
+.chart-num { font-size: 10px; fill: var(--ink-soft); opacity: .7; }
+.chart-col.today .chart-jour, .chart-col.actif .chart-jour { fill: var(--ink); font-weight: 700; }
+.chart-detail { margin: 6px 0 0; font-size: .9rem; color: var(--ink-soft); min-height: 1.3em; }
+
+/* ---------- Premières fois ---------- */
+.firsts-card { padding: 10px 14px; }
+.firsts-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.firsts-list li { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px dashed var(--card-border); }
+.firsts-list li:first-child { border-top: 0; }
+.firsts-list .first-emoji { font-size: 1.4rem; width: 1.8rem; text-align: center; flex: none; }
+.firsts-list li.first-vide { display: block; color: var(--ink-soft); font-size: .9rem; padding: 2px 0 0; }
+.firsts-list .del { width: 34px; height: 34px; font-size: .95rem; }
+#firsts-choix .chip.fait { opacity: .5; }
+#firsts-choix .chip[aria-checked="true"] { background: var(--chip-on); border-color: var(--chip-on); color: var(--chip-on-ink); opacity: 1; }
+.lecture-seule #firsts-toggle { display: none; }
+
+/* ---------- Fête ---------- */
+.confettis { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 70; pointer-events: none; }
+.fete-box { text-align: center; }
+.fete-emoji { font-size: 4.2rem; line-height: 1; animation: fete-saut 1s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes fete-saut { 0% { transform: scale(.2) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.25) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+.fete .sheet-title { font-size: 1.45rem; }
+.fete-btn { background: var(--accent); align-self: center; padding: 10px 26px; font-size: 1.1rem; }
+.fete[open] .fete-box { animation: monte .5s cubic-bezier(.2, .9, .3, 1.2) both; }
