@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "16";
+const VERSION_APPLI = "17";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -22,24 +22,46 @@ const FILE = "file-attente";
 const lireFile = () => lire(FILE, [], Array.isArray);
 let horsLigne = false;
 let verifReseau = null;
+// Journal pour le diagnostic (toucher le badge)
+const journal = { derniereErreur: null, dernierSucces: null, echecsDeSuite: 0 };
+function noterErreur(ou, e) {
+  journal.derniereErreur = { quand: new Date(), ou, message: String(e?.message || e) };
+}
 function signalerReseau(ok) {
-  if (horsLigne === !ok) return;
-  horsLigne = !ok;
+  if (ok) {
+    journal.dernierSucces = new Date();
+    journal.echecsDeSuite = 0;
+  } else {
+    journal.echecsDeSuite++;
+  }
+  // Une seule demande ratée (appli mise en veille, changement de wifi…) ne suffit pas : il en faut 2 de suite
+  const nouveau = !ok && journal.echecsDeSuite >= 2;
+  if (horsLigne === nouveau) return;
+  horsLigne = nouveau;
   majBadgeAttente();
   // Hors ligne : on revérifie toutes les 10 s, le badge s'efface dès que le serveur répond
   clearInterval(verifReseau);
-  if (horsLigne) verifReseau = setInterval(() => envoyerFile().then(() => fetch(`${SUPABASE_URL}/auth/v1/health`, { headers: { apikey: SUPABASE_KEY } }).then(() => signalerReseau(true), () => {})), 10000);
+  if (horsLigne) verifReseau = setInterval(verifierServeur, 10000);
+}
+async function verifierServeur() {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/`, { headers: { apikey: SUPABASE_KEY } });
+    signalerReseau(true);
+    envoyerFile();
+  } catch (e) {
+    noterErreur("vérification", e);
+  }
 }
 function majBadgeAttente() {
   const n = lireFile().length;
   const b = document.getElementById("sync-badge");
   if (!b) return;
   b.hidden = n === 0 && !horsLigne;
-  b.textContent = n ? `📶 ${n} en attente · toucher pour envoyer` : "📶 Hors ligne";
+  b.textContent = n ? `📶 ${n} en attente · toucher` : "📶 Hors ligne · toucher";
 }
 function mettreEnAttente(table, path, options) {
   const file = lireFile();
-  file.push({ table, path, method: options.method, body: options.body, headers: options.headers || {} });
+  file.push({ table, path, method: options.method, body: options.body, headers: options.headers || {}, le: Date.now(), essais: 0 });
   ecrire(FILE, file);
   majBadgeAttente();
   toast("📶 Pas de réseau : ce sera envoyé dès qu'il revient");
@@ -67,12 +89,20 @@ async function viderFile() {
         headers: await entetes(it.headers),
       });
     } catch (e) {
+      noterErreur(`envoi ${it.table}`, e);
       signalerReseau(false);
       break; // toujours pas de réseau : on réessaiera
     }
     signalerReseau(true);
-    if (res.status === 401) break; // connexion à refaire : on garde l'envoi pour après
-    // Réussi, ou refusé pour de bon (ex. dodo déjà lancé ailleurs) : on retire de la file
+    it.essais = (it.essais || 0) + 1;
+    // Connexion à refaire : on garde l'envoi, mais jamais plus de 5 essais (sinon il bloquerait tout)
+    if (res.status === 401 && it.essais < 5) {
+      noterErreur(`envoi ${it.table}`, "connexion expirée (401)");
+      ecrire(FILE, file);
+      break;
+    }
+    // Réussi, ou refusé pour de bon : on retire de la file
+    if (!res.ok) noterErreur(`envoi ${it.table}`, `refusé par le serveur (${res.status})`);
     file.shift();
     ecrire(FILE, file);
     if (res.ok) envoye++;
@@ -84,9 +114,38 @@ async function viderFile() {
   }
   return file.length === 0;
 }
-window.addEventListener("online", envoyerFile);
+window.addEventListener("online", () => {
+  verifierServeur();
+  envoyerFile();
+});
+
+// ---------- Diagnostic (toucher le badge) ----------
+async function ouvrirDiagnostic() {
+  await verifierServeur();
+  await envoyerFile();
+  const f = lireFile();
+  const e = journal.derniereErreur;
+  const fmt = (d) => (d ? d.toLocaleTimeString("fr-FR") : "jamais");
+  const lignes = [
+    `Version : v${VERSION_APPLI}`,
+    `Réseau d'après le téléphone : ${navigator.onLine ? "oui" : "non"}`,
+    `Dernière réponse du serveur : ${fmt(journal.dernierSucces)}`,
+    `En attente d'envoi : ${f.length}${f.length ? " (" + f.map((x) => x.table).join(", ") + ")" : ""}`,
+    `Dernier souci : ${e ? `${fmt(e.quand)} · ${e.ou} · ${e.message}` : "aucun"}`,
+  ];
+  $("diag-texte").textContent = lignes.join("\n");
+  $("diag-vider").hidden = f.length === 0;
+  majBadgeAttente();
+  $("diag").showModal();
+}
 document.addEventListener("click", (e) => {
-  if (e.target.closest("#sync-badge")) envoyerFile().then(() => rechargerTout());
+  if (e.target.closest("#sync-badge")) ouvrirDiagnostic();
+  if (e.target.closest("#diag-vider") && confirm("Effacer les ajouts en attente ? Ils ne seront jamais envoyés.")) {
+    ecrire(FILE, []);
+    $("diag").close();
+    majBadgeAttente();
+    toast("File d'attente vidée");
+  }
 });
 
 async function entetes(extra = {}) {
@@ -120,6 +179,7 @@ async function api(table, path = "", options = {}) {
   try {
     res = await fetch(url, { ...options, headers: await entetes(options.headers) });
   } catch (e) {
+    noterErreur(table, e);
     signalerReseau(false);
     if (ecriture) {
       mettreEnAttente(table, path, options);
