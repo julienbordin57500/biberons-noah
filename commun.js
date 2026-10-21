@@ -7,6 +7,9 @@ const SUPABASE_KEY = "sb_publishable_KnZB8Lh0snCPuAPphixPGw_QoNmXlrF";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
+// Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
+const VERSION_APPLI = "16";
+
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
 let surNonConnecte = () => {};
@@ -18,10 +21,14 @@ let surNonConnecte = () => {};
 const FILE = "file-attente";
 const lireFile = () => lire(FILE, [], Array.isArray);
 let horsLigne = false;
+let verifReseau = null;
 function signalerReseau(ok) {
   if (horsLigne === !ok) return;
   horsLigne = !ok;
   majBadgeAttente();
+  // Hors ligne : on revérifie toutes les 10 s, le badge s'efface dès que le serveur répond
+  clearInterval(verifReseau);
+  if (horsLigne) verifReseau = setInterval(() => envoyerFile().then(() => fetch(`${SUPABASE_URL}/auth/v1/health`, { headers: { apikey: SUPABASE_KEY } }).then(() => signalerReseau(true), () => {})), 10000);
 }
 function majBadgeAttente() {
   const n = lireFile().length;
@@ -83,7 +90,11 @@ document.addEventListener("click", (e) => {
 });
 
 async function entetes(extra = {}) {
-  const jeton = await obtenirJeton();
+  // Un souci pour rafraîchir la connexion ne doit pas faire croire à une coupure réseau
+  let jeton = null;
+  try {
+    jeton = await obtenirJeton();
+  } catch (e) {}
   return {
     apikey: SUPABASE_KEY,
     ...(jeton ? { Authorization: `Bearer ${jeton}` } : {}),
@@ -390,3 +401,27 @@ function rendreModifiable(li, onEdit) {
     onEdit();
   });
 }
+
+// ---------- Mise à jour automatique ----------
+// En revenant sur l'appli (et toutes les 10 min), on regarde si une nouvelle version est en ligne.
+let rechargementPrevu = false;
+async function verifierMiseAJour() {
+  if (rechargementPrevu || location.hostname === "localhost") return;
+  try {
+    const res = await fetch(`version.txt?${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return;
+    const v = (await res.text()).trim();
+    if (!v || v === VERSION_APPLI) return;
+    // Pas pendant qu'on écrit ou qu'une fenêtre est ouverte
+    const occupe = document.querySelector("dialog[open]") || ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
+    if (occupe) return;
+    rechargementPrevu = true;
+    toast("✨ Nouvelle version, mise à jour…");
+    setTimeout(() => location.reload(), 900);
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) verifierMiseAJour();
+});
+setInterval(verifierMiseAJour, 10 * 60 * 1000);
+setTimeout(verifierMiseAJour, 3000);

@@ -130,6 +130,7 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
       $("login").hidden = true;
     }
     $("moi-nom").textContent = `${pr.emoji} ${pr.nom}`;
+    $("moi-version").textContent = `v${VERSION_APPLI}`;
     $("moi").hidden = false;
     window.dispatchEvent(new CustomEvent("connecte", { detail: { premiere } }));
     resoudreConnexion();

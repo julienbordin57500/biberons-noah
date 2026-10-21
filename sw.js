@@ -1,21 +1,21 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v15";
+const CACHE = "carnet-noah-v16";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=15",
-  "scene.js?v=15",
-  "commun.js?v=15",
-  "auth.js?v=15",
-  "repas.js?v=15",
-  "couches.js?v=15",
-  "sommeil.js?v=15",
-  "medicaments.js?v=15",
-  "sante.js?v=15",
-  "garde.js?v=15",
-  "tuto.js?v=15",
-  "pages.js?v=15",
+  "style.css?v=16",
+  "scene.js?v=16",
+  "commun.js?v=16",
+  "auth.js?v=16",
+  "repas.js?v=16",
+  "couches.js?v=16",
+  "sommeil.js?v=16",
+  "medicaments.js?v=16",
+  "sante.js?v=16",
+  "garde.js?v=16",
+  "tuto.js?v=16",
+  "pages.js?v=16",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",
@@ -39,25 +39,37 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  // Les données (Supabase) ne passent pas par ici : l'appli gère elle-même le hors ligne
-  if (url.hostname.endsWith("supabase.co")) return;
+  // Les données (Supabase) et le numéro de version ne passent jamais par la mémoire
+  if (url.hostname.endsWith("supabase.co") || url.pathname.endsWith("version.txt")) return;
 
-  e.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE);
-      try {
-        // Au-delà de 4 s, on considère qu'il n'y a pas de réseau
-        const res = await Promise.race([
-          fetch(req),
-          new Promise((_, rej) => setTimeout(() => rej(new Error("lent")), 4000)),
-        ]);
-        if (res.ok || res.type === "opaque") cache.put(req, res.clone());
-        return res;
-      } catch (err) {
-        const enCache = (await cache.match(req)) || (req.mode === "navigate" ? await cache.match("index.html") : null);
-        if (enCache) return enCache;
-        throw err;
-      }
-    })()
-  );
+  const versionne = url.searchParams.has("v") || url.hostname === "cdn.jsdelivr.net";
+  e.respondWith(versionne ? memoireDabord(req) : reseauDabord(req));
 });
+
+// Fichiers versionnés (style.css?v=16…) : ils ne changent jamais, la mémoire du téléphone suffit
+async function memoireDabord(req) {
+  const cache = await caches.open(CACHE);
+  const enCache = await cache.match(req);
+  if (enCache) return enCache;
+  const res = await fetch(req);
+  if (res.ok) cache.put(req, res.clone());
+  return res;
+}
+
+// Page principale : toujours la dernière version si le réseau répond (jusqu'à 8 s)
+async function reseauDabord(req) {
+  const cache = await caches.open(CACHE);
+  try {
+    const res = await Promise.race([
+      // (une requête de navigation ne peut pas être recopiée avec des options : on repart de son adresse)
+      fetch(req.mode === "navigate" ? new Request(req.url, { cache: "no-cache", credentials: "same-origin" }) : req),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("lent")), 8000)),
+    ]);
+    if (res.ok) cache.put(req, res.clone());
+    return res;
+  } catch (err) {
+    const enCache = (await cache.match(req)) || (req.mode === "navigate" ? await cache.match("index.html") : null);
+    if (enCache) return enCache;
+    throw err;
+  }
+}
