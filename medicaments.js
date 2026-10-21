@@ -34,7 +34,7 @@
             const li = document.createElement("li");
             li.innerHTML = `
               <span class="med-nom">${esc(p.nom)}${p.dose ? ` <span class="med-dose">${esc(p.dose)}</span>` : ""}</span>
-              <span class="med-quand">à ${fmtHeure(p.pris_le)}${jourSiPasAujourdhui(p.pris_le)}${p.nb24 > 1 ? ` · ${p.nb24}× en 24 h` : ""}</span>
+              <span class="med-quand">à ${fmtHeure(p.pris_le)}${jourSiPasAujourdhui(p.pris_le)}${p.par ? ` · par ${esc(p.par)}` : ""}${p.nb24 > 1 ? ` · ${p.nb24}× en 24 h` : ""}</span>
               <span class="med-timer" data-depuis="${p.pris_le}"></span>`;
             li.append(boutonSupprimer(`Supprimer la prise de ${p.nom} de ${fmtHeure(p.pris_le)}`, () => supprimer(p.id)));
             rendreModifiable(li, () => modifier(p));
@@ -92,7 +92,7 @@
     try {
       await api(TABLE, "", {
         method: "POST",
-        body: JSON.stringify({ nom, dose: $("med-dose").value.trim() || null, pris_le: heureChoisie("med-heure").toISOString() }),
+        body: JSON.stringify({ nom, dose: $("med-dose").value.trim() || null, pris_le: heureChoisie("med-heure").toISOString(), par: profil?.nom || null }),
       });
       toast(`💊 ${nom} noté`);
       ["med-nom", "med-dose", "med-heure"].forEach((id) => ($(id).value = ""));

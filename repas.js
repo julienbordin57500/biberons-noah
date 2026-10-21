@@ -31,6 +31,7 @@
   let mode = estLaNuit() ? "allaitement" : "biberon";
 
   async function charger() {
+    if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
     try {
       repas = await api(TABLE, `?select=${COLONNES}&pris_le=gte.${encodeURIComponent(ilYa24h())}&order=pris_le.desc`);
       if (repas.length) {

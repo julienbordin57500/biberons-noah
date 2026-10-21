@@ -14,6 +14,7 @@
   const choix = { pipi: true, caca: false, taille: "moyen" };
 
   async function charger() {
+    if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
     try {
       couches = await api(TABLE, `?select=${COLONNES}&change_le=gte.${encodeURIComponent(ilYa24h())}&order=change_le.desc`);
       derniere = couches[0] || (await api(TABLE, `?select=${COLONNES}&order=change_le.desc&limit=1`))[0] || null;

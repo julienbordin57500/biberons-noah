@@ -9,7 +9,7 @@
     {
       emoji: "👵",
       titre: "Ton espace : l'onglet Garde",
-      texte: "C'est le dernier onglet, tout à droite (👵 Garde). C'est ici que tu notes ce qui se passe. Ce que tu écris est signé de ton nom.",
+      texte: "C'est l'onglet 👵 Garde. C'est ici que tu notes ce qui se passe pendant que tu le gardes. Ce que tu écris est signé de ton nom.",
     },
     {
       emoji: "🍼",
@@ -22,9 +22,9 @@
       texte: "Écris ce que vous avez fait, comment il était, puis « Enregistrer ma note ». Les parents la liront sur leur téléphone.",
     },
     {
-      emoji: "👀",
-      titre: "Le reste, tu regardes",
-      texte: "Repas, Couches, Sommeil et Santé : tu peux tout consulter (c'est grisé), seuls les parents modifient. Bonne garde !",
+      emoji: "💊",
+      titre: "💊 Un médicament ? Note-le",
+      texte: "Dans l'onglet 🩺 Santé, « + Prise » pour noter un médicament que tu lui donnes (avec l'heure). Tu y trouves aussi sa fiche santé : allergies, pédiatre… Bonne garde !",
     },
   ];
 

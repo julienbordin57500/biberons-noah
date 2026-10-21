@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -457,7 +457,7 @@
 
       <!-- ================= SANTÉ ================= -->
       <div class="page" id="page-sante" role="tabpanel" aria-label="Santé">
-        <p class="ro-banner">👀 Consultation seulement : seuls les parents modifient cette page.</p>
+        <p class="ro-banner">💊 Ici tu peux noter un médicament que tu donnes à Noah, et consulter sa fiche santé.</p>
         <section class="card med-card" aria-live="polite">
           <div class="med-head">
             <span class="med-title">💊 Médicaments</span>
@@ -476,7 +476,7 @@
           </div>
         </section>
 
-        <section class="card firsts-card">
+        <section class="card firsts-card parents-seulement">
           <div class="med-head">
             <span class="med-title">🌟 Ses premières fois</span>
             <button type="button" class="med-add" id="firsts-toggle" aria-expanded="false">+ Ajouter</button>
@@ -491,14 +491,14 @@
             <button type="button" class="g-btn med-save" id="first-btn">🎉 Noter et fêter</button>
           </div>
         </section>
-        <section class="card timer-card rdv-card">
+        <section class="card timer-card rdv-card parents-seulement">
           <p class="age" id="sante-age"></p>
           <p class="label">Prochain rendez-vous</p>
           <p class="rdv-when" id="rdv-next-when">Aucun rendez-vous prévu</p>
           <p class="sub" id="rdv-next-info">Ajoute-le juste en dessous 👇</p>
         </section>
 
-        <section class="card add-card" id="rdv-form">
+        <section class="card add-card parents-seulement" id="rdv-form">
           <p class="label">Nouveau rendez-vous</p>
           <div class="chips" id="chips-rdv" role="radiogroup" aria-label="Type de rendez-vous"></div>
           <div class="fields">
@@ -512,7 +512,7 @@
           </button>
         </section>
 
-        <section class="card history">
+        <section class="card history parents-seulement">
           <p class="label">Rendez-vous à venir</p>
           <ul id="rdv-list" class="rdv-list"></ul>
           <p class="empty" id="rdv-empty" hidden>Aucun rendez-vous à venir.</p>
@@ -522,7 +522,7 @@
           </details>
         </section>
 
-        <section class="card">
+        <section class="card parents-seulement">
           <p class="label">Vaccins et examens obligatoires</p>
           <p class="hint" id="cal-hint">Renseigne la date de naissance dans la fiche santé (en bas) pour voir les dates prévues.</p>
           <p class="cal-next" id="cal-next" hidden></p>
@@ -541,7 +541,7 @@
           <p class="hint small">Repères indicatifs d'après le calendrier des vaccinations 2026 (Santé publique France) et les 20 examens obligatoires de l'enfant. Le pédiatre et le carnet de santé font foi.</p>
         </section>
 
-        <section class="card">
+        <section class="card parents-seulement">
           <p class="label">Croissance</p>
           <div class="growth" id="growth-last"></div>
           <div class="fields">
@@ -709,19 +709,19 @@
   </dialog>
 
 
-  <script src="scene.js?v=19"></script>
+  <script src="scene.js?v=20"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=19"></script>
-  <script src="auth.js?v=19"></script>
-  <script src="repas.js?v=19"></script>
-  <script src="couches.js?v=19"></script>
-  <script src="sommeil.js?v=19"></script>
-  <script src="sante.js?v=19"></script>
-  <script src="medicaments.js?v=19"></script>
-  <script src="garde.js?v=19"></script>
-  <script src="graphiques.js?v=19"></script>
-  <script src="fetes.js?v=19"></script>
-  <script src="tuto.js?v=19"></script>
-  <script src="pages.js?v=19"></script>
+  <script src="commun.js?v=20"></script>
+  <script src="auth.js?v=20"></script>
+  <script src="repas.js?v=20"></script>
+  <script src="couches.js?v=20"></script>
+  <script src="sommeil.js?v=20"></script>
+  <script src="sante.js?v=20"></script>
+  <script src="medicaments.js?v=20"></script>
+  <script src="garde.js?v=20"></script>
+  <script src="graphiques.js?v=20"></script>
+  <script src="fetes.js?v=20"></script>
+  <script src="tuto.js?v=20"></script>
+  <script src="pages.js?v=20"></script>
 </body>
 </html>

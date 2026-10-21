@@ -836,7 +836,6 @@ body.entree .app { animation: entree .75s cubic-bezier(.2, .8, .2, 1) both; }
 .lecture-seule #m-btn,
 .lecture-seule #page-sante .fields,
 .lecture-seule #fiche-box,
-.lecture-seule .med-add,
 .lecture-seule .cal .check,
 .lecture-seule .del.plan,
 .lecture-seule .rdv-list .del {
@@ -905,3 +904,8 @@ body.entree .app { animation: entree .75s cubic-bezier(.2, .8, .2, 1) both; }
 .fete .sheet-title { font-size: 1.45rem; }
 .fete-btn { background: var(--accent); align-self: center; padding: 10px 26px; font-size: 1.1rem; }
 .fete[open] .fete-box { animation: monte .5s cubic-bezier(.2, .9, .3, 1.2) both; }
+
+/* Famille : pages et sections réservées aux parents cachées, 2 onglets plus larges */
+.lecture-seule .parents-seulement, .lecture-seule #fiche-box { display: none !important; }
+.tabs[data-nb="2"] { grid-template-columns: repeat(2, 1fr); }
+.tabs[data-nb="2"] .tab { flex-direction: row; gap: 8px; font-size: 1rem; }

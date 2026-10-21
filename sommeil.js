@@ -8,6 +8,7 @@
   let dernierFini = null; // pour « réveillé depuis »
 
   async function charger() {
+    if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
     try {
       const depuis = encodeURIComponent(ilYa24h());
       sommeils = await api(TABLE, `?select=${COLONNES}&or=(fin.is.null,fin.gte.${depuis})&order=debut.desc`);

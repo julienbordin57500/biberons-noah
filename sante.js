@@ -64,11 +64,13 @@
 
   async function charger() {
     try {
+      // La famille ne voit que la fiche santé (et les médicaments, gérés à part)
+      const parent = estParent();
       const [p, r, m, s] = await Promise.all([
         api("sante_profil", "?select=*&id=eq.1"),
-        api("rendez_vous", "?select=*&order=quand.asc"),
-        api("mesures", "?select=*&order=mesure_le.desc,id.desc"),
-        api("suivi_calendrier", "?select=*"),
+        parent ? api("rendez_vous", "?select=*&order=quand.asc") : [],
+        parent ? api("mesures", "?select=*&order=mesure_le.desc,id.desc") : [],
+        parent ? api("suivi_calendrier", "?select=*") : [],
       ]);
       profil = p[0] || {};
       rdvs = r;

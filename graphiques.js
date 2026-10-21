@@ -17,6 +17,7 @@
   }
 
   async function charger() {
+    if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
     const j = jours();
     const depuis = encodeURIComponent(j[0].debut.toISOString());
     try {

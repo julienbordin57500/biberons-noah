@@ -130,7 +130,7 @@
   }
 
   async function verifier() {
-    if (!profil) return;
+    if (!profil || !estParent()) return;
     try {
       const [p, mesures, dodos, nbRepas, nbCouches] = await Promise.all([
         api("sante_profil", "?select=date_naissance,poids_naissance_g,taille_naissance_cm&id=eq.1"),
@@ -311,6 +311,7 @@
   );
 
   async function charger() {
+    if (!estParent()) return; // la famille n'a pas accès à ces données
     await chargerPremieres();
     // Les grands moments : au démarrage puis toutes les 15 minutes
     if (Date.now() - derniereVerif > 15 * 60 * 1000) {
