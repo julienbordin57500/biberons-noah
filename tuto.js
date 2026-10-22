@@ -47,7 +47,8 @@
   }
 
   function ouvrir() {
-    if (!profil) return;
+    // Réservé à Mamita et aux grands-parents (même si on vient de changer de profil)
+    if (!profil || estParent() || $("tuto").open) return;
     etapes = ETAPES(profil.nom === "Autre" ? "" : profil.nom).map((e, j) =>
       j === 0 && profil.nom === "Autre" ? { ...e, titre: "Bienvenue !" } : e
     );

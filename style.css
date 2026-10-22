@@ -988,25 +988,29 @@ button:focus-visible, .chip:focus-visible, .tab:focus-visible { outline: 3px sol
   .add-btn::after { display: none; }
 }
 
-/* ---------- Cloche des nouvelles (douce, jamais alarmante) ---------- */
-.cloche {
-  position: absolute; z-index: 3; top: 18px; right: 104px;
-  width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--card-border);
-  background: color-mix(in srgb, var(--card) 85%, transparent); cursor: pointer;
-  display: grid; place-items: center; font-size: 1.35rem; box-shadow: var(--shadow);
-  transition: transform .15s;
-}
-.cloche:active { transform: scale(.92); }
-.cloche.a-lire .cloche-icone { animation: tinte 3.5s ease-in-out infinite; transform-origin: 50% 10%; }
-@keyframes tinte { 0%, 86%, 100% { transform: rotate(0); } 89% { transform: rotate(14deg); } 93% { transform: rotate(-12deg); } 96% { transform: rotate(6deg); } }
+/* ---------- Cloche des nouvelles : suspendue à l'acacia, douce, jamais alarmante ---------- */
+.landscape .cloche-svg { pointer-events: auto; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.cloche-zone { fill: transparent; }
+.liane { fill: none; stroke: var(--trunk); stroke-width: 1.4; stroke-linecap: round; }
+.feuille { fill: var(--acacia); }
+.cloche-corps { fill: var(--sun); stroke: var(--sun-face); stroke-width: 1.2; stroke-linejoin: round; }
+.cloche-anneau { fill: none; stroke: var(--sun-face); stroke-width: 1.2; }
+.cloche-reflet { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linecap: round; opacity: .6; }
+.cloche-battant { fill: var(--sun-face); }
+.cloche-oeil { fill: none; stroke: #4a2c14; stroke-width: 1.1; stroke-linecap: round; }
+.cloche-joue { fill: var(--cheek); opacity: .7; }
+.cloche-balance { transform-origin: 0 0; transition: transform .2s; }
+/* Une nouvelle à lire : la cloche se balance doucement de temps en temps */
+.cloche-svg.a-lire .cloche-balance { animation: balance 4s ease-in-out infinite; }
+@keyframes balance { 0%, 80%, 100% { transform: rotate(0); } 84% { transform: rotate(14deg); } 89% { transform: rotate(-11deg); } 94% { transform: rotate(6deg); } }
+.cloche-svg:active .cloche-balance { transform: scale(.9); }
+.cloche-svg:focus-visible .cloche-zone { stroke: var(--accent); stroke-width: 2; }
 /* Pastille douce : couleur de la garde, pas de rouge */
-.cloche-nb {
-  position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px;
-  border-radius: 999px; background: var(--garde); color: #fff; font-size: .75rem; font-weight: 700;
-  display: grid; place-items: center; border: 2px solid var(--card);
-}
+.cloche-pastille circle { fill: var(--garde); stroke: #fff; stroke-width: 1.4; }
+.cloche-pastille text { fill: #fff; font-size: 8.5px; font-weight: 700; font-family: "Fredoka", sans-serif; }
+.cloche-pastille { animation: pop-in .35s cubic-bezier(.2, .9, .3, 1.4); transform-box: fill-box; transform-origin: center; }
 .notifs-list { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.notifs-list li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--chip); border: 2px solid transparent; }
+.notifs-list li { position: relative; overflow: hidden; display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--chip); border: 2px solid transparent; }
 .notifs-list li.nouveau { border-color: color-mix(in srgb, var(--garde) 45%, transparent); }
 .notifs-list li.cliquable { cursor: pointer; }
 .notifs-list li.cliquable:active { transform: scale(.98); }
@@ -1026,3 +1030,53 @@ button:focus-visible, .chip:focus-visible, .tab:focus-visible { outline: 3px sol
 }
 .recap-actions { display: flex; gap: 8px; }
 .recap-actions .g-btn { flex: 1; }
+
+/* Nouvelles : arrivée en cascade, petite ✕ pour effacer */
+.notifs-list li:not(.notif-calme) { animation: notif-in .45s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: calc(var(--i, 0) * 55ms); }
+@keyframes notif-in { from { transform: translateY(14px) scale(.97); } }
+.notif-x {
+  flex: none; align-self: flex-start; width: 30px; height: 30px; margin: -2px -4px 0 0; border-radius: 50%;
+  border: 0; background: transparent; color: var(--ink-soft); font: inherit; font-size: .95rem; cursor: pointer;
+}
+.notif-x:active { transform: scale(.85); background: var(--card); }
+
+/* 🐊 Le crocodile qui croque la nouvelle */
+.croco {
+  position: absolute; left: 0; top: 50%; width: 150px; height: 70px; margin-top: -35px;
+  pointer-events: none; z-index: 2; animation: croco-va 1.5s cubic-bezier(.35, .8, .3, 1) forwards;
+}
+.croco svg { width: 100%; height: 100%; overflow: visible; }
+@keyframes croco-va {
+  0% { transform: translateX(-165px); }
+  24% { transform: translateX(-10px); }
+  30% { transform: translateX(-16px); }
+  72% { transform: translateX(-14px); }
+  100% { transform: translateX(-180px); }
+}
+.croco .cr-haut { transform-origin: 0 0; animation: machoire 1.5s ease forwards; }
+@keyframes machoire {
+  0% { transform: rotate(-34deg); }
+  44% { transform: rotate(-34deg); }
+  50% { transform: rotate(3deg); }   /* CHOMP */
+  56% { transform: rotate(-12deg); }
+  62% { transform: rotate(0); }
+  100% { transform: rotate(0); }
+}
+.croco .cr-corps, .croco .cr-bosse { fill: #6f9a3a; }
+.croco .cr-bosse-dos { fill: #557a2a; }
+.croco .cr-gueule { fill: #e88a8a; }
+.croco .cr-joue { fill: #f59a7b; opacity: .6; }
+.croco .cr-ventre { fill: #c8d98a; }
+.croco .cr-patte { fill: #5c7a2e; }
+.croco .cr-dents { fill: none; stroke: #fffaf0; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.croco .cr-narine { fill: #2f3a1a; }
+.croco .cr-oeil { fill: none; stroke: #2f3a1a; stroke-width: 2; stroke-linecap: round; }
+/* La nouvelle est aspirée dans la gueule, puis la place se referme */
+.notifs-list li.croque { animation: none; }
+.notifs-list li.croque > :not(.croco) { transform-origin: 110px 50%; animation: avale .42s .4s cubic-bezier(.5, 0, .9, .5) forwards; }
+@keyframes avale { to { transform: scale(.08); opacity: 0; } }
+.notifs-list li.croque .notif-x { visibility: hidden; }
+.notifs-list li.referme {
+  transition: height .35s ease, padding .35s ease, margin .35s ease, opacity .3s ease, border-width .35s;
+  height: 0 !important; padding-top: 0; padding-bottom: 0; margin-top: -8px; opacity: 0; border-width: 0;
+}

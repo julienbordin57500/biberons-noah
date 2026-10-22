@@ -5,6 +5,7 @@
 // Rien n'est stocké sur le serveur : les nouvelles sont calculées à partir des données, « lu » est retenu sur le téléphone.
 (() => {
   const LU = "cloche-lu"; // date (ms) de la dernière ouverture de la cloche
+  const SUPPR = "notifs-supprimees"; // nouvelles effacées avec la ✕ (croquées par le crocodile)
   const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
   const EMOJI = Object.fromEntries(PROFILS.map((p) => [p.nom, p.emoji]));
   let nouvelles = [];
@@ -28,7 +29,7 @@
   // ---------- Construire les nouvelles ----------
   async function charger() {
     if (!estParent()) return; // la cloche est réservée aux parents
-    $("cloche").hidden = false;
+    $("cloche").removeAttribute("hidden");
     const depuis = new Date(Date.now() - 7 * DAY_MS);
     const depuisIso = encodeURIComponent(depuis.toISOString());
     try {
@@ -151,7 +152,11 @@
         });
       }
 
-      nouvelles = liste.filter((n) => n.quand <= new Date(Date.now() + 60000)).sort((a, b) => b.quand - a.quand);
+      const supprimees = new Set(lire(SUPPR, [], Array.isArray));
+      nouvelles = liste
+        .map((n) => ({ ...n, cle: `${n.titre}|${n.texte || ""}` }))
+        .filter((n) => n.quand <= new Date(Date.now() + 60000) && !supprimees.has(n.cle))
+        .sort((a, b) => b.quand - a.quand);
     } catch (e) {
       // pas grave : la cloche se remettra à jour au prochain chargement
     }
@@ -164,7 +169,7 @@
   };
   function majPastille() {
     const n = nonLues();
-    $("cloche-nb").hidden = n === 0;
+    $("cloche-pastille").toggleAttribute("hidden", n === 0);
     $("cloche-nb").textContent = n > 9 ? "9+" : String(n);
     $("cloche").setAttribute("aria-label", n ? `${n} nouvelle${n > 1 ? "s" : ""}` : "Nouvelles");
     $("cloche").classList.toggle("a-lire", n > 0);
@@ -176,9 +181,10 @@
     const ul = $("notifs-list");
     ul.replaceChildren(
       ...(nouvelles.length
-        ? nouvelles.map((n) => {
+        ? nouvelles.map((n, i) => {
             const li = document.createElement("li");
             li.className = (n.quand.getTime() > lu ? "nouveau " : "") + (n.rappel ? "rappel" : "");
+            li.style.setProperty("--i", String(Math.min(i, 8)));
             li.innerHTML = `<span class="notif-emoji" aria-hidden="true">${n.emoji}</span>
               <span class="notif-corps"><span class="notif-titre">${esc(n.titre)}</span>
               ${n.texte ? `<span class="notif-texte">${esc(n.texte)}</span>` : ""}
@@ -201,15 +207,78 @@
                 document.querySelectorAll(".tab")[i]?.click();
               });
             }
+            const x = document.createElement("button");
+            x.type = "button";
+            x.className = "notif-x";
+            x.textContent = "✕";
+            x.setAttribute("aria-label", `Effacer « ${n.titre} »`);
+            x.addEventListener("click", (e) => {
+              e.stopPropagation();
+              croquer(li, n);
+            });
+            li.append(x);
             return li;
           })
-        : [Object.assign(document.createElement("li"), { className: "notif-calme", textContent: "Tout est calme 🌿 Rien de nouveau pour l'instant." })])
+        : [messageCalme()])
     );
     ecrire(LU, Date.now());
     majPastille();
     $("notifs").showModal();
   }
+  const messageCalme = () =>
+    Object.assign(document.createElement("li"), { className: "notif-calme", textContent: "Tout est calme 🌿 Rien de nouveau pour l'instant." });
+
+  // ---------- Le crocodile qui croque la nouvelle effacée 🐊 ----------
+  const CROCO = `<svg viewBox="0 0 150 70" aria-hidden="true">
+      <path class="cr-corps" d="M4 46 Q18 36 30 40 L30 52 Q16 54 4 46 Z"/>
+      <ellipse class="cr-corps" cx="50" cy="46" rx="28" ry="15"/>
+      <circle class="cr-bosse-dos" cx="36" cy="33" r="4.5"/><circle class="cr-bosse-dos" cx="48" cy="31" r="5"/><circle class="cr-bosse-dos" cx="60" cy="32" r="4.5"/>
+      <ellipse class="cr-ventre" cx="52" cy="53" rx="20" ry="5.5"/>
+      <rect class="cr-patte" x="34" y="52" width="9" height="13" rx="4.5"/>
+      <rect class="cr-patte" x="58" y="52" width="9" height="13" rx="4.5"/>
+      <circle class="cr-corps" cx="80" cy="44" r="15"/>
+      <path class="cr-gueule" d="M84 44 L136 47 L88 26 Z"/>
+      <path class="cr-corps" d="M76 44 L134 46 Q144 47 142 53 Q140 58 133 57 L80 58 Q72 56 76 44 Z"/>
+      <path class="cr-dents" d="M92 46 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5"/>
+      <g transform="translate(80 40)"><g class="cr-haut">
+        <path class="cr-corps" d="M-2 6 Q-4 -14 14 -17 L52 -9 Q62 -7 60 1 Q59 7 52 7 L-2 7 Z"/>
+        <path class="cr-dents" d="M10 7 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5"/>
+        <circle class="cr-narine" cx="53" cy="-5" r="1.8"/><circle class="cr-narine" cx="47" cy="-6.5" r="1.4"/>
+        <circle class="cr-bosse" cx="10" cy="-15" r="7.5"/>
+        <path class="cr-oeil" d="M5.5 -16 q4.5 -4.5 9 0"/>
+        <circle class="cr-joue" cx="20" cy="-2" r="3"/>
+      </g></g>
+    </svg>`;
+
+  function croquer(li, n) {
+    const fin = () => {
+      ecrire(SUPPR, [...lire(SUPPR, [], Array.isArray), n.cle].slice(-300));
+      nouvelles = nouvelles.filter((x) => x.cle !== n.cle);
+      li.remove();
+      if (!$("notifs-list").children.length) $("notifs-list").append(messageCalme());
+      majPastille();
+    };
+    if (li.classList.contains("croque")) return;
+    // Sans animations (réglage de l'iPhone) : la nouvelle disparaît simplement
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return fin();
+    li.style.height = li.offsetHeight + "px";
+    const croco = document.createElement("span");
+    croco.className = "croco";
+    croco.innerHTML = CROCO;
+    li.append(croco);
+    li.classList.add("croque");
+    // 1. il arrive gueule ouverte · 2. la nouvelle glisse dans sa gueule · 3. CHOMP · 4. il repart, la place se referme
+    setTimeout(() => li.classList.add("referme"), 1150);
+    setTimeout(fin, 1550);
+  }
+
   $("cloche").addEventListener("click", ouvrir);
+  $("cloche").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      ouvrir();
+    }
+  });
   $("notifs-recap").addEventListener("click", () => {
     $("notifs").close();
     const d = new Date();
@@ -382,7 +451,7 @@
 
   // La cloche se met à jour avec le reste (chaque minute, après chaque ajout, en revenant sur l'appli)
   window.addEventListener("connecte", () => {
-    $("cloche").hidden = !estParent();
+    $("cloche").toggleAttribute("hidden", !estParent());
   });
   enregistrerRubrique({ charger });
 })();

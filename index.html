@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -213,12 +213,31 @@
         <g class="grass">
           <path d="M30 112 l4-12 l3 12 l4-9 l2 9"/><path d="M160 108 l4-12 l3 12 l4-9 l2 9"/><path d="M326 110 l4-12 l3 12 l4-9 l2 9"/>
         </g>
+
+        <!-- 🔔 La cloche des nouvelles : suspendue par une liane à l'acacia -->
+        <g class="cloche-svg" id="cloche" role="button" tabindex="0" aria-label="Nouvelles" hidden>
+          <circle class="cloche-zone" cx="300" cy="88" r="26"/>
+          <path class="liane" d="M300 60 q4 5 0 9 q-4 4 0 9"/>
+          <ellipse class="feuille" cx="303.5" cy="64" rx="3" ry="1.6" transform="rotate(30 303.5 64)"/>
+          <ellipse class="feuille" cx="296.5" cy="72" rx="3" ry="1.6" transform="rotate(-30 296.5 72)"/>
+          <g transform="translate(300 77) scale(1.25)">
+            <g class="cloche-balance">
+              <circle class="cloche-anneau" cx="0" cy="1" r="2.2"/>
+              <path class="cloche-corps" d="M0 2 C-8 2 -11 8 -11 14 L-12.5 20 Q-13 22.5 -10.5 22.5 L10.5 22.5 Q13 22.5 12.5 20 L11 14 C11 8 8 2 0 2 Z"/>
+              <path class="cloche-reflet" d="M-6.5 8 Q-8 12 -8 16"/>
+              <circle class="cloche-battant" cx="0" cy="25" r="2.6"/>
+              <path class="cloche-oeil" d="M-5.5 12 q1.6 -1.6 3.2 0 M2.3 12 q1.6 -1.6 3.2 0"/>
+              <path class="cloche-oeil" d="M-2 16 q2 1.8 4 0"/>
+              <circle class="cloche-joue" cx="-6" cy="15.5" r="1.4"/><circle class="cloche-joue" cx="6" cy="15.5" r="1.4"/>
+            </g>
+          </g>
+          <g class="cloche-pastille" id="cloche-pastille" hidden>
+            <circle cx="315" cy="80" r="7.2"/>
+            <text id="cloche-nb" x="315" y="83.2" text-anchor="middle">1</text>
+          </g>
+        </g>
       </svg>
 
-      <button type="button" class="cloche" id="cloche" hidden aria-label="Nouvelles">
-        <span class="cloche-icone" aria-hidden="true">🔔</span>
-        <span class="cloche-nb" id="cloche-nb" hidden></span>
-      </button>
       <div class="top">
         <div class="lion" aria-hidden="true">
           <span class="zzz"><span>z</span><span>z</span><span>Z</span></span>
@@ -743,20 +762,20 @@
   </dialog>
 
 
-  <script src="scene.js?v=22"></script>
+  <script src="scene.js?v=24"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=22"></script>
-  <script src="auth.js?v=22"></script>
-  <script src="repas.js?v=22"></script>
-  <script src="couches.js?v=22"></script>
-  <script src="sommeil.js?v=22"></script>
-  <script src="sante.js?v=22"></script>
-  <script src="medicaments.js?v=22"></script>
-  <script src="garde.js?v=22"></script>
-  <script src="graphiques.js?v=22"></script>
-  <script src="fetes.js?v=22"></script>
-  <script src="notifs.js?v=22"></script>
-  <script src="tuto.js?v=22"></script>
-  <script src="pages.js?v=22"></script>
+  <script src="commun.js?v=24"></script>
+  <script src="auth.js?v=24"></script>
+  <script src="repas.js?v=24"></script>
+  <script src="couches.js?v=24"></script>
+  <script src="sommeil.js?v=24"></script>
+  <script src="sante.js?v=24"></script>
+  <script src="medicaments.js?v=24"></script>
+  <script src="garde.js?v=24"></script>
+  <script src="graphiques.js?v=24"></script>
+  <script src="fetes.js?v=24"></script>
+  <script src="notifs.js?v=24"></script>
+  <script src="tuto.js?v=24"></script>
+  <script src="pages.js?v=24"></script>
 </body>
 </html>
