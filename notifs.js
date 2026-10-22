@@ -250,7 +250,13 @@
       </g></g>
     </svg>`;
 
+  // Le crocodile traverse la nouvelle de gauche à droite en mâchonnant : tout ce qui est derrière lui a disparu
+  const DUREE_CROCO = 900; // ms pour traverser
+  const BOUCHE = 118; // position de la gueule dans le dessin (px depuis la gauche du crocodile)
+  const LARGEUR_CROCO = 150;
+
   function croquer(li, n) {
+    if (li.classList.contains("croque")) return;
     const fin = () => {
       ecrire(SUPPR, [...lire(SUPPR, [], Array.isArray), n.cle].slice(-300));
       nouvelles = nouvelles.filter((x) => x.cle !== n.cle);
@@ -258,18 +264,38 @@
       if (!$("notifs-list").children.length) $("notifs-list").append(messageCalme());
       majPastille();
     };
-    if (li.classList.contains("croque")) return;
+    const replier = () => {
+      li.classList.add("referme");
+      setTimeout(fin, 380);
+    };
     // Sans animations (réglage de l'iPhone) : la nouvelle disparaît simplement
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return fin();
+
+    const W = li.offsetWidth;
     li.style.height = li.offsetHeight + "px";
     const croco = document.createElement("span");
     croco.className = "croco";
     croco.innerHTML = CROCO;
     li.append(croco);
     li.classList.add("croque");
-    // 1. il arrive gueule ouverte · 2. la nouvelle glisse dans sa gueule · 3. CHOMP · 4. il repart, la place se referme
-    setTimeout(() => li.classList.add("referme"), 1150);
-    setTimeout(fin, 1550);
+    const contenu = [...li.children].filter((c) => c !== croco);
+    const depart = -LARGEUR_CROCO; // il arrive de la gauche, hors de la nouvelle
+    const arrivee = W + 10; // et ressort à droite
+    const t0 = performance.now();
+    (function image(t) {
+      const p = Math.min(1, (t - t0) / DUREE_CROCO);
+      const x = depart + (arrivee - depart) * p;
+      croco.style.transform = `translateX(${x}px)`;
+      // Ce qui est à gauche de sa gueule est mangé : texte et fond de la carte
+      const mange = Math.max(0, Math.min(W, x + BOUCHE));
+      contenu.forEach((c) => {
+        const gauche = mange - c.offsetLeft;
+        c.style.clipPath = `inset(-4px -4px -4px ${Math.max(0, gauche)}px)`;
+      });
+      li.style.setProperty("--mange", mange + "px");
+      if (p < 1) requestAnimationFrame(image);
+      else replier();
+    })(t0);
   }
 
   $("cloche").addEventListener("click", ouvrir);

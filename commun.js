@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "24";
+const VERSION_APPLI = "26";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -485,3 +485,30 @@ document.addEventListener("visibilitychange", () => {
 });
 setInterval(verifierMiseAJour, 10 * 60 * 1000);
 setTimeout(verifierMiseAJour, 3000);
+
+// ---------- Fenêtres : le fond ne bouge plus quand une fenêtre est ouverte ----------
+// (sur iPhone, « overflow: hidden » ne suffit pas : on fige la page à sa position puis on la rend à la fermeture)
+(() => {
+  let ouvertes = 0;
+  let y = 0;
+  const bloquer = () => {
+    if (ouvertes++ > 0) return;
+    y = window.scrollY;
+    document.body.style.top = `-${y}px`;
+    document.body.classList.add("fond-bloque");
+  };
+  const debloquer = () => {
+    ouvertes = Math.max(0, ouvertes - 1);
+    if (ouvertes > 0) return;
+    document.body.classList.remove("fond-bloque");
+    document.body.style.top = "";
+    window.scrollTo({ top: y, behavior: "instant" });
+  };
+  const ouvrirOrigine = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function () {
+    if (this.open) return;
+    ouvrirOrigine.call(this);
+    bloquer();
+    this.addEventListener("close", debloquer, { once: true });
+  };
+})();
