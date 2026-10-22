@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -215,6 +215,10 @@
         </g>
       </svg>
 
+      <button type="button" class="cloche" id="cloche" hidden aria-label="Nouvelles">
+        <span class="cloche-icone" aria-hidden="true">🔔</span>
+        <span class="cloche-nb" id="cloche-nb" hidden></span>
+      </button>
       <div class="top">
         <div class="lion" aria-hidden="true">
           <span class="zzz"><span>z</span><span>z</span><span>Z</span></span>
@@ -683,6 +687,36 @@
     </form>
   </dialog>
 
+  <!-- Cloche : les nouvelles (famille, rappels doux, récap du mois) -->
+  <dialog class="sheet notifs" id="notifs" aria-labelledby="notifs-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="notifs-titre">🔔 Les nouvelles</p>
+      <ul class="notifs-list" id="notifs-list"></ul>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn">Fermer</button>
+        <button type="button" class="link" id="notifs-recap">📊 Récap du mois</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Récap du mois, à copier pour l'envoyer -->
+  <dialog class="sheet recap" id="recap" aria-labelledby="recap-titre">
+    <form method="dialog">
+      <div class="recap-head">
+        <p class="sheet-title" id="recap-titre">📊 Récap</p>
+        <input type="month" id="recap-mois" aria-label="Choisir le mois">
+      </div>
+      <pre class="recap-texte" id="recap-texte"></pre>
+      <div class="recap-actions">
+        <button type="button" class="g-btn" id="recap-copier">📋 Copier</button>
+        <button type="button" class="g-btn alt" id="recap-partager" hidden>📤 Partager</button>
+      </div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="link">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Diagnostic réseau (en touchant le badge 📶) -->
   <dialog class="sheet" id="diag" aria-labelledby="diag-titre">
     <form method="dialog">
@@ -709,19 +743,20 @@
   </dialog>
 
 
-  <script src="scene.js?v=21"></script>
+  <script src="scene.js?v=22"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=21"></script>
-  <script src="auth.js?v=21"></script>
-  <script src="repas.js?v=21"></script>
-  <script src="couches.js?v=21"></script>
-  <script src="sommeil.js?v=21"></script>
-  <script src="sante.js?v=21"></script>
-  <script src="medicaments.js?v=21"></script>
-  <script src="garde.js?v=21"></script>
-  <script src="graphiques.js?v=21"></script>
-  <script src="fetes.js?v=21"></script>
-  <script src="tuto.js?v=21"></script>
-  <script src="pages.js?v=21"></script>
+  <script src="commun.js?v=22"></script>
+  <script src="auth.js?v=22"></script>
+  <script src="repas.js?v=22"></script>
+  <script src="couches.js?v=22"></script>
+  <script src="sommeil.js?v=22"></script>
+  <script src="sante.js?v=22"></script>
+  <script src="medicaments.js?v=22"></script>
+  <script src="garde.js?v=22"></script>
+  <script src="graphiques.js?v=22"></script>
+  <script src="fetes.js?v=22"></script>
+  <script src="notifs.js?v=22"></script>
+  <script src="tuto.js?v=22"></script>
+  <script src="pages.js?v=22"></script>
 </body>
 </html>

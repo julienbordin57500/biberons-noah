@@ -1,23 +1,24 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v21";
+const CACHE = "carnet-noah-v22";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=21",
-  "scene.js?v=21",
-  "commun.js?v=21",
-  "auth.js?v=21",
-  "repas.js?v=21",
-  "couches.js?v=21",
-  "sommeil.js?v=21",
-  "medicaments.js?v=21",
-  "sante.js?v=21",
-  "garde.js?v=21",
-  "tuto.js?v=21",
-  "graphiques.js?v=21",
-  "fetes.js?v=21",
-  "pages.js?v=21",
+  "style.css?v=22",
+  "scene.js?v=22",
+  "commun.js?v=22",
+  "auth.js?v=22",
+  "repas.js?v=22",
+  "couches.js?v=22",
+  "sommeil.js?v=22",
+  "medicaments.js?v=22",
+  "sante.js?v=22",
+  "garde.js?v=22",
+  "tuto.js?v=22",
+  "graphiques.js?v=22",
+  "fetes.js?v=22",
+  "notifs.js?v=22",
+  "pages.js?v=22",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",
@@ -48,7 +49,7 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(versionne ? memoireDabord(req) : reseauDabord(req));
 });
 
-// Fichiers versionnés (style.css?v=21…) : ils ne changent jamais, la mémoire du téléphone suffit
+// Fichiers versionnés (style.css?v=22…) : ils ne changent jamais, la mémoire du téléphone suffit
 async function memoireDabord(req) {
   const cache = await caches.open(CACHE);
   const enCache = await cache.match(req);

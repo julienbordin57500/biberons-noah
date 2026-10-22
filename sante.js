@@ -37,6 +37,9 @@
     { cle: "e-11a", m: 132, nom: "Examen entre 11 et 13 ans" },
     { cle: "e-15a", m: 180, nom: "Examen entre 15 et 16 ans" },
   ];
+  // Partagé avec la cloche (rappels doux de vaccins et d'examens)
+  window.calendrierNoah = { VACCINS, EXAMENS };
+
   const FICHE = [
     "date_naissance", "heure_naissance", "poids_naissance_g", "taille_naissance_cm", "pc_naissance_cm",
     "groupe_sanguin", "allergies", "traitements", "pediatre_nom", "pediatre_tel", "pediatre_adresse", "notes",

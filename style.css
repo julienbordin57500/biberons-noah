@@ -987,3 +987,42 @@ button:focus-visible, .chip:focus-visible, .tab:focus-visible { outline: 3px sol
 @media (prefers-reduced-motion: reduce) {
   .add-btn::after { display: none; }
 }
+
+/* ---------- Cloche des nouvelles (douce, jamais alarmante) ---------- */
+.cloche {
+  position: absolute; z-index: 3; top: 18px; right: 104px;
+  width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--card-border);
+  background: color-mix(in srgb, var(--card) 85%, transparent); cursor: pointer;
+  display: grid; place-items: center; font-size: 1.35rem; box-shadow: var(--shadow);
+  transition: transform .15s;
+}
+.cloche:active { transform: scale(.92); }
+.cloche.a-lire .cloche-icone { animation: tinte 3.5s ease-in-out infinite; transform-origin: 50% 10%; }
+@keyframes tinte { 0%, 86%, 100% { transform: rotate(0); } 89% { transform: rotate(14deg); } 93% { transform: rotate(-12deg); } 96% { transform: rotate(6deg); } }
+/* Pastille douce : couleur de la garde, pas de rouge */
+.cloche-nb {
+  position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: 999px; background: var(--garde); color: #fff; font-size: .75rem; font-weight: 700;
+  display: grid; place-items: center; border: 2px solid var(--card);
+}
+.notifs-list { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.notifs-list li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--chip); border: 2px solid transparent; }
+.notifs-list li.nouveau { border-color: color-mix(in srgb, var(--garde) 45%, transparent); }
+.notifs-list li.cliquable { cursor: pointer; }
+.notifs-list li.cliquable:active { transform: scale(.98); }
+.notif-emoji { font-size: 1.5rem; line-height: 1.2; flex: none; }
+.notif-corps { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; text-align: left; }
+.notif-titre { font-weight: 700; }
+.notif-texte { color: var(--ink-soft); font-size: .92rem; overflow-wrap: anywhere; }
+.notif-quand { color: var(--ink-soft); font-size: .78rem; opacity: .8; }
+.notif-action { flex: none; align-self: center; padding: 6px 14px; min-height: 38px; }
+.notifs-list li.notif-calme { display: block; text-align: center; color: var(--ink-soft); background: none; padding: 18px 8px; }
+.recap-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.recap-head input { font: inherit; font-size: .95rem; color: var(--ink); background: var(--chip); border: 2px solid var(--card-border); border-radius: 12px; padding: 4px 8px; min-height: 38px; }
+.recap-texte {
+  margin: 0; max-height: 55vh; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+  font-family: inherit; font-size: .92rem; line-height: 1.5; background: var(--chip); padding: 12px 14px; border-radius: 14px;
+  -webkit-user-select: text; user-select: text;
+}
+.recap-actions { display: flex; gap: 8px; }
+.recap-actions .g-btn { flex: 1; }
