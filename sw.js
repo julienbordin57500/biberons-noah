@@ -1,24 +1,24 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v26";
+const CACHE = "carnet-noah-v27";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=26",
-  "scene.js?v=26",
-  "commun.js?v=26",
-  "auth.js?v=26",
-  "repas.js?v=26",
-  "couches.js?v=26",
-  "sommeil.js?v=26",
-  "medicaments.js?v=26",
-  "sante.js?v=26",
-  "garde.js?v=26",
-  "tuto.js?v=26",
-  "graphiques.js?v=26",
-  "fetes.js?v=26",
-  "notifs.js?v=26",
-  "pages.js?v=26",
+  "style.css?v=27",
+  "scene.js?v=27",
+  "commun.js?v=27",
+  "auth.js?v=27",
+  "repas.js?v=27",
+  "couches.js?v=27",
+  "sommeil.js?v=27",
+  "medicaments.js?v=27",
+  "sante.js?v=27",
+  "garde.js?v=27",
+  "tuto.js?v=27",
+  "graphiques.js?v=27",
+  "fetes.js?v=27",
+  "notifs.js?v=27",
+  "pages.js?v=27",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",
@@ -33,7 +33,8 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((cles) => Promise.all(cles.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      // On ne supprime que les anciennes mémoires de Noah, jamais celles d'une autre appli (ex. Hortense)
+      .then((cles) => Promise.all(cles.filter((k) => k.startsWith("carnet-noah-") && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -49,7 +50,7 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(versionne ? memoireDabord(req) : reseauDabord(req));
 });
 
-// Fichiers versionnés (style.css?v=26…) : ils ne changent jamais, la mémoire du téléphone suffit
+// Fichiers versionnés (style.css?v=27…) : ils ne changent jamais, la mémoire du téléphone suffit
 async function memoireDabord(req) {
   const cache = await caches.open(CACHE);
   const enCache = await cache.match(req);
