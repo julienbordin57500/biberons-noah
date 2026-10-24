@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=27">
+  <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -622,6 +622,13 @@
           </div>
         </section>
 
+        <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
+        <section class="card resume-maison" id="g-resume" hidden>
+          <p class="resume-titre">🏠 Les dernières nouvelles</p>
+          <ul class="resume-liste" id="g-resume-liste" aria-live="polite"></ul>
+          <p class="hint small" id="g-resume-maj"></p>
+        </section>
+
         <section class="card garde-day">
           <div class="day-nav">
             <button type="button" class="day-arrow" id="g-prev" aria-label="Jour précédent">‹</button>
@@ -753,31 +760,33 @@
 
   <!-- Fenêtre de modification d'une entrée (repas, couche, dodo) -->
   <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
-    <form method="dialog" id="edit-form">
+    <form method="dialog" id="edit-form" novalidate>
       <p class="sheet-title" id="edit-title">Modifier</p>
       <div class="fields" id="edit-fields"></div>
+      <p class="login-erreur" id="edit-erreur" role="alert"></p>
       <div class="sheet-actions">
         <button type="submit" value="ok" class="g-btn">Enregistrer</button>
-        <button type="submit" value="annuler" class="link">Annuler</button>
+        <button type="button" class="link" id="edit-annuler">Annuler</button>
       </div>
     </form>
   </dialog>
 
 
-  <script src="scene.js?v=27"></script>
+  <script src="scene.js?v=28"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=27"></script>
-  <script src="auth.js?v=27"></script>
-  <script src="repas.js?v=27"></script>
-  <script src="couches.js?v=27"></script>
-  <script src="sommeil.js?v=27"></script>
-  <script src="sante.js?v=27"></script>
-  <script src="medicaments.js?v=27"></script>
-  <script src="garde.js?v=27"></script>
-  <script src="graphiques.js?v=27"></script>
-  <script src="fetes.js?v=27"></script>
-  <script src="notifs.js?v=27"></script>
-  <script src="tuto.js?v=27"></script>
-  <script src="pages.js?v=27"></script>
+  <script src="commun.js?v=28"></script>
+  <script src="auth.js?v=28"></script>
+  <script src="repas.js?v=28"></script>
+  <script src="couches.js?v=28"></script>
+  <script src="sommeil.js?v=28"></script>
+  <script src="sante.js?v=28"></script>
+  <script src="medicaments.js?v=28"></script>
+  <script src="resume.js?v=28"></script>
+  <script src="garde.js?v=28"></script>
+  <script src="graphiques.js?v=28"></script>
+  <script src="fetes.js?v=28"></script>
+  <script src="notifs.js?v=28"></script>
+  <script src="tuto.js?v=28"></script>
+  <script src="pages.js?v=28"></script>
 </body>
 </html>

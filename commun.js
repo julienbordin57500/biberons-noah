@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "27";
+const VERSION_APPLI = "28";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -432,6 +432,17 @@ function editer(titre, champs) {
       { once: true }
     );
     dlg.returnValue = "";
+    $("edit-erreur").textContent = "";
+    // Annuler ferme toujours, même si une heure est à moitié tapée
+    $("edit-annuler").onclick = () => dlg.close("annuler");
+    // Heure à moitié effacée (« --:32 ») : on le dit au lieu de bloquer sans rien afficher
+    $("edit-form").onsubmit = (e) => {
+      const incomplet = [...$("edit-fields").querySelectorAll("input")].find((el) => el.validity.badInput);
+      if (!incomplet) return;
+      e.preventDefault();
+      $("edit-erreur").textContent = incomplet.type === "time" ? "L'heure est incomplète : complète-la, ou touche Annuler." : "Un champ est incomplet.";
+      incomplet.focus();
+    };
     dlg.showModal();
   });
 }
