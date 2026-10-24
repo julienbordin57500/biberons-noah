@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "28";
+const VERSION_APPLI = "29";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
