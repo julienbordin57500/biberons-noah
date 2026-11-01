@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "32";
+const VERSION_APPLI = "33";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -409,6 +409,37 @@ function editer(titre, champs) {
           input.append(o);
         });
         input.value = c.valeur === null || c.valeur === undefined ? "" : String(c.valeur);
+      } else if (c.type === "time") {
+        // Heure en deux menus (heures, minutes) plutôt que la roue d'Apple :
+        // dans cette fenêtre, la roue bloquait voire faisait planter certains iPhone (iOS 26)
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.value = c.valeur || "";
+        const [h0, m0] = (c.valeur || "00:00").split(":");
+        const menu = (max, valeur, nom) => {
+          const sel = document.createElement("select");
+          sel.setAttribute("aria-label", nom);
+          for (let i = 0; i < max; i++) {
+            const o = document.createElement("option");
+            o.value = o.textContent = pad(i);
+            sel.append(o);
+          }
+          sel.value = valeur;
+          return sel;
+        };
+        const heures = menu(24, h0, "Heures");
+        const minutes = menu(60, m0, "Minutes");
+        const maj = () => (input.value = `${heures.value}:${minutes.value}`);
+        heures.addEventListener("change", maj);
+        minutes.addEventListener("change", maj);
+        const boite = document.createElement("span");
+        boite.className = "heure-menus";
+        const deuxPoints = document.createElement("span");
+        deuxPoints.textContent = ":";
+        boite.append(heures, deuxPoints, minutes);
+        input.dataset.cle = c.cle;
+        label.append(span, boite, input);
+        return label;
       } else {
         input = document.createElement("input");
         input.type = c.type === "check" ? "checkbox" : c.type;
