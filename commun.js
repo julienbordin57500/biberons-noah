@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "33";
+const VERSION_APPLI = "34";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -409,6 +409,49 @@ function editer(titre, champs) {
           input.append(o);
         });
         input.value = c.valeur === null || c.valeur === undefined ? "" : String(c.valeur);
+      } else if (c.type === "date") {
+        // Date en trois menus (jour, mois, année) plutôt que le calendrier d'Apple (même souci que la roue d'heure)
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.value = c.valeur || "";
+        const [a0, m0, j0] = (c.valeur || "").split("-");
+        const an = new Date().getFullYear();
+        const menu = (options, valeur, nom) => {
+          const sel = document.createElement("select");
+          sel.setAttribute("aria-label", nom);
+          options.forEach(([v, l]) => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = l;
+            sel.append(o);
+          });
+          sel.value = valeur;
+          return sel;
+        };
+        const MOIS = ["janv.", "févr.", "mars", "avril", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+        const jours = menu(Array.from({ length: 31 }, (_, i) => [pad(i + 1), String(i + 1)]), j0, "Jour");
+        const mois = menu(MOIS.map((m, i) => [pad(i + 1), m]), m0, "Mois");
+        const annees = [...new Set([Number(a0) || an, an - 1, an, an + 1, an + 2])].sort();
+        const annee = menu(annees.map((a) => [String(a), String(a)]), a0 || String(an), "Année");
+        const maj = () => {
+          // 31 février → dernier jour du mois
+          const dernier = new Date(Number(annee.value), Number(mois.value), 0).getDate();
+          if (Number(jours.value) > dernier) jours.value = pad(dernier);
+          input.value = `${annee.value}-${mois.value}-${jours.value}`;
+        };
+        [jours, mois, annee].forEach((s) => s.addEventListener("change", maj));
+        const boite = document.createElement("span");
+        boite.className = "heure-menus date-menus";
+        boite.append(jours, mois, annee);
+        input.dataset.cle = c.cle;
+        label.append(span, boite, input);
+        return label;
+      } else if (c.type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = 4;
+        input.maxLength = c.max || 1000;
+        if (c.placeholder) input.placeholder = c.placeholder;
+        input.value = c.valeur || "";
       } else if (c.type === "time") {
         // Heure en deux menus (heures, minutes) plutôt que la roue d'Apple :
         // dans cette fenêtre, la roue bloquait voire faisait planter certains iPhone (iOS 26)
@@ -462,7 +505,7 @@ function editer(titre, champs) {
         if (!valide) return resolve(null);
         const r = {};
         $("edit-fields").querySelectorAll("[data-cle]").forEach((el) => {
-          r[el.dataset.cle] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.value;
+          r[el.dataset.cle] = el.type === "checkbox" ? el.checked : el.value.trim() === "" ? null : el.value.trim();
         });
         resolve(r);
       },
