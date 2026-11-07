@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=34">
+  <link rel="stylesheet" href="style.css?v=35">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -237,6 +237,22 @@
             <text id="cloche-nb" x="313.5" y="82.3" text-anchor="middle">1</text>
           </g>
           <circle class="cloche-zone" cx="300" cy="92" r="26"/>
+        </g>
+
+        <!-- 🎵 Les sons pour s'endormir : un petit médaillon à côté de la cloche -->
+        <g class="cloche-svg sons-svg" id="sons-svg" role="button" tabindex="0" aria-label="Sons pour s'endormir" hidden>
+          <path class="liane" d="M354 66 q3 3 0 6"/>
+          <g transform="translate(354 72)">
+            <g class="sons-balance">
+              <circle class="medaillon-ombre" cx="0.8" cy="12.8" r="12"/>
+              <circle class="medaillon" cx="0" cy="12" r="12"/>
+              <circle class="medaillon-cercle" cx="0" cy="12" r="9.5"/>
+              <!-- note de musique -->
+              <ellipse class="icone-cloche" cx="-2.2" cy="16.2" rx="3" ry="2.2" transform="rotate(-20 -2.2 16.2)"/>
+              <path class="icone-note" d="M0.6 15.8 V6 q4.2 1 4 5.2"/>
+            </g>
+          </g>
+          <circle class="cloche-zone" cx="354" cy="84" r="20"/>
         </g>
       </svg>
 
@@ -764,6 +780,21 @@
   </dialog>
 
   <!-- Fenêtre de modification d'une entrée (repas, couche, dodo) -->
+  <!-- 🎵 Sons pour s'endormir -->
+  <dialog class="sheet" id="sons" aria-labelledby="sons-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="sons-titre">🎵 Pour s'endormir</p>
+      <div class="sons-liste" id="sons-liste"></div>
+      <p class="label">S'arrête tout seul après</p>
+      <div class="chips" id="sons-durees" role="radiogroup" aria-label="Durée"></div>
+      <p class="hint small">Le son continue écran verrouillé. Le volume se règle avec les boutons du téléphone : garde-le doux et le téléphone loin du lit 🙂</p>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn alt">Fermer</button>
+        <button type="button" class="link" id="sons-stop" hidden>⏹️ Arrêter le son</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
     <form method="dialog" id="edit-form" novalidate>
       <p class="sheet-title" id="edit-title">Modifier</p>
@@ -777,21 +808,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=34"></script>
+  <script src="scene.js?v=35"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=34"></script>
-  <script src="auth.js?v=34"></script>
-  <script src="repas.js?v=34"></script>
-  <script src="couches.js?v=34"></script>
-  <script src="sommeil.js?v=34"></script>
-  <script src="sante.js?v=34"></script>
-  <script src="medicaments.js?v=34"></script>
-  <script src="resume.js?v=34"></script>
-  <script src="garde.js?v=34"></script>
-  <script src="graphiques.js?v=34"></script>
-  <script src="fetes.js?v=34"></script>
-  <script src="notifs.js?v=34"></script>
-  <script src="tuto.js?v=34"></script>
-  <script src="pages.js?v=34"></script>
+  <script src="commun.js?v=35"></script>
+  <script src="auth.js?v=35"></script>
+  <script src="repas.js?v=35"></script>
+  <script src="couches.js?v=35"></script>
+  <script src="sommeil.js?v=35"></script>
+  <script src="sante.js?v=35"></script>
+  <script src="medicaments.js?v=35"></script>
+  <script src="resume.js?v=35"></script>
+  <script src="sons.js?v=35"></script>
+  <script src="garde.js?v=35"></script>
+  <script src="graphiques.js?v=35"></script>
+  <script src="fetes.js?v=35"></script>
+  <script src="notifs.js?v=35"></script>
+  <script src="tuto.js?v=35"></script>
+  <script src="pages.js?v=35"></script>
 </body>
 </html>

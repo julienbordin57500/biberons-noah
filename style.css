@@ -1127,3 +1127,22 @@ dialog.sheet::backdrop { touch-action: none; }
 .date-menus select:nth-child(2) { flex: 1.4; }
 #edit-fields textarea { width: 100%; resize: vertical; }
 .h-note { white-space: pre-line; }
+
+/* 🎵 Médaillon des sons et fenêtre « Pour s'endormir » */
+.icone-note { fill: none; stroke: #7a4a24; stroke-width: 1.8; stroke-linecap: round; }
+.sons-balance { transform-origin: 354px 72px; transform-box: view-box; }
+.sons-svg.joue .sons-balance { animation: balance 3s ease-in-out infinite; }
+.sons-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.son-tuile {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+  padding: 10px 6px; border-radius: 18px; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; cursor: pointer;
+}
+.son-tuile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.son-emoji { font-size: 1.7rem; line-height: 1.2; }
+.son-nom { font-weight: 800; font-size: .95rem; line-height: 1.2; }
+.son-sous { font-size: .75rem; color: var(--ink-soft); }
+.son-tuile.joue { border-color: var(--sleep); background: color-mix(in srgb, var(--sleep) 22%, var(--card)); }
+.son-tuile.joue .son-emoji { animation: tuile-berce 3s ease-in-out infinite; }
+#sons-durees { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { .sons-svg.joue .sons-balance, .son-tuile.joue .son-emoji { animation: none; } }
