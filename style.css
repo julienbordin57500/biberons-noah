@@ -1130,8 +1130,9 @@ dialog.sheet::backdrop { touch-action: none; }
 
 /* 🎵 Médaillon des sons et fenêtre « Pour s'endormir » */
 .icone-note { fill: none; stroke: #7a4a24; stroke-width: 1.8; stroke-linecap: round; }
-.sons-balance { transform-origin: 354px 72px; transform-box: view-box; }
-.sons-svg.joue .sons-balance { animation: balance 3s ease-in-out infinite; }
+.sons-balance { transform-origin: 0 0; transform-box: view-box; }
+.sons-svg.joue .sons-balance { animation: berce-medaillon 3.2s ease-in-out infinite; }
+@keyframes berce-medaillon { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 .sons-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .son-tuile {
   display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
@@ -1146,3 +1147,14 @@ dialog.sheet::backdrop { touch-action: none; }
 .son-tuile.joue .son-emoji { animation: tuile-berce 3s ease-in-out infinite; }
 #sons-durees { display: flex; flex-wrap: wrap; gap: 6px; }
 @media (prefers-reduced-motion: reduce) { .sons-svg.joue .sons-balance, .son-tuile.joue .son-emoji { animation: none; } }
+
+/* Minuterie des sons : durée au choix avec − / + */
+.sons-perso { display: flex; align-items: center; gap: 8px; }
+.sons-perso-label { font-size: .9rem; color: var(--ink-soft); flex: 1; }
+.sons-perso .stepper-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; font-size: 1.3rem; font-weight: 800; cursor: pointer; }
+.sons-perso-val { min-width: 92px; padding: 8px 12px; border-radius: 999px; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.sons-perso.on .sons-perso-val { background: var(--chip-on); border-color: var(--chip-on); color: var(--chip-on-ink); }
+.sons-reste { margin: 0; text-align: center; font-weight: 700; color: var(--sleep); min-height: 1.2em; }
+.sons-reste:empty { display: none; }

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="style.css?v=36">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -787,6 +787,13 @@
       <div class="sons-liste" id="sons-liste"></div>
       <p class="label">S'arrête tout seul après</p>
       <div class="chips" id="sons-durees" role="radiogroup" aria-label="Durée"></div>
+      <div class="sons-perso" id="sons-perso">
+        <span class="sons-perso-label">Ou au choix :</span>
+        <button type="button" class="stepper-btn" id="sons-moins" aria-label="5 minutes de moins">−</button>
+        <button type="button" class="sons-perso-val" id="sons-perso-val">45 min</button>
+        <button type="button" class="stepper-btn" id="sons-plus" aria-label="5 minutes de plus">+</button>
+      </div>
+      <p class="sons-reste" id="sons-reste" aria-live="polite"></p>
       <p class="hint small">Le son continue écran verrouillé. Le volume se règle avec les boutons du téléphone : garde-le doux et le téléphone loin du lit 🙂</p>
       <div class="sheet-actions">
         <button type="submit" value="ok" class="g-btn alt">Fermer</button>
@@ -808,22 +815,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=35"></script>
+  <script src="scene.js?v=36"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=35"></script>
-  <script src="auth.js?v=35"></script>
-  <script src="repas.js?v=35"></script>
-  <script src="couches.js?v=35"></script>
-  <script src="sommeil.js?v=35"></script>
-  <script src="sante.js?v=35"></script>
-  <script src="medicaments.js?v=35"></script>
-  <script src="resume.js?v=35"></script>
-  <script src="sons.js?v=35"></script>
-  <script src="garde.js?v=35"></script>
-  <script src="graphiques.js?v=35"></script>
-  <script src="fetes.js?v=35"></script>
-  <script src="notifs.js?v=35"></script>
-  <script src="tuto.js?v=35"></script>
-  <script src="pages.js?v=35"></script>
+  <script src="commun.js?v=36"></script>
+  <script src="auth.js?v=36"></script>
+  <script src="repas.js?v=36"></script>
+  <script src="couches.js?v=36"></script>
+  <script src="sommeil.js?v=36"></script>
+  <script src="sante.js?v=36"></script>
+  <script src="medicaments.js?v=36"></script>
+  <script src="resume.js?v=36"></script>
+  <script src="sons.js?v=36"></script>
+  <script src="garde.js?v=36"></script>
+  <script src="graphiques.js?v=36"></script>
+  <script src="fetes.js?v=36"></script>
+  <script src="notifs.js?v=36"></script>
+  <script src="tuto.js?v=36"></script>
+  <script src="pages.js?v=36"></script>
 </body>
 </html>
