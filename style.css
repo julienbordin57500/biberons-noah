@@ -1158,3 +1158,4 @@ dialog.sheet::backdrop { touch-action: none; }
 .sons-perso.on .sons-perso-val { background: var(--chip-on); border-color: var(--chip-on); color: var(--chip-on-ink); }
 .sons-reste { margin: 0; text-align: center; font-weight: 700; color: var(--sleep); min-height: 1.2em; }
 .sons-reste:empty { display: none; }
+.sons-credits { margin-top: 4px; } .sons-credits summary { cursor: pointer; }

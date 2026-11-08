@@ -1,26 +1,28 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v36";
+const CACHE = "carnet-noah-v37";
+// Mémoire des sons (dossier sons/) : changer le numéro seulement si on remplace un son
+const CACHE_SONS = "carnet-noah-sons-v1";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=36",
-  "scene.js?v=36",
-  "commun.js?v=36",
-  "auth.js?v=36",
-  "repas.js?v=36",
-  "couches.js?v=36",
-  "sommeil.js?v=36",
-  "medicaments.js?v=36",
-  "sante.js?v=36",
-  "garde.js?v=36",
-  "resume.js?v=36",
-  "sons.js?v=36",
-  "tuto.js?v=36",
-  "graphiques.js?v=36",
-  "fetes.js?v=36",
-  "notifs.js?v=36",
-  "pages.js?v=36",
+  "style.css?v=37",
+  "scene.js?v=37",
+  "commun.js?v=37",
+  "auth.js?v=37",
+  "repas.js?v=37",
+  "couches.js?v=37",
+  "sommeil.js?v=37",
+  "medicaments.js?v=37",
+  "sante.js?v=37",
+  "garde.js?v=37",
+  "resume.js?v=37",
+  "sons.js?v=37",
+  "tuto.js?v=37",
+  "graphiques.js?v=37",
+  "fetes.js?v=37",
+  "notifs.js?v=37",
+  "pages.js?v=37",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",
@@ -36,7 +38,7 @@ self.addEventListener("activate", (e) => {
     caches
       .keys()
       // On ne supprime que les anciennes mémoires de Noah, jamais celles d'une autre appli (ex. Hortense)
-      .then((cles) => Promise.all(cles.filter((k) => k.startsWith("carnet-noah-") && k !== CACHE).map((k) => caches.delete(k))))
+      .then((cles) => Promise.all(cles.filter((k) => k.startsWith("carnet-noah-") && k !== CACHE && k !== CACHE_SONS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -48,13 +50,15 @@ self.addEventListener("fetch", (e) => {
   // Les données (Supabase) et le numéro de version ne passent jamais par la mémoire
   if (url.hostname.endsWith("supabase.co") || url.pathname.endsWith("version.txt")) return;
 
+  // Sons pour s'endormir : gardés à part, pour ne pas les retélécharger à chaque nouvelle version
+  if (url.pathname.includes("/sons/")) return e.respondWith(memoireDabord(req, CACHE_SONS));
   const versionne = url.searchParams.has("v") || url.hostname === "cdn.jsdelivr.net";
   e.respondWith(versionne ? memoireDabord(req) : reseauDabord(req));
 });
 
 // Fichiers versionnés (style.css?v=27…) : ils ne changent jamais, la mémoire du téléphone suffit
-async function memoireDabord(req) {
-  const cache = await caches.open(CACHE);
+async function memoireDabord(req, nom = CACHE) {
+  const cache = await caches.open(nom);
   const enCache = await cache.match(req);
   if (enCache) return enCache;
   const res = await fetch(req);
