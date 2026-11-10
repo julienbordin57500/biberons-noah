@@ -1159,3 +1159,26 @@ dialog.sheet::backdrop { touch-action: none; }
 .sons-reste { margin: 0; text-align: center; font-weight: 700; color: var(--sleep); min-height: 1.2em; }
 .sons-reste:empty { display: none; }
 .sons-credits { margin-top: 4px; } .sons-credits summary { cursor: pointer; }
+
+/* Garde : réactions des parents (façon iMessage) et doublons */
+.pill-groupe { position: relative; display: inline-flex; align-items: center; gap: 2px; }
+.reaction {
+  font: inherit; font-size: .85rem; line-height: 1; min-width: 34px; min-height: 30px; padding: 4px 6px;
+  background: var(--card); border: 2px dashed var(--card-border); border-radius: 999px; cursor: pointer; color: var(--ink-soft);
+}
+.reaction.mise { border-style: solid; border-color: var(--garde); font-size: 1rem; color: var(--ink); }
+.reaction:disabled { cursor: default; border-style: solid; }
+.palette-reactions {
+  position: absolute; z-index: 20; bottom: calc(100% + 6px); left: 0; display: flex; gap: 2px; padding: 4px 6px;
+  background: var(--card); border: 2px solid var(--card-border); border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  animation: palette-entree .15s ease-out;
+}
+.palette-reactions button { font-size: 1.45rem; background: none; border: 0; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; padding: 0; }
+.palette-reactions button.choisi { background: var(--chip); }
+@keyframes palette-entree { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pill.doublon { border-color: var(--late); }
+.g-reactions {
+  display: block; width: 100%; margin: 0 0 10px; padding: 10px 12px; font: inherit; font-weight: 600; text-align: left; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--garde); border-radius: 14px; cursor: pointer;
+}
+.g-reactions[hidden] { display: none; }

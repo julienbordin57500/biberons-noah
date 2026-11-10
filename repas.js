@@ -1,7 +1,7 @@
 // Page Repas : biberons et allaitements (table « biberons »)
 (() => {
   const TABLE = "biberons";
-  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil,gardien";
+  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil,gardien,garde_id";
   const REPRISE_MAX_MS = 3 * 60 * 60 * 1000; // au-delà, on ne propose plus de relancer le dodo
   // De 10 à 300 ml, de 10 en 10 (la roue de l'iPhone s'ouvre en touchant « Combien ? »)
   const QUANTITES = Array.from({ length: 30 }, (_, i) => (i + 1) * 10);
@@ -140,9 +140,10 @@
     }
   }
 
-  async function supprimer(id) {
+  // Une note venue de la garde s'efface à la source (et donc aussi chez les grands-parents)
+  async function supprimer(id, gardeId) {
     try {
-      await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
+      await api(gardeId ? "garde_evenements" : TABLE, `?id=eq.${gardeId || id}`, { method: "DELETE" });
       toast("Repas supprimé");
       await charger();
     } catch (e) {
@@ -204,7 +205,7 @@
       <span class="h-time">${fmtHeure(r.pris_le)}</span>
       <span class="h-info"><span class="h-type">${m.nom}</span>${det ? `<span class="h-det">${det}</span>` : ""}${parGardien(r)}</span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(r.pris_le).getTime())}</span>`;
-    li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id)));
+    li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id, r.garde_id)));
     rendreModifiable(li, () => modifier(r));
     return li;
   }

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="style.css?v=38">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -660,6 +660,7 @@
             <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
           </div>
           <p class="garde-by" id="g-by"></p>
+          <button type="button" class="g-reactions" id="g-reactions" hidden aria-live="polite"></button>
           <ul class="notes" id="g-notes"></ul>
           <div id="g-my-note" hidden>
             <label class="field wide note-field">
@@ -808,6 +809,17 @@
     </form>
   </dialog>
 
+  <dialog class="sheet" id="g-doublon" aria-labelledby="g-doublon-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="g-doublon-titre">⚠️ Déjà noté ?</p>
+      <p id="g-doublon-texte"></p>
+      <div class="sheet-actions">
+        <button type="submit" value="non" class="g-btn">Non, c'était en trop</button>
+        <button type="submit" value="oui" class="link" id="g-doublon-oui">Oui, en ajouter un autre</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
     <form method="dialog" id="edit-form" novalidate>
       <p class="sheet-title" id="edit-title">Modifier</p>
@@ -821,22 +833,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=37"></script>
+  <script src="scene.js?v=38"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=37"></script>
-  <script src="auth.js?v=37"></script>
-  <script src="repas.js?v=37"></script>
-  <script src="couches.js?v=37"></script>
-  <script src="sommeil.js?v=37"></script>
-  <script src="sante.js?v=37"></script>
-  <script src="medicaments.js?v=37"></script>
-  <script src="resume.js?v=37"></script>
-  <script src="sons.js?v=37"></script>
-  <script src="garde.js?v=37"></script>
-  <script src="graphiques.js?v=37"></script>
-  <script src="fetes.js?v=37"></script>
-  <script src="notifs.js?v=37"></script>
-  <script src="tuto.js?v=37"></script>
-  <script src="pages.js?v=37"></script>
+  <script src="commun.js?v=38"></script>
+  <script src="auth.js?v=38"></script>
+  <script src="repas.js?v=38"></script>
+  <script src="couches.js?v=38"></script>
+  <script src="sommeil.js?v=38"></script>
+  <script src="sante.js?v=38"></script>
+  <script src="medicaments.js?v=38"></script>
+  <script src="resume.js?v=38"></script>
+  <script src="sons.js?v=38"></script>
+  <script src="garde.js?v=38"></script>
+  <script src="graphiques.js?v=38"></script>
+  <script src="fetes.js?v=38"></script>
+  <script src="notifs.js?v=38"></script>
+  <script src="tuto.js?v=38"></script>
+  <script src="pages.js?v=38"></script>
 </body>
 </html>

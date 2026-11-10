@@ -46,6 +46,7 @@
       notes = n;
       evenements = ev;
       dodoEnCours = enCours[0] || null;
+      annoncerReactions();
       if (!noteModifiee) $("g-note").value = (moi && notes.find((x) => x.gardien === moi.nom)?.note) || "";
     } catch (e) {
       afficherErreur("Impossible de charger l'espace garde. Vérifie la connexion internet.");
@@ -126,7 +127,15 @@
     btn.classList.toggle("on", !!dodoEnCours);
   }
 
-  // Pastilles : on ne peut effacer que les siennes (un appui « Effacer ? », un second efface)
+  // Deux notes identiques à moins de 10 minutes d'écart : sans doute un appui en trop
+  const memeContenu = (a, b) =>
+    a.type === b.type && a.gardien === b.gardien && (a.ml ?? null) === (b.ml ?? null) && (a.lait ?? null) === (b.lait ?? null) &&
+    !!a.pipi === !!b.pipi && !!a.caca === !!b.caca;
+  const estDoublon = (e, liste) =>
+    e.type !== "sommeil" && liste.some((x) => x.id < e.id && memeContenu(x, e) && Math.abs(new Date(e.quand) - new Date(x.quand)) < 10 * 60000);
+
+  // Pastilles : la famille efface les siennes, les parents peuvent tout effacer (un appui « Effacer ? », un second efface).
+  // Les parents peuvent aussi réagir avec un émoji, que les grands-parents voient.
   function remplir(id, liste, texte, vide) {
     const el = $(id);
     if (!liste.length) {
@@ -135,14 +144,19 @@
     }
     el.replaceChildren(
       ...liste.map((e) => {
+        const groupe = document.createElement("span");
+        groupe.className = "pill-groupe";
         const b = document.createElement("button");
         b.type = "button";
-        const mienne = moi && e.gardien === moi.nom;
-        b.className = "pill" + (e.type === "sommeil" && !e.fin ? " live" : "") + (mienne ? "" : " readonly");
-        b.textContent = texte(e);
-        if (!mienne) {
+        const effacable = (moi && e.gardien === moi.nom) || tel?.parent;
+        const doublon = estDoublon(e, liste);
+        const etiquette = () => texte(e) + (doublon ? " · ⚠️ doublon ?" : "");
+        b.className = "pill" + (e.type === "sommeil" && !e.fin ? " live" : "") + (effacable ? "" : " readonly") + (doublon ? " doublon" : "");
+        b.textContent = etiquette();
+        groupe.append(b, boutonReaction(e));
+        if (!effacable) {
           b.disabled = true;
-          return b;
+          return groupe;
         }
         b.addEventListener("click", () => {
           if (b.classList.contains("confirm")) return supprimer(e.id);
@@ -151,13 +165,112 @@
           setTimeout(() => {
             if (!b.isConnected) return;
             b.classList.remove("confirm");
-            b.textContent = texte(e);
+            b.textContent = etiquette();
           }, 3000);
         });
-        return b;
+        return groupe;
       })
     );
   }
+
+  // ---------- Réactions ----------
+  const REACTIONS = ["❤️", "😊", "👍", "😂", "😮", "😕"];
+  // Parents : petit bouton « 🙂+ » (ou la réaction déjà mise) qui ouvre la palette.
+  // Famille : la réaction des parents s'affiche simplement à côté de la note.
+  function boutonReaction(e) {
+    const r = document.createElement("button");
+    r.type = "button";
+    r.className = "reaction" + (e.reaction ? " mise" : "");
+    if (!tel?.parent) {
+      if (!e.reaction) return document.createTextNode("");
+      r.disabled = true;
+      r.textContent = e.reaction;
+      r.title = `${e.reaction_par || "Les parents"} a réagi`;
+      return r;
+    }
+    r.textContent = e.reaction || "🙂+";
+    r.setAttribute("aria-label", e.reaction ? `Changer la réaction ${e.reaction}` : "Réagir avec un émoji");
+    r.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      ouvrirPalette(r, e);
+    });
+    return r;
+  }
+
+  function fermerPalette() {
+    document.querySelector(".palette-reactions")?.remove();
+  }
+  function ouvrirPalette(ancre, e) {
+    const dejaOuverte = document.querySelector(".palette-reactions")?.dataset.id === String(e.id);
+    fermerPalette();
+    if (dejaOuverte) return;
+    const pal = document.createElement("div");
+    pal.className = "palette-reactions";
+    pal.dataset.id = e.id;
+    pal.setAttribute("role", "menu");
+    [...REACTIONS, ...(e.reaction ? ["✕"] : [])].forEach((emo) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = emo;
+      b.setAttribute("aria-label", emo === "✕" ? "Retirer la réaction" : `Réagir ${emo}`);
+      if (emo === e.reaction) b.classList.add("choisi");
+      b.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        fermerPalette();
+        reagir(e, emo === "✕" || emo === e.reaction ? null : emo);
+      });
+      pal.append(b);
+    });
+    ancre.parentElement.append(pal);
+    // Ne pas dépasser du bord droit de l'écran
+    const deborde = pal.getBoundingClientRect().right - (window.innerWidth - 8);
+    if (deborde > 0) pal.style.left = `${-deborde}px`;
+  }
+  document.addEventListener("click", (ev) => {
+    if (!ev.target.closest?.(".palette-reactions")) fermerPalette();
+  });
+
+  async function reagir(e, emo) {
+    const avant = { reaction: e.reaction, reaction_par: e.reaction_par, reaction_le: e.reaction_le };
+    Object.assign(e, { reaction: emo, reaction_par: emo ? tel.nom : null, reaction_le: emo ? new Date().toISOString() : null });
+    rendre(); // tout de suite à l'écran
+    try {
+      await api("garde_evenements", `?id=eq.${e.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ reaction: e.reaction, reaction_par: e.reaction_par, reaction_le: e.reaction_le }),
+      });
+      if (emo) toast(`${emo} envoyé à ${e.gardien || "la famille"}`);
+    } catch (err) {
+      Object.assign(e, avant);
+      rendre();
+      afficherErreur("La réaction n'a pas pu être envoyée. Réessaie.");
+    }
+  }
+
+  // Famille : prévenue des nouvelles réactions des parents sur ses notes (une fois chacune)
+  async function annoncerReactions() {
+    if (!moi) return;
+    const cle = `reactions-vues-${moi.nom}`;
+    const vu = lire(cle, 0, Number.isFinite);
+    try {
+      const depuis = new Date(Math.max(vu, Date.now() - 3 * DAY_MS)).toISOString();
+      const liste = await api(
+        "garde_evenements",
+        `?select=type,quand,ml,reaction,reaction_par,reaction_le&gardien=eq.${encodeURIComponent(moi.nom)}&reaction_le=gt.${encodeURIComponent(depuis)}&order=reaction_le.desc`
+      );
+      if (!liste.length) return;
+      ecrire(cle, Date.now());
+      if (!vu) return; // première fois sur ce téléphone : on ne ressort pas l'historique
+      const quoi = { repas: "ton biberon", couche: "ta couche", sommeil: "ton dodo" };
+      const x = liste[0];
+      const autres = liste.length > 1 ? ` (et ${liste.length - 1} autre${liste.length > 2 ? "s" : ""})` : "";
+      $("g-reactions").textContent = `${x.reaction} ${x.reaction_par || "Les parents"} a réagi à ${quoi[x.type] || "ta note"} de ${fmtHeure(x.quand)}${autres}`;
+      $("g-reactions").hidden = false;
+    } catch (e) {
+      /* pas grave : on réessaiera au prochain chargement */
+    }
+  }
+  $("g-reactions").addEventListener("click", () => ($("g-reactions").hidden = true));
 
   // ---------- Actions ----------
   async function enregistrerNote() {
@@ -186,8 +299,30 @@
     }
   }
 
+  // Petite fenêtre « Tu viens déjà de noter… » : Ajouter quand même / Annuler
+  function demander(message, oui) {
+    return new Promise((ok) => {
+      const d = $("g-doublon");
+      $("g-doublon-texte").textContent = message;
+      $("g-doublon-oui").textContent = oui;
+      d.onclose = () => ok(d.returnValue === "oui");
+      d.returnValue = "";
+      d.showModal();
+    });
+  }
+
   async function ajouter(ligne, msg) {
     if (!moi) return;
+    const nouvelle = { type: ligne.type, gardien: moi.nom, ...ligne };
+    const recente = !ligne.quand && evenements.filter((x) => memeContenu(x, nouvelle) && Date.now() - new Date(x.created_at || x.quand) < 5 * 60000).pop();
+    if (recente) {
+      const quoi = ligne.type === "repas" ? `ce biberon${ligne.ml ? ` de ${ligne.ml} ml` : ""}` : "cette couche";
+      const ilYa = fmtIlYa(Date.now() - new Date(recente.created_at || recente.quand));
+      if (!(await demander(`Tu as déjà noté ${quoi} ${ilYa}. C'est bien un deuxième ?`, "Oui, en ajouter un autre"))) {
+        toast("Pas ajouté 👍");
+        return;
+      }
+    }
     try {
       await api("garde_evenements", "", {
         method: "POST",

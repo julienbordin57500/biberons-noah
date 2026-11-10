@@ -1,7 +1,7 @@
 // Page Couches : quand la couche a été changée, pipi, caca et taille du caca
 (() => {
   const TABLE = "couches";
-  const COLONNES = "id,change_le,pipi,caca,caca_taille,caca_couleur,gardien";
+  const COLONNES = "id,change_le,pipi,caca,caca_taille,caca_couleur,gardien,garde_id";
   const TAILLES = ["petit", "moyen", "gros"];
   // Couleurs de la carte des selles du carnet de santé (« alerte » : à montrer au pédiatre)
   const COULEURS = [
@@ -93,9 +93,10 @@
     }
   }
 
-  async function supprimer(id) {
+  // Une note venue de la garde s'efface à la source (et donc aussi chez les grands-parents)
+  async function supprimer(id, gardeId) {
     try {
-      await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
+      await api(gardeId ? "garde_evenements" : TABLE, `?id=eq.${gardeId || id}`, { method: "DELETE" });
       toast("Couche supprimée");
       await charger();
     } catch (e) {
@@ -153,7 +154,7 @@
       <span class="h-time">${fmtHeure(c.change_le)}</span>
       <span class="h-info"><span class="h-type">${pastille(c)}${contenu(c)}</span>${parGardien(c)}</span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(c.change_le).getTime())}</span>`;
-    li.append(boutonSupprimer(`Supprimer la couche de ${fmtHeure(c.change_le)}`, () => supprimer(c.id)));
+    li.append(boutonSupprimer(`Supprimer la couche de ${fmtHeure(c.change_le)}`, () => supprimer(c.id, c.garde_id)));
     rendreModifiable(li, () => modifier(c));
     return li;
   }
