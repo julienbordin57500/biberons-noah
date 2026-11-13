@@ -479,9 +479,11 @@ body[data-page="4"] .tab[aria-selected="true"] { background: var(--garde); color
 #t-caca[aria-pressed="true"] { background: #a0703f; border-color: #a0703f; }
 .sizes .chip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; }
 .sizes .chip::before { content: "💩"; line-height: 1; }
-.sizes .chip:nth-child(1)::before { font-size: .9rem; }
-.sizes .chip:nth-child(2)::before { font-size: 1.3rem; }
-.sizes .chip:nth-child(3)::before { font-size: 1.8rem; }
+.sizes .chip:nth-child(1)::before { content: "💨"; font-size: 1.1rem; }
+.sizes .chip:nth-child(2)::before { font-size: .9rem; }
+.sizes .chip:nth-child(3)::before { font-size: 1.3rem; }
+.sizes .chip:nth-child(4)::before { font-size: 1.8rem; }
+.sizes .chip { min-width: 0; font-size: .85rem; text-align: center; line-height: 1.15; }
 .add-btn.couche { background: var(--couche); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--couche) 60%, #000); }
 
 /* ---------- Sommeil ---------- */

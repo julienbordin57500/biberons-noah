@@ -1,8 +1,20 @@
 // Page Couches : quand la couche a été changée, pipi, caca et taille du caca
 (() => {
   const TABLE = "couches";
-  const COLONNES = "id,change_le,pipi,caca,caca_taille,caca_couleur,gardien,garde_id";
-  const TAILLES = ["petit", "moyen", "gros"];
+  const COLONNES = "id,change_le,pipi,caca,caca_taille,caca_couleur,caca_texture,gardien,garde_id";
+  const TAILLES = ["trace", "petit", "moyen", "gros"];
+  // « trace » : juste une trace dans la couche (le petit raté qu'on ne compte pas vraiment comme un caca)
+  const nomTaille = (t) => (t === "trace" ? "Juste une trace" : t[0].toUpperCase() + t.slice(1));
+  const motTaille = (t) => (t === "trace" ? "juste une trace" : t);
+  // Consistance (facultative) : de la plus liquide à la plus dure
+  const TEXTURES = [
+    { v: "liquide", nom: "Liquide" },
+    { v: "molle", nom: "Molle" },
+    { v: "normale", nom: "Normale" },
+    { v: "moulee", nom: "Moulée" },
+    { v: "dure", nom: "Dure" },
+  ];
+  const texture = (v) => TEXTURES.find((t) => t.v === v);
   // Couleurs de la carte des selles du carnet de santé (« alerte » : à montrer au pédiatre)
   const COULEURS = [
     { v: "jaune", nom: "Jaune", hex: "#e2b51f" },
@@ -22,7 +34,7 @@
   let dernierCaca = null;
 
   // Choix pour la prochaine couche (remis à zéro après chaque ajout)
-  const choix = { pipi: true, caca: false, taille: "moyen", couleur: null };
+  const choix = { pipi: true, caca: false, taille: "moyen", couleur: null, texture: null };
 
   async function charger() {
     if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
@@ -50,6 +62,7 @@
         caca: choix.caca,
         caca_taille: choix.caca ? choix.taille : null,
         caca_couleur: choix.caca ? choix.couleur : null,
+        caca_texture: choix.caca ? choix.texture : null,
       };
       await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
       animerBouton(btn);
@@ -59,6 +72,7 @@
       choix.caca = false;
       choix.taille = "moyen";
       choix.couleur = null;
+      choix.texture = null;
       rendreChoix();
       await charger();
     } catch (e) {
@@ -73,7 +87,8 @@
       { cle: "heure", label: "Heure", type: "time", valeur: hhmm(c.change_le) },
       { cle: "pipi", label: "💧 Pipi", type: "check", valeur: c.pipi },
       { cle: "caca", label: "💩 Caca", type: "check", valeur: c.caca },
-      { cle: "caca_taille", label: "Taille du caca", type: "select", valeur: c.caca_taille, options: [[null, "—"], ...TAILLES.map((t) => [t, t[0].toUpperCase() + t.slice(1)])] },
+      { cle: "caca_taille", label: "Taille du caca", type: "select", valeur: c.caca_taille, options: [[null, "—"], ...TAILLES.map((t) => [t, nomTaille(t)])] },
+      { cle: "caca_texture", label: "Consistance", type: "select", valeur: c.caca_texture, options: [[null, "Non précisée"], ...TEXTURES.map((x) => [x.v, x.nom])] },
       { cle: "caca_couleur", label: "Couleur du caca", type: "select", valeur: c.caca_couleur, options: [[null, "Non précisée"], ...COULEURS.map((x) => [x.v, x.nom])] },
     ]);
     if (!v) return;
@@ -83,6 +98,7 @@
       caca: v.caca,
       caca_taille: v.caca ? v.caca_taille || "moyen" : null,
       caca_couleur: v.caca ? v.caca_couleur : null,
+      caca_texture: v.caca ? v.caca_texture : null,
     };
     try {
       await api(TABLE, `?id=eq.${c.id}`, { method: "PATCH", body: JSON.stringify(maj) });
@@ -104,11 +120,16 @@
     }
   }
 
+  // « · molle · jaune » : consistance et couleur, si elles ont été choisies
+  const details = (c) =>
+    (texture(c.caca_texture) ? ` · ${texture(c.caca_texture).nom.toLowerCase()}` : "") +
+    (couleur(c.caca_couleur) ? ` · ${couleur(c.caca_couleur).nom.toLowerCase()}` : "");
+
   // « Pipi + caca moyen », « Caca gros », « Pipi », « Couche propre »
   function contenu(c) {
     const morceaux = [];
     if (c.pipi) morceaux.push("pipi");
-    if (c.caca) morceaux.push("caca" + (c.caca_taille ? ` ${c.caca_taille}` : "") + (couleur(c.caca_couleur) ? ` · ${couleur(c.caca_couleur).nom.toLowerCase()}` : ""));
+    if (c.caca) morceaux.push((c.caca_taille === "trace" ? "trace de caca" : "caca" + (c.caca_taille ? ` ${c.caca_taille}` : "")) + details(c));
     if (!morceaux.length) return "Couche propre";
     const txt = morceaux.join(" + ");
     return txt[0].toUpperCase() + txt.slice(1);
@@ -133,8 +154,8 @@
       : "Pas encore de couche enregistrée";
     $("caca-info").textContent = dernierCaca
       ? `à ${fmtHeure(dernierCaca.change_le)}${jourSiPasAujourdhui(dernierCaca.change_le)}` +
-        (dernierCaca.caca_taille ? ` · ${dernierCaca.caca_taille}` : "") +
-        (couleur(dernierCaca.caca_couleur) ? ` · ${couleur(dernierCaca.caca_couleur).nom.toLowerCase()}` : "")
+        (dernierCaca.caca_taille ? ` · ${motTaille(dernierCaca.caca_taille)}` : "") +
+        details(dernierCaca)
       : "Pas encore de caca enregistré";
     tick();
 
@@ -183,6 +204,25 @@
     $("couleur-conseil").hidden = !c?.alerte;
   }
 
+  // Pastilles de consistance (facultatif : un second appui sur la même l'enlève)
+  function rendreTextures() {
+    $("chips-texture").replaceChildren(
+      ...TEXTURES.map((x) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip";
+        b.setAttribute("role", "radio");
+        b.setAttribute("aria-checked", String(choix.texture === x.v));
+        b.textContent = x.nom;
+        b.addEventListener("click", () => {
+          choix.texture = choix.texture === x.v ? null : x.v;
+          rendreTextures();
+        });
+        return b;
+      })
+    );
+  }
+
   function remplirStat(prefix, liste) {
     const pipis = liste.filter((c) => c.pipi).length;
     const cacas = liste.filter((c) => c.caca).length;
@@ -200,6 +240,7 @@
     $("couche-btn-label").textContent = choix.pipi || choix.caca ? "Couche changée" : "Couche propre changée";
     rendreTailles && rendreTailles();
     rendreCouleurs();
+    rendreTextures();
     contenuChange();
   }
 
@@ -216,7 +257,7 @@
     TAILLES,
     () => choix.taille,
     (v) => (choix.taille = v),
-    (v) => v[0].toUpperCase() + v.slice(1),
+    nomTaille,
     false
   );
   $("couche-btn").addEventListener("click", ajouter);

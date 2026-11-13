@@ -366,7 +366,7 @@
       couchesJour: couches.length / n,
       pipisJour: couches.filter((c) => c.pipi).length / n,
       cacasJour: couches.filter((c) => c.caca).length / n,
-      tailles: ["petit", "moyen", "gros"].map((t) => couches.filter((c) => c.caca_taille === t).length),
+      tailles: ["trace", "petit", "moyen", "gros"].map((t) => couches.filter((c) => c.caca_taille === t).length),
       dodoJour: msDodo / n,
       plusLongue,
     };
@@ -422,7 +422,7 @@
     L.push("👶 COUCHES");
     L.push(`• ${v1(s.couchesJour)} couches par jour${evol(s.couchesJour, a?.couchesJour)}`);
     L.push(`• ${pl(s.pipisJour, "pipi")} et ${pl(s.cacasJour, "caca")} par jour`);
-    const tailles = ["petit", "moyen", "gros"].map((t, i) => s.tailles[i] && `${s.tailles[i]} ${t}${s.tailles[i] > 1 && t !== "gros" ? "s" : ""}`).filter(Boolean);
+    const tailles = ["trace", "petit", "moyen", "gros"].map((t, i) => s.tailles[i] && `${s.tailles[i]} ${t}${s.tailles[i] > 1 && t !== "gros" ? "s" : ""}`).filter(Boolean);
     if (tailles.length) L.push(`• taille des cacas : ${tailles.join(", ")}`);
     L.push("");
     L.push("😴 SOMMEIL");
