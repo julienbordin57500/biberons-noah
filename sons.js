@@ -1,21 +1,21 @@
 // 🎵 Sons pour s'endormir : de vrais enregistrements libres de droits (Wikimedia Commons),
-// rangés dans le dossier sons/ (fichiers légers, 0,1 à 1,9 Mo). Un son n'est téléchargé que la
+// rangés dans le dossier sons/ (1 à 5 Mo chacun). Un son n'est téléchargé que la
 // première fois qu'on l'écoute, puis il reste sur le téléphone (marche ensuite sans réseau).
 // On passe par un lecteur audio classique : le son continue écran verrouillé et même en mode silencieux.
 (() => {
   const VOLUME = 0.7; // sur iPhone, le volume se règle seulement avec les boutons du téléphone
-  const V_SONS = 1; // à augmenter si on remplace un fichier du dossier sons/
+  const V_SONS = 2; // à augmenter si on remplace un fichier du dossier sons/
 
   // Ambiances = boucles sans couture ; berceuses = 2 à 4 min, rejouées tant que la minuterie court
   const SONS = [
-    { id: "souffle", emoji: "🌬️", nom: "Souffle doux", sous: "bruit blanc tout doux", fichier: "souffle" },
-    { id: "grave", emoji: "🌀", nom: "Bruit doux grave", sous: "bruit blanc profond, très enveloppant", fichier: "bruit-grave" },
-    { id: "vagues", emoji: "🌊", nom: "Vagues", sous: "la mer, lentement", fichier: "vagues" },
-    { id: "pluie", emoji: "🌧️", nom: "Pluie douce", sous: "sur la fenêtre", fichier: "pluie" },
-    { id: "brahms", emoji: "🌙", nom: "Berceuse de Brahms", sous: "boîte à musique · 2 min 20", fichier: "brahms-boite" },
-    { id: "prince", emoji: "👑", nom: "Dors, mon petit prince", sous: "boîte à musique · 2 min 50", fichier: "prince-boite" },
-    { id: "faure", emoji: "🧸", nom: "Berceuse de Fauré", sous: "« Dolly » · piano · 3 min", fichier: "faure-dolly" },
-    { id: "brahms2", emoji: "🎹", nom: "Brahms, autre version", sous: "instruments · 1 min 45", fichier: "brahms-douce" },
+    { id: "souffle", emoji: "🌬️", nom: "Bruit blanc doux", sous: "souffle régulier, comme un ventilateur", fichier: "souffle" },
+    { id: "grave", emoji: "🌀", nom: "Bruit grave", sous: "profond et enveloppant", fichier: "bruit-grave" },
+    { id: "pluie", emoji: "🌧️", nom: "Pluie douce", sous: "sur les feuilles", fichier: "pluie" },
+    { id: "vagues", emoji: "🌊", nom: "Vagues", sous: "plage, mer calme", fichier: "vagues" },
+    { id: "harpes", emoji: "🪽", nom: "Canon de Pachelbel", sous: "deux harpes · 5 min 30", fichier: "canon-harpes" },
+    { id: "nenuphar", emoji: "🪷", nom: "Nénuphar", sous: "piano et violoncelles · 2 min", fichier: "nenuphar-piano" },
+    { id: "bach", emoji: "🎹", nom: "Prélude de Bach", sous: "piano doux · 3 min", fichier: "bach-prelude" },
+    { id: "lamantins", emoji: "🌙", nom: "Musique pour dormir", sous: "piano et nappes · 10 min", fichier: "lamantins" },
   ];
   const RAPIDES = [15, 30, 60];
   const MIN_DUREE = 5;

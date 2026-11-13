@@ -47,6 +47,7 @@
       evenements = ev;
       dodoEnCours = enCours[0] || null;
       annoncerReactions();
+      marquerVu();
       if (!noteModifiee) $("g-note").value = (moi && notes.find((x) => x.gardien === moi.nom)?.note) || "";
     } catch (e) {
       afficherErreur("Impossible de charger l'espace garde. Vérifie la connexion internet.");
@@ -118,6 +119,7 @@
     $("g-sleep-sum").textContent = dodos.length ? fmtMinutes(total) : "0";
     remplir("g-sleep-list", dodos, (e) => `${fmtHeure(e.quand)} → ${e.fin ? fmtHeure(e.fin) : "en cours"}${signe(e)}`, "Pas encore de dodo");
     majBoutonDodo();
+    rendreVu();
     contenuChange();
   }
 
@@ -247,6 +249,40 @@
     }
   }
 
+  // ---------- « Vu par les parents » ----------
+  // Un parent qui regarde la page Garde marque tout seul les notes de la famille comme vues
+  const gardeAffichee = () => lire("page-id", null, (v) => typeof v === "string") === "page-garde" && document.visibilityState === "visible";
+  async function marquerVu() {
+    if (!tel?.parent || !gardeAffichee() || !evenements.some((e) => !e.vu_le)) return;
+    const maintenant = new Date().toISOString();
+    try {
+      await api("garde_evenements", `?vu_le=is.null&created_at=lte.${encodeURIComponent(maintenant)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ vu_le: maintenant, vu_par: tel.nom }),
+      });
+      evenements.forEach((e) => !e.vu_le && Object.assign(e, { vu_le: maintenant, vu_par: tel.nom }));
+    } catch (e) {
+      /* pas grave : ce sera marqué la prochaine fois */
+    }
+  }
+  window.addEventListener("page-vue", (e) => e.detail === "page-garde" && marquerVu());
+  document.addEventListener("visibilitychange", () => marquerVu());
+
+  // Famille : « 👀 Vu par Maman à 14:12 » pour ses notes du jour
+  function rendreVu() {
+    const el = $("g-vu");
+    const miennes = moi ? evenements.filter((e) => e.gardien === moi.nom) : [];
+    if (!miennes.length) return (el.hidden = true);
+    const vues = miennes.filter((e) => e.vu_le).sort((a, b) => new Date(a.vu_le) - new Date(b.vu_le));
+    const pasVues = miennes.length - vues.length;
+    const der = vues[vues.length - 1];
+    el.textContent = !der
+      ? "🕓 Les parents n'ont pas encore vu tes notes"
+      : `👀 Vu par ${der.vu_par || "les parents"} à ${fmtHeure(der.vu_le)}` +
+        (pasVues ? ` · ${pasVues} nouvelle${pasVues > 1 ? "s" : ""} pas encore vue${pasVues > 1 ? "s" : ""}` : " · tout est vu ✓");
+    el.hidden = false;
+  }
+
   // Famille : prévenue des nouvelles réactions des parents sur ses notes (une fois chacune)
   async function annoncerReactions() {
     if (!moi) return;
@@ -299,18 +335,6 @@
     }
   }
 
-  // Petite fenêtre « Tu viens déjà de noter… » : Ajouter quand même / Annuler
-  function demander(message, oui) {
-    return new Promise((ok) => {
-      const d = $("g-doublon");
-      $("g-doublon-texte").textContent = message;
-      $("g-doublon-oui").textContent = oui;
-      d.onclose = () => ok(d.returnValue === "oui");
-      d.returnValue = "";
-      d.showModal();
-    });
-  }
-
   async function ajouter(ligne, msg) {
     if (!moi) return;
     const nouvelle = { type: ligne.type, gardien: moi.nom, ...ligne };
@@ -318,7 +342,7 @@
     if (recente) {
       const quoi = ligne.type === "repas" ? `ce biberon${ligne.ml ? ` de ${ligne.ml} ml` : ""}` : "cette couche";
       const ilYa = fmtIlYa(Date.now() - new Date(recente.created_at || recente.quand));
-      if (!(await demander(`Tu as déjà noté ${quoi} ${ilYa}. C'est bien un deuxième ?`, "Oui, en ajouter un autre"))) {
+      if (!(await demanderDoublon(`Tu as déjà noté ${quoi} ${ilYa}. C'est bien un deuxième ?`))) {
         toast("Pas ajouté 👍");
         return;
       }

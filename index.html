@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=39">
+  <link rel="stylesheet" href="style.css?v=40">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -662,6 +662,7 @@
             <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
           </div>
           <p class="garde-by" id="g-by"></p>
+          <p class="g-vu" id="g-vu" hidden></p>
           <button type="button" class="g-reactions" id="g-reactions" hidden aria-live="polite"></button>
           <ul class="notes" id="g-notes"></ul>
           <div id="g-my-note" hidden>
@@ -800,9 +801,11 @@
       <p class="hint small">Le son continue écran verrouillé. Le volume se règle avec les boutons du téléphone : garde-le doux et le téléphone loin du lit 🙂</p>
       <details class="sons-credits hint small">
         <summary>Crédits des sons</summary>
-        Enregistrements de Wikimedia Commons, adoucis pour bébé. Domaine public : boîtes à musique (stephan, pdsounds.org),
-        Brahms et Fauré (Pracchia-78), pluie (cori), souffle (Jorge Stolfi), bruit grave (JPxG, CC0).
-        Vagues : « Ocean waves crushing » par Luftrum, CC BY 3.0.
+        Musiques de Kevin MacLeod (incompetech.com), sous licence Creative Commons : By Attribution 4.0 :
+        « Canon in D for Two Harps », « Water Lily », « Prelude in C (BWV 846) », « Music for Manatees ».
+        Ambiances de Wikimedia Commons : pluie « Rain on leaves » par Gravity Sound (CC BY 4.0),
+        vagues « Ocean Waves on a Tropical Beach » par Jarrod Stanley (CC0), bruit grave par JPxG (CC0),
+        bruit blanc doux (domaine public).
       </details>
       <div class="sheet-actions">
         <button type="submit" value="ok" class="g-btn alt">Fermer</button>
@@ -817,7 +820,7 @@
       <p id="g-doublon-texte"></p>
       <div class="sheet-actions">
         <button type="submit" value="non" class="g-btn">Non, c'était en trop</button>
-        <button type="submit" value="oui" class="link" id="g-doublon-oui">Oui, en ajouter un autre</button>
+        <button type="submit" value="oui" class="link" id="g-doublon-oui">Oui, c'est bien un autre</button>
       </div>
     </form>
   </dialog>
@@ -835,22 +838,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=39"></script>
+  <script src="scene.js?v=40"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=39"></script>
-  <script src="auth.js?v=39"></script>
-  <script src="repas.js?v=39"></script>
-  <script src="couches.js?v=39"></script>
-  <script src="sommeil.js?v=39"></script>
-  <script src="sante.js?v=39"></script>
-  <script src="medicaments.js?v=39"></script>
-  <script src="resume.js?v=39"></script>
-  <script src="sons.js?v=39"></script>
-  <script src="garde.js?v=39"></script>
-  <script src="graphiques.js?v=39"></script>
-  <script src="fetes.js?v=39"></script>
-  <script src="notifs.js?v=39"></script>
-  <script src="tuto.js?v=39"></script>
-  <script src="pages.js?v=39"></script>
+  <script src="commun.js?v=40"></script>
+  <script src="auth.js?v=40"></script>
+  <script src="repas.js?v=40"></script>
+  <script src="couches.js?v=40"></script>
+  <script src="sommeil.js?v=40"></script>
+  <script src="sante.js?v=40"></script>
+  <script src="medicaments.js?v=40"></script>
+  <script src="resume.js?v=40"></script>
+  <script src="sons.js?v=40"></script>
+  <script src="garde.js?v=40"></script>
+  <script src="graphiques.js?v=40"></script>
+  <script src="fetes.js?v=40"></script>
+  <script src="notifs.js?v=40"></script>
+  <script src="tuto.js?v=40"></script>
+  <script src="pages.js?v=40"></script>
 </body>
 </html>

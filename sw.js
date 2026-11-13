@@ -1,28 +1,28 @@
 // Garde l'appli sur le téléphone pour qu'elle s'ouvre même sans réseau.
 // Réseau d'abord (pour avoir les mises à jour), mémoire du téléphone si pas de réseau.
-const CACHE = "carnet-noah-v39";
+const CACHE = "carnet-noah-v40";
 // Mémoire des sons (dossier sons/) : changer le numéro seulement si on remplace un son
-const CACHE_SONS = "carnet-noah-sons-v1";
+const CACHE_SONS = "carnet-noah-sons-v2";
 const FICHIERS = [
   "./",
   "index.html",
-  "style.css?v=39",
-  "scene.js?v=39",
-  "commun.js?v=39",
-  "auth.js?v=39",
-  "repas.js?v=39",
-  "couches.js?v=39",
-  "sommeil.js?v=39",
-  "medicaments.js?v=39",
-  "sante.js?v=39",
-  "garde.js?v=39",
-  "resume.js?v=39",
-  "sons.js?v=39",
-  "tuto.js?v=39",
-  "graphiques.js?v=39",
-  "fetes.js?v=39",
-  "notifs.js?v=39",
-  "pages.js?v=39",
+  "style.css?v=40",
+  "scene.js?v=40",
+  "commun.js?v=40",
+  "auth.js?v=40",
+  "repas.js?v=40",
+  "couches.js?v=40",
+  "sommeil.js?v=40",
+  "medicaments.js?v=40",
+  "sante.js?v=40",
+  "garde.js?v=40",
+  "resume.js?v=40",
+  "sons.js?v=40",
+  "tuto.js?v=40",
+  "graphiques.js?v=40",
+  "fetes.js?v=40",
+  "notifs.js?v=40",
+  "pages.js?v=40",
   "icon.svg",
   "icon-180.png",
   "manifest.webmanifest",

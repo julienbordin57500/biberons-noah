@@ -1184,3 +1184,10 @@ dialog.sheet::backdrop { touch-action: none; }
   background: var(--chip); border: 2px solid var(--garde); border-radius: 14px; cursor: pointer;
 }
 .g-reactions[hidden] { display: none; }
+.g-vu { margin: -4px 0 10px; text-align: center; font-size: .9rem; font-weight: 600; color: var(--ink-soft); }
+.g-vu[hidden] { display: none; }
+.toast.avec-action { display: flex; align-items: center; gap: 12px; padding-right: 8px; }
+.toast-annuler {
+  font: inherit; font-size: .95rem; font-weight: 800; color: var(--ink); background: var(--card);
+  border: 0; border-radius: 999px; padding: 6px 14px; min-height: 36px; cursor: pointer;
+}

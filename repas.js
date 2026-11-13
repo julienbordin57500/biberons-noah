@@ -57,12 +57,18 @@
           : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
       const quand = heureChoisie("repas-heure");
       ligne.pris_le = quand.toISOString();
+      // Même biberon noté il y a moins de 5 minutes : sans doute un appui en trop
+      const pareil = !$("repas-heure").value && repas.find((r) => recemment(r.pris_le) && r.type === ligne.type && (r.quantite_ml ?? null) === (ligne.quantite_ml ?? null) && (r.cote ?? null) === (ligne.cote ?? null));
+      if (pareil && !(await demanderDoublon(`Tu as déjà noté ce ${ligne.type === "biberon" ? `biberon${ligne.quantite_ml ? ` de ${ligne.quantite_ml} ml` : ""}` : "repas"} ${fmtIlYa(Date.now() - new Date(pareil.pris_le))}. C'est bien un deuxième ?`))) {
+        toast("Pas ajouté 👍");
+        return;
+      }
       // La nuit, si Noah dormait, le repas met le dodo en pause
       const pause = estLaNuit(quand) && (await mettreDodoEnPause(quand));
       if (pause) ligne.reprise_sommeil = true;
-      await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
+      const id = await ajouterLigne(TABLE, ligne);
       animerBouton(btn);
-      toast(pause ? "🌙 Dodo en pause pendant le repas" : `${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
+      toast(pause ? "🌙 Dodo en pause pendant le repas" : `${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`, pause ? null : annulerAjout(TABLE, id));
       $("repas-heure").value = "";
       await (pause ? rechargerTout() : charger());
     } catch (e) {

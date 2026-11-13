@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "39";
+const VERSION_APPLI = "40";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -269,13 +269,58 @@ function afficherErreur(msg) {
 }
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, annuler) {
   const t = $("toast");
   t.textContent = msg;
+  // Petit bouton « Annuler » pendant 5 secondes (un appui en trop se corrige tout de suite)
+  if (annuler) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "toast-annuler";
+    b.textContent = "Annuler";
+    b.addEventListener("click", async () => {
+      t.hidden = true;
+      try {
+        await annuler();
+        toast("↩️ Annulé");
+      } catch (e) {
+        afficherErreur("Impossible d'annuler. Supprime-le dans la liste.");
+      }
+    });
+    t.append(" ", b);
+  }
+  t.classList.toggle("avec-action", !!annuler);
   t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.hidden = true), 2200);
+  toastTimer = setTimeout(() => (t.hidden = true), annuler ? 5000 : 2200);
 }
+
+// Ajoute une ligne et renvoie son id (null si elle part dans la file d'attente hors ligne)
+async function ajouterLigne(table, ligne) {
+  const r = await api(table, "", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(ligne) });
+  return Array.isArray(r) && r[0] ? r[0].id : null;
+}
+// Retire une ligne qu'on vient d'ajouter (bouton « Annuler ») puis recharge les pages
+const annulerAjout = (table, id) =>
+  id
+    ? async () => {
+        await api(table, `?id=eq.${id}`, { method: "DELETE" });
+        await rechargerTout();
+      }
+    : null;
+
+// « Tu viens déjà de noter… » : Non, c'était en trop / Oui, en ajouter un autre
+function demanderDoublon(message) {
+  return new Promise((ok) => {
+    const d = $("g-doublon");
+    $("g-doublon-texte").textContent = message;
+    d.onclose = () => ok(d.returnValue === "oui");
+    d.returnValue = "";
+    d.showModal();
+  });
+}
+// Même chose notée il y a moins de 5 minutes (et l'heure n'a pas été changée à la main)
+const recemment = (date) => Math.abs(Date.now() - new Date(date).getTime()) < 5 * 60000;
 
 function animerBouton(btn) {
   btn.classList.remove("pop");

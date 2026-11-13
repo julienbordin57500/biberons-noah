@@ -37,9 +37,9 @@
         await api(TABLE, `?id=eq.${enCours.id}`, { method: "PATCH", body: JSON.stringify({ fin: quand.toISOString() }) });
         toast(`☀️ Bon réveil ! Dodo de ${fmtMinutes(quand - new Date(enCours.debut))}`);
       } else {
-        await api(TABLE, "", { method: "POST", body: JSON.stringify({ debut: quand.toISOString() }) });
+        const id = await ajouterLigne(TABLE, { debut: quand.toISOString() });
         await api("biberons", "?reprise_sommeil=is.true", { method: "PATCH", body: JSON.stringify({ reprise_sommeil: false }) }).catch(() => {});
-        toast(estLaNuit(quand) ? "🌙 Bonne nuit Noah !" : "🌙 Bonne sieste Noah !");
+        toast(estLaNuit(quand) ? "🌙 Bonne nuit Noah !" : "🌙 Bonne sieste Noah !", annulerAjout(TABLE, id));
       }
       animerBouton(btn);
       $("sleep-heure").value = "";

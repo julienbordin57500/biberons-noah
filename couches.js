@@ -15,6 +15,8 @@
     { v: "dure", nom: "Dure" },
   ];
   const texture = (v) => TEXTURES.find((t) => t.v === v);
+  // Une simple trace reste dans la liste mais ne compte pas comme un caca (compteurs, « dernier caca »)
+  const vraiCaca = (c) => c.caca && c.caca_taille !== "trace";
   // Couleurs de la carte des selles du carnet de santé (« alerte » : à montrer au pédiatre)
   const COULEURS = [
     { v: "jaune", nom: "Jaune", hex: "#e2b51f" },
@@ -42,8 +44,8 @@
       couches = await api(TABLE, `?select=${COLONNES}&change_le=gte.${encodeURIComponent(ilYa24h())}&order=change_le.desc`);
       derniere = couches[0] || (await api(TABLE, `?select=${COLONNES}&order=change_le.desc&limit=1`))[0] || null;
       dernierCaca =
-        couches.find((c) => c.caca) ||
-        (await api(TABLE, `?select=${COLONNES}&caca=is.true&order=change_le.desc&limit=1`))[0] ||
+        couches.find(vraiCaca) ||
+        (await api(TABLE, `?select=${COLONNES}&caca=is.true&or=(caca_taille.is.null,caca_taille.neq.trace)&order=change_le.desc&limit=1`))[0] ||
         null;
       afficherErreur(null);
     } catch (e) {
@@ -64,9 +66,14 @@
         caca_couleur: choix.caca ? choix.couleur : null,
         caca_texture: choix.caca ? choix.texture : null,
       };
-      await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
+      const pareille = !$("couche-heure").value && couches.find((c) => recemment(c.change_le) && c.pipi === ligne.pipi && c.caca === ligne.caca);
+      if (pareille && !(await demanderDoublon(`Tu as déjà noté cette couche ${fmtIlYa(Date.now() - new Date(pareille.change_le))}. C'est bien une deuxième ?`))) {
+        toast("Pas ajouté 👍");
+        return;
+      }
+      const id = await ajouterLigne(TABLE, ligne);
       animerBouton(btn);
-      toast(`👶 Couche changée${choix.caca ? " 💩" : choix.pipi ? " 💧" : ""}`);
+      toast(`👶 Couche changée${choix.caca ? " 💩" : choix.pipi ? " 💧" : ""}`, annulerAjout(TABLE, id));
       $("couche-heure").value = "";
       choix.pipi = true;
       choix.caca = false;
@@ -225,7 +232,7 @@
 
   function remplirStat(prefix, liste) {
     const pipis = liste.filter((c) => c.pipi).length;
-    const cacas = liste.filter((c) => c.caca).length;
+    const cacas = liste.filter(vraiCaca).length;
     $(`couche-${prefix}-count`).textContent = liste.length;
     $(`couche-${prefix}-pipi`).textContent = `💧 ${pipis} pipi${pipis > 1 ? "s" : ""}`;
     $(`couche-${prefix}-caca`).textContent = `💩 ${cacas} caca${cacas > 1 ? "s" : ""}`;
