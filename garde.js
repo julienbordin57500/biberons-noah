@@ -49,7 +49,6 @@
       annoncerReactions();
       marquerVu();
       verifierDodoOublie();
-      if (!noteModifiee) $("g-note").value = (moi && notes.find((x) => x.gardien === moi.nom)?.note) || "";
     } catch (e) {
       afficherErreur("Impossible de charger l'espace garde. Vérifie la connexion internet.");
     }
@@ -59,7 +58,9 @@
   // ---------- Affichage ----------
   function rendre() {
     // Qui utilise ce téléphone
-    $("g-who-name").textContent = !tel ? "" : tel.parent ? `${tel.emoji} ${tel.nom} · mode parents (consultation)` : `${tel.emoji} ${tel.nom} · tu peux noter la journée`;
+    // (la famille n'a pas besoin de ce bandeau : ses gros boutons sont juste en dessous)
+    $("g-whoami").hidden = !!moi;
+    $("g-who-name").textContent = !tel ? "" : `${tel.emoji} ${tel.nom} · mode parents (consultation)`;
 
     // Jour
     const nom = jour.toLocaleDateString("fr-FR", { weekday: "long" });
@@ -73,33 +74,38 @@
       ? `Gardé par <strong>${gardiens.map((g) => esc(qui(g))).join(" et ")}</strong>`
       : "Personne n'a encore rien noté ce jour-là.";
 
-    // Notes de chacun (sauf la mienne, qui est dans le champ d'écriture)
-    const autres = notes.filter((x) => x.note && (!moi || x.gardien !== moi.nom));
-    $("g-notes").innerHTML = autres
-      .map(
-        (x) => `<li class="note-card">
-          <p class="note-head">${esc(qui(x.gardien))} <span>· ${fmtHeure(x.updated_at)}</span></p>
-          <p class="note-text">${esc(x.note)}</p>
-        </li>`
-      )
-      .join("");
-    $("g-my-note").hidden = !moi;
-    if (moi) {
-      $("g-my-note-label").textContent = `📝 Ma note du jour (${moi.nom})`;
-      const mienne = notes.find((x) => x.gardien === moi.nom);
-      if (!noteModifiee)
-        $("g-note-saved").textContent = mienne?.updated_at ? `✅ Enregistrée en ligne à ${fmtHeure(mienne.updated_at)} : tout le monde peut la lire.` : "";
-    }
+    // Mots du jour de chacun (le sien se touche pour le modifier)
+    $("g-notes").replaceChildren(
+      ...notes
+        .filter((x) => x.note)
+        .map((x) => {
+          const li = document.createElement("li");
+          li.className = "note-card";
+          li.innerHTML = `<p class="note-head">${esc(qui(x.gardien))} <span>· ${fmtHeure(x.updated_at)}</span></p>
+            <p class="note-text">${esc(x.note)}</p>`;
+          if (moi && x.gardien === moi.nom) {
+            li.classList.add("modifiable");
+            li.setAttribute("role", "button");
+            li.tabIndex = 0;
+            li.addEventListener("click", ecrireMot);
+          }
+          return li;
+        })
+    );
 
-    // Boutons d'ajout : seulement pour un téléphone qui a choisi qui il est
+    // Gros boutons : seulement pour la famille (Mamita, grands-parents) ; aujourd'hui = notés tout de suite,
+    // un autre jour = seulement « ajouter quelque chose ce jour-là » (avec l'heure)
     const aujourdhui = estAujourdhui();
-    document.querySelectorAll("#page-garde [data-today-only]").forEach((el) => (el.hidden = !moi || !aujourdhui));
-    document.querySelectorAll("#page-garde [data-writer-only]").forEach((el) => (el.hidden = !moi));
+    $("g-actions").hidden = !moi;
+    $("g-tuiles").hidden = !aujourdhui;
+    $("g-oubli-lien").textContent = aujourdhui ? "🕓 J'ai oublié de noter" : `🕓 Ajouter ce ${nom}`;
+    const monMot = moi && notes.find((x) => x.gardien === moi.nom && x.note);
+    $("g-mot").textContent = monMot ? "📝 Modifier mon mot" : "📝 Un mot pour les parents";
     $("g-read-hint").hidden = !!moi;
     $("g-read-hint").textContent = tel?.parent
       ? "👀 Mode parents : vous voyez tout ce que Mamita et les grands-parents notent."
       : "👀 Mode consultation.";
-    $("g-past-hint").hidden = !moi || aujourdhui;
+    $("g-modif-hint").hidden = !(moi || tel?.parent) || !evenements.length;
 
     // Récap
     const plusieurs = gardiens.length > 1;
@@ -125,9 +131,15 @@
   }
 
   function majBoutonDodo() {
-    const btn = $("g-sleep-btn");
-    btn.textContent = dodoEnCours ? `☀️ Il se réveille · ${fmtDuree(Date.now() - new Date(dodoEnCours.quand).getTime())}` : "🌙 Il s'endort maintenant";
+    const btn = $("g-t-dodo");
+    const dort = dodoEnCours ? fmtMinutes(Math.max(60000, Date.now() - new Date(dodoEnCours.quand).getTime())) : "";
+    $("g-t-dodo-emoji").textContent = dodoEnCours ? "☀️" : "🌙";
+    $("g-t-dodo-nom").textContent = dodoEnCours ? "Réveillé" : "Il s'endort";
+    $("g-t-dodo-sous").textContent = dodoEnCours ? "toucher au réveil" : "dodo";
     btn.classList.toggle("on", !!dodoEnCours);
+    // Il dort : grand bandeau tout en haut pour noter le réveil (impossible à rater)
+    $("g-reveil").hidden = !dodoEnCours || !moi || !estAujourdhui();
+    if (dodoEnCours) $("g-reveil-depuis").textContent = `😴 Noah dort depuis ${dort}`;
     // Rappel doux après 3 h de dodo : penser au bouton réveil
     const depuis = dodoEnCours ? Date.now() - new Date(dodoEnCours.quand).getTime() : 0;
     const alerte = $("g-alerte-dodo");
@@ -169,16 +181,8 @@
           b.disabled = true;
           return groupe;
         }
-        b.addEventListener("click", () => {
-          if (b.classList.contains("confirm")) return supprimer(e.id);
-          b.classList.add("confirm");
-          b.textContent = "Effacer ?";
-          setTimeout(() => {
-            if (!b.isConnected) return;
-            b.classList.remove("confirm");
-            b.textContent = etiquette();
-          }, 3000);
-        });
+        b.setAttribute("aria-label", `${etiquette()} : changer l'heure ou effacer`);
+        b.addEventListener("click", () => ouvrirLigne(e));
         return groupe;
       })
     );
@@ -318,10 +322,8 @@
   $("g-reactions").addEventListener("click", () => ($("g-reactions").hidden = true));
 
   // ---------- Actions ----------
-  async function enregistrerNote() {
-    if (!moi) return;
-    const btn = $("g-note-btn");
-    btn.disabled = true;
+  async function enregistrerNote(texte) {
+    if (!moi) return false;
     try {
       await api("garde_jours", "?on_conflict=jour,gardien", {
         method: "POST",
@@ -329,18 +331,15 @@
         body: JSON.stringify({
           jour: isoJour(jour),
           gardien: moi.nom,
-          note: $("g-note").value.trim() || null,
+          note: texte.trim() || null,
           updated_at: new Date().toISOString(),
         }),
       });
-      noteModifiee = false;
-      animerBouton(btn);
-      toast("📝 Note enregistrée");
+      toast("📝 Mot enregistré : les parents peuvent le lire");
       await charger();
+      return true;
     } catch (e) {
-      afficherErreur("La note n'a pas pu être enregistrée. Réessaie.");
-    } finally {
-      btn.disabled = false;
+      return false;
     }
   }
 
@@ -424,30 +423,298 @@
     }
   }
 
-  // Dodo ajouté après coup : « endormi à 13:00, réveillé à 14:30 » pour le jour affiché
-  async function ajouterDodoManuel() {
-    const a = $("g-dodo-debut").value;
-    const b = $("g-dodo-fin").value;
-    if (!a || !b) {
-      afficherErreur("Indique l'heure d'endormissement et l'heure de réveil.");
-      return;
-    }
-    const aLe = (hhmm) => {
-      const [h, m] = hhmm.split(":").map(Number);
-      const d = new Date(jour);
-      d.setHours(h, m, 0, 0);
-      return d;
+  // ---------- Petite fenêtre à tout faire ----------
+  // feuille("titre", (corps, fermer) => { ...remplit le corps... })
+  function feuille(titre, construire) {
+    const dlg = $("g-feuille");
+    $("g-feuille-titre").textContent = titre;
+    const corps = $("g-feuille-corps");
+    corps.replaceChildren();
+    const fermer = () => dlg.open && dlg.close();
+    construire(corps, fermer);
+    $("g-feuille-fermer").onclick = fermer;
+    if (!dlg.open) dlg.showModal();
+  }
+  const grosBouton = (texte, action, classe = "") => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "g-gros " + classe;
+    b.innerHTML = texte;
+    b.addEventListener("click", action);
+    return b;
+  };
+  const titre = (t) => {
+    const p = document.createElement("p");
+    p.className = "g-feuille-label";
+    p.textContent = t;
+    return p;
+  };
+  // Heure en deux menus (heures : minutes), plus simple et plus sûr que la roue de l'iPhone
+  function menusHeure(date) {
+    const d = date ? new Date(date) : new Date();
+    const boite = document.createElement("div");
+    boite.className = "heure-menus oubli-heure";
+    const menu = (max, val, pasDe, nom) => {
+      const sel = document.createElement("select");
+      sel.setAttribute("aria-label", nom);
+      for (let i = 0; i < max; i += pasDe) sel.append(new Option(pad(i), pad(i)));
+      sel.value = pad(val);
+      return sel;
     };
-    const debut = aLe(a);
-    const fin = aLe(b);
-    if (fin <= debut) fin.setDate(fin.getDate() + 1); // ex. 23:00 → 01:30
-    if (fin > new Date(Date.now() + 5 * 60 * 1000)) {
-      afficherErreur("Ce dodo finit dans le futur : vérifie les heures.");
-      return;
+    const h = menu(24, d.getHours(), 1, "Heures");
+    const m = menu(60, d.getMinutes(), 1, "Minutes");
+    const sep = document.createElement("span");
+    sep.textContent = ":";
+    boite.append(h, sep, m);
+    return { el: boite, heure: () => `${h.value}:${m.value}` };
+  }
+  // Date du jour affiché à l'heure choisie
+  const aLHeure = (hhmm, base = jour) => {
+    const [h, m] = hhmm.split(":").map(Number);
+    const d = new Date(base);
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
+  const erreurFeuille = (corps, msg) => {
+    let p = corps.querySelector(".g-feuille-erreur");
+    if (!p) {
+      p = document.createElement("p");
+      p.className = "g-feuille-erreur";
+      corps.append(p);
     }
-    await ajouter({ type: "sommeil", quand: debut.toISOString(), fin: fin.toISOString() }, `😴 Dodo de ${fmtMinutes(fin - debut)} ajouté`);
-    $("g-dodo-debut").value = "";
-    $("g-dodo-fin").value = "";
+    p.textContent = msg;
+  };
+
+  // ---------- Biberon : un appui avec la quantité habituelle ----------
+  let biberon = lire("garde-biberon", { ml: 150, lait: "poudre" }, (v) => v && Number.isInteger(v.ml) && v.ml >= 10 && v.ml <= 300);
+  // Quantité (− / +) et type de lait, en gros
+  function choixQuantite(corps, depart) {
+    const choix = { ...depart };
+    const ligne = document.createElement("div");
+    ligne.className = "g-quantite";
+    const val = document.createElement("span");
+    val.className = "g-quantite-val";
+    const maj = () => {
+      val.textContent = `${choix.ml} ml`;
+      laits.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lait === choix.lait)));
+    };
+    const pas = (n) => () => {
+      choix.ml = Math.min(300, Math.max(10, choix.ml + n));
+      maj();
+    };
+    ligne.append(grosBouton("−", pas(-10), "rond"), val, grosBouton("+", pas(10), "rond"));
+    const laits = [
+      ["poudre", "🥄 Poudre"],
+      ["maternel", "🥛 Maternel"],
+    ].map(([v, t]) => {
+      const b = grosBouton(t, () => {
+        choix.lait = v;
+        maj();
+      }, "choix");
+      b.dataset.lait = v;
+      return b;
+    });
+    const rangee = document.createElement("div");
+    rangee.className = "g-rangee";
+    rangee.append(...laits);
+    corps.append(titre("Quantité"), ligne, titre("Lait"), rangee);
+    maj();
+    return choix;
+  }
+  // Biberon : on choisit la quantité bue (en partant de la dernière) puis « Noter »
+  function choisirBiberon() {
+    feuille("🍼 Combien a-t-il bu ?", (corps, fermer) => {
+      const choix = choixQuantite(corps, biberon);
+      corps.append(
+        grosBouton("✅ Noter ce biberon", async () => {
+          biberon = { ml: choix.ml, lait: choix.lait };
+          ecrire("garde-biberon", biberon);
+          fermer();
+          const reveille = await finirDodoAvantRepas();
+          ajouter({ type: "repas", ml: biberon.ml, lait: biberon.lait }, `🍼 Biberon de ${biberon.ml} ml noté${reveille ? " · ☀️ dodo terminé" : ""}`);
+        }, "principal")
+      );
+    });
+  }
+
+  // Dodo : « il s'endort » / « il s'est réveillé », maintenant ou un peu plus tôt
+  function choisirDodo() {
+    if (dodoEnCours && dodoOublie(dodoEnCours.quand)) return verifierDodoOublie(true);
+    const reveil = !!dodoEnCours;
+    feuille(reveil ? "☀️ Noah s'est réveillé ?" : "🌙 Noah s'endort ?", (corps, fermer) => {
+      corps.append(
+        grosBouton(reveil ? "☀️ Oui, il se réveille maintenant" : "🌙 Oui, il s'endort maintenant", () => {
+          fermer();
+          basculerDodo();
+        }, "principal"),
+        grosBouton("🕓 C'était un peu plus tôt", () => dodoPlusTot(reveil))
+      );
+    });
+  }
+  function dodoPlusTot(reveil) {
+    feuille(reveil ? "☀️ Réveillé à quelle heure ?" : "🌙 Endormi à quelle heure ?", (corps, fermer) => {
+      const h = menusHeure(new Date(Date.now() - 15 * 60000));
+      corps.append(h.el);
+      corps.append(
+        grosBouton("✅ Enregistrer", async () => {
+          const quand = aLHeure(h.heure(), new Date());
+          if (!passe(quand)) return erreurFeuille(corps, "Cette heure est dans le futur : vérifie.");
+          if (reveil && quand <= new Date(dodoEnCours.quand)) return erreurFeuille(corps, `Il s'est endormi à ${fmtHeure(dodoEnCours.quand)} : le réveil doit être après.`);
+          fermer();
+          if (!reveil) return ajouter({ type: "sommeil", quand: quand.toISOString() }, `🌙 Dodo noté depuis ${fmtHeure(quand)}`);
+          try {
+            await api("garde_evenements", `?id=eq.${dodoEnCours.id}`, { method: "PATCH", body: JSON.stringify({ fin: quand.toISOString() }) });
+            toast(`☀️ Réveillé à ${fmtHeure(quand)}`);
+            await charger();
+          } catch (e) {
+            afficherErreur("Impossible d'enregistrer le réveil. Réessaie.");
+          }
+        }, "principal")
+      );
+    });
+  }
+
+  // ---------- Un mot pour les parents (la note du jour) ----------
+  function ecrireMot() {
+    if (!moi) return;
+    const mien = notes.find((x) => x.gardien === moi.nom);
+    feuille("📝 Un mot pour les parents", (corps, fermer) => {
+      const zone = document.createElement("textarea");
+      zone.className = "g-mot-zone";
+      zone.rows = 5;
+      zone.maxLength = 2000;
+      zone.placeholder = "Ce que vous avez fait, comment il était, ce qu'il faut savoir…";
+      zone.value = mien?.note || "";
+      corps.append(zone, grosBouton("💾 Enregistrer", async () => {
+        if (await enregistrerNote(zone.value)) fermer();
+        else erreurFeuille(corps, "Pas enregistré : vérifie internet et réessaie.");
+      }, "principal"));
+    });
+  }
+
+  // ---------- Couche : 3 grands choix ----------
+  const COUCHES = [
+    ["pipi", "💧 Pipi", { pipi: true, caca: false }],
+    ["caca", "💩 Caca", { pipi: false, caca: true }],
+    ["deux", "💧💩 Les deux", { pipi: true, caca: true }],
+  ];
+  function choisirCouche() {
+    feuille("👶 Dans la couche ?", (corps, fermer) => {
+      COUCHES.forEach(([, texte, valeurs]) =>
+        corps.append(
+          grosBouton(texte, () => {
+            fermer();
+            ajouter({ type: "couche", ...valeurs }, `👶 Couche notée (${texte.replace(/^\S+ /, "").toLowerCase()})`);
+          }, "principal")
+        )
+      );
+    });
+  }
+
+  // ---------- « J'ai oublié de noter » : biberon, couche ou dodo à une heure passée ----------
+  function oubli() {
+    feuille(estAujourdhui() ? "🕓 Qu'as-tu oublié ?" : `🕓 Ajouter au ${jour.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}`, (corps) => {
+      corps.append(
+        grosBouton("🍼 Un biberon", oubliBiberon, "principal"),
+        grosBouton("👶 Une couche", oubliCouche, "principal"),
+        grosBouton("😴 Un dodo", oubliDodo, "principal")
+      );
+    });
+  }
+  const passe = (d) => d <= new Date(Date.now() + 60000);
+  function oubliBiberon() {
+    feuille("🍼 Biberon oublié", (corps, fermer) => {
+      const h = menusHeure(estAujourdhui() ? new Date(Date.now() - 30 * 60000) : aLHeure("12:00"));
+      corps.append(titre("À quelle heure ?"), h.el);
+      const choix = choixQuantite(corps, biberon);
+      corps.append(
+        grosBouton("✅ Ajouter ce biberon", () => {
+          const quand = aLHeure(h.heure());
+          if (!passe(quand)) return erreurFeuille(corps, "Cette heure est dans le futur : vérifie.");
+          fermer();
+          ajouter({ type: "repas", ml: choix.ml, lait: choix.lait, quand: quand.toISOString() }, `🍼 Biberon de ${fmtHeure(quand)} ajouté`);
+        }, "principal")
+      );
+    });
+  }
+  function oubliCouche() {
+    feuille("👶 Couche oubliée", (corps, fermer) => {
+      const h = menusHeure(estAujourdhui() ? new Date(Date.now() - 30 * 60000) : aLHeure("12:00"));
+      corps.append(titre("À quelle heure ?"), h.el, titre("Dans la couche"));
+      COUCHES.forEach(([, texte, valeurs]) =>
+        corps.append(
+          grosBouton(texte, () => {
+            const quand = aLHeure(h.heure());
+            if (!passe(quand)) return erreurFeuille(corps, "Cette heure est dans le futur : vérifie.");
+            fermer();
+            ajouter({ type: "couche", ...valeurs, quand: quand.toISOString() }, `👶 Couche de ${fmtHeure(quand)} ajoutée`);
+          }, "principal")
+        )
+      );
+    });
+  }
+  function oubliDodo() {
+    feuille("😴 Dodo oublié", (corps, fermer) => {
+      const base = estAujourdhui() ? new Date(Date.now() - 2 * 3600000) : aLHeure("13:00");
+      const a = menusHeure(base);
+      const b = menusHeure(new Date(base.getTime() + 3600000));
+      corps.append(titre("Endormi à"), a.el, titre("Réveillé à"), b.el);
+      corps.append(
+        grosBouton("✅ Ajouter ce dodo", () => {
+          const debut = aLHeure(a.heure());
+          const fin = aLHeure(b.heure());
+          if (fin <= debut) fin.setDate(fin.getDate() + 1); // ex. 23:00 → 01:30
+          if (!passe(fin)) return erreurFeuille(corps, "Le réveil est dans le futur : vérifie les heures.");
+          if (fin - debut > DODO_OUBLIE_MS) return erreurFeuille(corps, "Plus de 12 h de dodo : vérifie les heures.");
+          fermer();
+          ajouter({ type: "sommeil", quand: debut.toISOString(), fin: fin.toISOString() }, `😴 Dodo de ${fmtMinutes(fin - debut)} ajouté`);
+        }, "principal")
+      );
+    });
+  }
+
+  // ---------- Toucher une ligne : changer l'heure ou effacer ----------
+  const NOMS = { repas: "🍼 Biberon", couche: "👶 Couche", sommeil: "😴 Dodo" };
+  function ouvrirLigne(e) {
+    feuille(`${NOMS[e.type] || "Note"} de ${fmtHeure(e.quand)}`, (corps, fermer) => {
+      corps.append(
+        grosBouton("🕓 Changer l'heure", () => changerHeure(e), "principal"),
+        grosBouton("🗑️ Effacer", () => {
+          fermer();
+          supprimer(e.id);
+        }, "danger")
+      );
+    });
+  }
+  function changerHeure(e) {
+    feuille(`🕓 ${NOMS[e.type] || "Note"} : nouvelle heure`, (corps, fermer) => {
+      const a = menusHeure(e.quand);
+      const b = e.type === "sommeil" && e.fin ? menusHeure(e.fin) : null;
+      corps.append(titre(e.type === "sommeil" ? "Endormi à" : "Heure"), a.el);
+      if (b) corps.append(titre("Réveillé à"), b.el);
+      corps.append(
+        grosBouton("✅ Enregistrer", async () => {
+          const quand = aLHeure(a.heure(), e.quand);
+          const maj = { quand: quand.toISOString() };
+          if (b) {
+            const fin = aLHeure(b.heure(), quand);
+            if (fin <= quand) fin.setDate(fin.getDate() + 1);
+            if (!passe(fin)) return erreurFeuille(corps, "Le réveil est dans le futur : vérifie.");
+            if (fin - quand > DODO_OUBLIE_MS) return erreurFeuille(corps, "Plus de 12 h de dodo : vérifie les heures.");
+            maj.fin = fin.toISOString();
+          }
+          if (!passe(quand)) return erreurFeuille(corps, "Cette heure est dans le futur : vérifie.");
+          try {
+            await api("garde_evenements", `?id=eq.${e.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+            fermer();
+            toast("🕓 Heure changée");
+            await charger();
+          } catch (err) {
+            erreurFeuille(corps, "Impossible d'enregistrer. Réessaie.");
+          }
+        }, "principal")
+      );
+    });
   }
 
   async function supprimer(id) {
@@ -471,24 +738,12 @@
 
   $("g-prev").addEventListener("click", () => changerJour(-1));
   $("g-next").addEventListener("click", () => changerJour(1));
-  $("g-note").addEventListener("input", () => {
-    noteModifiee = true;
-    $("g-note-saved").textContent = "Pense à enregistrer 👇";
-  });
-  $("g-note-btn").addEventListener("click", enregistrerNote);
-  $("g-repas-btn").addEventListener("click", async () => {
-    const ml = $("g-ml").value ? Number($("g-ml").value) : null;
-    const reveille = await finirDodoAvantRepas();
-    ajouter({ type: "repas", ml, lait: $("g-lait").value }, reveille ? "🍼 Biberon noté · ☀️ dodo terminé" : "🍼 Biberon noté");
-  });
-  document.querySelectorAll("#page-garde [data-couche]").forEach((b) =>
-    b.addEventListener("click", () => {
-      const c = b.dataset.couche;
-      ajouter({ type: "couche", pipi: c !== "caca", caca: c !== "pipi" }, "👶 Couche notée");
-    })
-  );
-  $("g-sleep-btn").addEventListener("click", basculerDodo);
-  $("g-dodo-add").addEventListener("click", ajouterDodoManuel);
+  $("g-t-biberon").addEventListener("click", choisirBiberon);
+  $("g-t-couche").addEventListener("click", choisirCouche);
+  $("g-t-dodo").addEventListener("click", choisirDodo);
+  $("g-reveil").addEventListener("click", choisirDodo);
+  $("g-mot").addEventListener("click", ecrireMot);
+  $("g-oubli-lien").addEventListener("click", oubli);
 
   // Minuit passé : on revient sur le nouveau jour (sauf si une note est en cours d'écriture)
   let dernierMinuit = minuit().getTime();
@@ -502,7 +757,7 @@
         return;
       }
     }
-    // Seul le bouton bouge chaque seconde (redessiner les pastilles annulerait un « Effacer ? »)
+    // Seul le bouton du dodo bouge chaque seconde
     if (dodoEnCours) majBoutonDodo();
   }
 

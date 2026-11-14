@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=41">
+  <link rel="stylesheet" href="style.css?v=43">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -643,13 +643,34 @@
           </div>
         </section>
 
-        <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
-        <section class="card resume-maison" id="g-resume" hidden>
-          <div class="resume-tete">
-            <p class="resume-titre"><span aria-hidden="true">🏠</span> Les dernières nouvelles</p>
-            <span class="resume-maj" id="g-resume-maj"></span>
+        <!-- Noter maintenant : 3 gros boutons pour la famille (un appui = c'est noté) -->
+        <section class="card g-actions" id="g-actions" hidden>
+          <button type="button" class="g-reveil" id="g-reveil" hidden>
+            <span class="g-reveil-haut" id="g-reveil-depuis">😴 Noah dort depuis 25 min</span>
+            <span class="g-reveil-bas">☀️ Toucher ici quand il se réveille</span>
+          </button>
+          <div class="g-tuiles" id="g-tuiles">
+            <button type="button" class="g-tuile" id="g-t-biberon">
+              <span class="g-tuile-emoji" aria-hidden="true">🍼</span>
+              <span class="g-tuile-nom">Biberon</span>
+              <span class="g-tuile-sous">combien de ml ?</span>
+            </button>
+            <button type="button" class="g-tuile" id="g-t-couche">
+              <span class="g-tuile-emoji" aria-hidden="true">👶</span>
+              <span class="g-tuile-nom">Couche</span>
+              <span class="g-tuile-sous">pipi ou caca</span>
+            </button>
+            <button type="button" class="g-tuile" id="g-t-dodo">
+              <span class="g-tuile-emoji" aria-hidden="true" id="g-t-dodo-emoji">🌙</span>
+              <span class="g-tuile-nom" id="g-t-dodo-nom">Il s'endort</span>
+              <span class="g-tuile-sous" id="g-t-dodo-sous">dodo</span>
+            </button>
           </div>
-          <div class="resume-grille" id="g-resume-liste" aria-live="polite"></div>
+          <p class="g-alerte-dodo" id="g-alerte-dodo" hidden></p>
+          <div class="g-liens">
+            <button type="button" class="g-oubli-lien" id="g-mot">📝 Un mot pour les parents</button>
+            <button type="button" class="g-oubli-lien" id="g-oubli-lien">🕓 J'ai oublié de noter</button>
+          </div>
         </section>
 
         <section class="card garde-day">
@@ -665,64 +686,41 @@
           <p class="g-vu" id="g-vu" hidden></p>
           <button type="button" class="g-reactions" id="g-reactions" hidden aria-live="polite"></button>
           <ul class="notes" id="g-notes"></ul>
-          <div id="g-my-note" hidden>
-            <label class="field wide note-field">
-              <span id="g-my-note-label">📝 Ma note du jour</span>
-              <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment il était, ce qu'il faut savoir…"></textarea>
-            </label>
-            <button type="button" class="add-btn garde small" id="g-note-btn">
-              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer ma note</span>
-            </button>
-            <p class="hint small center-text" id="g-note-saved"></p>
-          </div>
-        </section>
 
-        <section class="card garde-recap">
-          <p class="label">Récap de la journée</p>
+
 
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">🍼</span><span class="g-title">Repas</span><span class="g-sum" id="g-repas-sum"></span></div>
             <div class="pills" id="g-repas-list"></div>
-            <div class="g-add" data-today-only>
-              <select id="g-ml" aria-label="Quantité">
-                <option value="">? ml</option><option value="10">10 ml</option><option value="20">20 ml</option><option value="30">30 ml</option><option value="40">40 ml</option><option value="50">50 ml</option><option value="60">60 ml</option><option value="70">70 ml</option><option value="80">80 ml</option><option value="90">90 ml</option><option value="100">100 ml</option><option value="110">110 ml</option><option value="120">120 ml</option><option value="130">130 ml</option><option value="140">140 ml</option><option value="150" selected>150 ml</option><option value="160">160 ml</option><option value="170">170 ml</option><option value="180">180 ml</option><option value="190">190 ml</option><option value="200">200 ml</option><option value="210">210 ml</option><option value="220">220 ml</option><option value="230">230 ml</option><option value="240">240 ml</option><option value="250">250 ml</option><option value="260">260 ml</option><option value="270">270 ml</option><option value="280">280 ml</option><option value="290">290 ml</option><option value="300">300 ml</option>
-              </select>
-              <select id="g-lait" aria-label="Type de lait">
-                <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
-              </select>
-              <button type="button" class="g-btn" id="g-repas-btn">+ Biberon</button>
-            </div>
           </div>
-
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">👶</span><span class="g-title">Couches</span><span class="g-sum" id="g-couche-sum"></span></div>
             <div class="pills" id="g-couche-list"></div>
-            <div class="g-add" data-today-only>
-              <button type="button" class="g-btn" data-couche="pipi">+ 💧</button>
-              <button type="button" class="g-btn" data-couche="caca">+ 💩</button>
-              <button type="button" class="g-btn" data-couche="les deux">+ 💧💩</button>
-            </div>
           </div>
-
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">😴</span><span class="g-title">Sommeil</span><span class="g-sum" id="g-sleep-sum"></span></div>
             <div class="pills" id="g-sleep-list"></div>
-            <div class="g-add" data-today-only>
-              <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Il s'endort</button>
-              <p class="g-alerte-dodo" id="g-alerte-dodo" hidden></p>
-            </div>
-            <div class="g-add g-range" data-writer-only>
-              <label class="field"><span>Endormi à</span><input type="time" id="g-dodo-debut"></label>
-              <label class="field"><span>Réveillé à</span><input type="time" id="g-dodo-fin"></label>
-              <button type="button" class="g-btn wide alt" id="g-dodo-add">+ Ajouter ce dodo</button>
-            </div>
           </div>
-
-          <p class="hint small" id="g-read-hint">👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.</p>
-          <p class="hint small" id="g-past-hint" hidden>Pour noter un repas ou une couche, reviens sur aujourd'hui. Un dodo peut être ajouté pour n'importe quel jour.</p>
+          <p class="hint" id="g-modif-hint" hidden>✏️ Une erreur ? Touche la ligne pour changer l'heure ou l'effacer.</p>
+          <p class="hint small" id="g-read-hint">👀 Mode consultation.</p>
           <p class="hint small" id="g-tuto-box" hidden><button type="button" class="link" id="g-tuto">💡 Revoir le petit tuto</button></p>
-          <p class="hint small">Tout est enregistré en ligne : chaque téléphone qui a le lien voit les mêmes notes et le même récap. Rien ne se mélange avec vos pages Repas, Couches et Sommeil. Touche deux fois une de tes pastilles pour l'effacer.</p>
         </section>
+
+        <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
+        <section class="card resume-maison" id="g-resume" hidden>
+          <div class="resume-tete">
+            <p class="resume-titre"><span aria-hidden="true">🏠</span> Les dernières nouvelles</p>
+            <span class="resume-maj" id="g-resume-maj"></span>
+          </div>
+          <div class="resume-grille" id="g-resume-liste" aria-live="polite"></div>
+        </section>
+
+        <!-- Petite fenêtre à tout faire de la garde (couche, quantité, oubli, modifier une ligne) -->
+        <dialog class="sheet g-feuille" id="g-feuille" aria-labelledby="g-feuille-titre">
+          <p class="sheet-title" id="g-feuille-titre"></p>
+          <div class="g-feuille-corps" id="g-feuille-corps"></div>
+          <button type="button" class="link g-feuille-fermer" id="g-feuille-fermer">Annuler</button>
+        </dialog>
       </div>
     </div>
 
@@ -854,22 +852,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=41"></script>
+  <script src="scene.js?v=43"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=41"></script>
-  <script src="auth.js?v=41"></script>
-  <script src="repas.js?v=41"></script>
-  <script src="couches.js?v=41"></script>
-  <script src="sommeil.js?v=41"></script>
-  <script src="sante.js?v=41"></script>
-  <script src="medicaments.js?v=41"></script>
-  <script src="resume.js?v=41"></script>
-  <script src="sons.js?v=41"></script>
-  <script src="garde.js?v=41"></script>
-  <script src="graphiques.js?v=41"></script>
-  <script src="fetes.js?v=41"></script>
-  <script src="notifs.js?v=41"></script>
-  <script src="tuto.js?v=41"></script>
-  <script src="pages.js?v=41"></script>
+  <script src="commun.js?v=43"></script>
+  <script src="auth.js?v=43"></script>
+  <script src="repas.js?v=43"></script>
+  <script src="couches.js?v=43"></script>
+  <script src="sommeil.js?v=43"></script>
+  <script src="sante.js?v=43"></script>
+  <script src="medicaments.js?v=43"></script>
+  <script src="resume.js?v=43"></script>
+  <script src="sons.js?v=43"></script>
+  <script src="garde.js?v=43"></script>
+  <script src="graphiques.js?v=43"></script>
+  <script src="fetes.js?v=43"></script>
+  <script src="notifs.js?v=43"></script>
+  <script src="tuto.js?v=43"></script>
+  <script src="pages.js?v=43"></script>
 </body>
 </html>

@@ -1202,3 +1202,63 @@ dialog.sheet::backdrop { touch-action: none; }
 .g-alerte-dodo[hidden] { display: none; }
 #oubli-erreur { color: var(--late); text-align: center; font-weight: 600; }
 #oubli-erreur:empty { display: none; }
+
+/* ---------- Garde simplifiée : 3 gros boutons et fenêtres à grands choix ---------- */
+.g-actions { display: flex; flex-direction: column; gap: 10px; }
+.g-tuiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.g-tuiles[hidden] { display: none; }
+.g-tuile {
+  font: inherit; color: #fff; background: var(--garde); border: 0; border-radius: 20px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 118px; padding: 10px 4px; box-shadow: 0 4px 0 color-mix(in srgb, var(--garde) 70%, #000);
+  transition: transform .1s;
+}
+.g-tuile:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--garde) 70%, #000); }
+.g-tuile.on { background: var(--wake); color: #3a2508; box-shadow: 0 4px 0 color-mix(in srgb, var(--wake) 70%, #000); }
+.g-tuile-emoji { font-size: 2.4rem; line-height: 1.1; }
+.g-tuile-nom { font-size: 1.12rem; font-weight: 800; line-height: 1.15; text-align: center; }
+.g-tuile-sous { font-size: .82rem; font-weight: 600; opacity: .92; text-align: center; }
+.g-changer, .g-oubli-lien {
+  font: inherit; font-size: 1rem; font-weight: 700; color: var(--garde); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 14px; padding: 10px 12px; min-height: 48px; cursor: pointer;
+}
+.g-changer[hidden] { display: none; }
+.g-feuille-corps { display: flex; flex-direction: column; gap: 10px; }
+.g-feuille-label { margin: 6px 0 0; font-weight: 700; color: var(--ink-soft); }
+.g-feuille-erreur { margin: 0; color: var(--late); font-weight: 700; text-align: center; }
+.g-feuille-fermer { display: block; margin: 12px auto 0; font-size: 1.05rem; }
+.g-gros {
+  font: inherit; font-size: 1.2rem; font-weight: 800; color: var(--ink); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 16px; padding: 12px; min-height: 60px; cursor: pointer;
+}
+.g-gros.principal { background: var(--garde); color: #fff; border-color: transparent; }
+.g-gros.danger { background: var(--late); color: #fff; border-color: transparent; }
+.g-gros.choix { flex: 1; font-size: 1.05rem; }
+.g-gros.choix[aria-pressed="true"] { background: var(--garde); color: #fff; border-color: transparent; }
+.g-gros.rond { width: 64px; height: 64px; border-radius: 50%; font-size: 1.8rem; padding: 0; }
+.g-quantite { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.g-quantite-val { font-size: 2rem; font-weight: 800; flex: 1; text-align: center; }
+.g-rangee { display: flex; gap: 8px; }
+.garde-recap .pill { font-size: 1.02rem; padding: 7px 12px; }
+#page-garde .g-title { font-size: 1.2rem; }
+/* Il dort : grand bandeau pour noter le réveil */
+.g-reveil {
+  font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
+  padding: 14px 12px; border: 0; border-radius: 20px; cursor: pointer; color: #3a2508; background: var(--wake);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--wake) 70%, #000);
+  animation: reveil-doux 2.6s ease-in-out infinite;
+}
+.g-reveil[hidden] { display: none; }
+.g-reveil-haut { font-size: 1.05rem; font-weight: 700; }
+.g-reveil-bas { font-size: 1.25rem; font-weight: 800; }
+@keyframes reveil-doux { 50% { transform: scale(1.015); } }
+@media (prefers-reduced-motion: reduce) { .g-reveil { animation: none; } }
+.g-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g-liens .g-oubli-lien { font-size: .95rem; padding: 10px 8px; }
+.note-card.modifiable { cursor: pointer; }
+.note-card.modifiable .note-head::after { content: " ✏️"; }
+.g-mot-zone {
+  font: inherit; font-size: 1.1rem; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 14px;
+  border: 2px solid var(--card-border); background: var(--chip); color: var(--ink); resize: vertical;
+}
+#page-garde .day-nav { margin-bottom: 4px; }
