@@ -1262,3 +1262,9 @@ dialog.sheet::backdrop { touch-action: none; }
   border: 2px solid var(--card-border); background: var(--chip); color: var(--ink); resize: vertical;
 }
 #page-garde .day-nav { margin-bottom: 4px; }
+/* Croix pour fermer une fenêtre (en haut à droite) */
+.sheet-croix {
+  position: absolute; top: 10px; right: 10px; z-index: 2; width: 40px; height: 40px; border-radius: 50%;
+  font: inherit; font-size: 1.15rem; font-weight: 800; line-height: 1; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--card-border); cursor: pointer;
+}
