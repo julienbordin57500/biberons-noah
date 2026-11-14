@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="style.css?v=41">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -709,6 +709,7 @@
             <div class="pills" id="g-sleep-list"></div>
             <div class="g-add" data-today-only>
               <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Il s'endort</button>
+              <p class="g-alerte-dodo" id="g-alerte-dodo" hidden></p>
             </div>
             <div class="g-add g-range" data-writer-only>
               <label class="field"><span>Endormi à</span><input type="time" id="g-dodo-debut"></label>
@@ -814,6 +815,21 @@
     </form>
   </dialog>
 
+  <dialog class="sheet" id="oubli-dialog" aria-labelledby="oubli-titre">
+    <div class="oubli">
+      <p class="sheet-title" id="oubli-titre">😴 Réveil oublié ?</p>
+      <p id="oubli-texte"></p>
+      <p class="label">Réveillé vers</p>
+      <div class="heure-menus oubli-heure">
+        <select id="oubli-h" aria-label="Heures"></select><span>:</span><select id="oubli-m" aria-label="Minutes"></select>
+      </div>
+      <p class="edit-erreur" id="oubli-erreur" aria-live="polite"></p>
+      <button type="button" class="g-btn wide" id="oubli-ok">☀️ Enregistrer le réveil</button>
+      <button type="button" class="g-btn alt wide" id="oubli-effacer">🗑️ Je ne sais plus, effacer ce dodo</button>
+      <button type="button" class="link" id="oubli-plus-tard">Plus tard</button>
+    </div>
+  </dialog>
+
   <dialog class="sheet" id="g-doublon" aria-labelledby="g-doublon-titre">
     <form method="dialog">
       <p class="sheet-title" id="g-doublon-titre">⚠️ Déjà noté ?</p>
@@ -838,22 +854,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=40"></script>
+  <script src="scene.js?v=41"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=40"></script>
-  <script src="auth.js?v=40"></script>
-  <script src="repas.js?v=40"></script>
-  <script src="couches.js?v=40"></script>
-  <script src="sommeil.js?v=40"></script>
-  <script src="sante.js?v=40"></script>
-  <script src="medicaments.js?v=40"></script>
-  <script src="resume.js?v=40"></script>
-  <script src="sons.js?v=40"></script>
-  <script src="garde.js?v=40"></script>
-  <script src="graphiques.js?v=40"></script>
-  <script src="fetes.js?v=40"></script>
-  <script src="notifs.js?v=40"></script>
-  <script src="tuto.js?v=40"></script>
-  <script src="pages.js?v=40"></script>
+  <script src="commun.js?v=41"></script>
+  <script src="auth.js?v=41"></script>
+  <script src="repas.js?v=41"></script>
+  <script src="couches.js?v=41"></script>
+  <script src="sommeil.js?v=41"></script>
+  <script src="sante.js?v=41"></script>
+  <script src="medicaments.js?v=41"></script>
+  <script src="resume.js?v=41"></script>
+  <script src="sons.js?v=41"></script>
+  <script src="garde.js?v=41"></script>
+  <script src="graphiques.js?v=41"></script>
+  <script src="fetes.js?v=41"></script>
+  <script src="notifs.js?v=41"></script>
+  <script src="tuto.js?v=41"></script>
+  <script src="pages.js?v=41"></script>
 </body>
 </html>

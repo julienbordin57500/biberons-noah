@@ -48,6 +48,7 @@
       dodoEnCours = enCours[0] || null;
       annoncerReactions();
       marquerVu();
+      verifierDodoOublie();
       if (!noteModifiee) $("g-note").value = (moi && notes.find((x) => x.gardien === moi.nom)?.note) || "";
     } catch (e) {
       afficherErreur("Impossible de charger l'espace garde. Vérifie la connexion internet.");
@@ -127,6 +128,14 @@
     const btn = $("g-sleep-btn");
     btn.textContent = dodoEnCours ? `☀️ Il se réveille · ${fmtDuree(Date.now() - new Date(dodoEnCours.quand).getTime())}` : "🌙 Il s'endort maintenant";
     btn.classList.toggle("on", !!dodoEnCours);
+    // Rappel doux après 3 h de dodo : penser au bouton réveil
+    const depuis = dodoEnCours ? Date.now() - new Date(dodoEnCours.quand).getTime() : 0;
+    const alerte = $("g-alerte-dodo");
+    alerte.hidden = depuis < 3 * 3600000;
+    if (!alerte.hidden)
+      alerte.textContent = dodoOublie(dodoEnCours.quand)
+        ? "⚠️ Ce dodo n'a pas été arrêté : touche le bouton pour dire à quelle heure il s'est réveillé."
+        : "⏰ Long dodo : pense à toucher « Il se réveille » dès qu'il ouvre les yeux.";
   }
 
   // Deux notes identiques à moins de 10 minutes d'écart : sans doute un appui en trop
@@ -361,7 +370,47 @@
     }
   }
 
+  // ---------- Dodo oublié ----------
+  // Un dodo lancé il y a plus de 12 h : on demande l'heure du réveil (ou on l'efface), une fois par ouverture
+  let dejaDemande = null;
+  async function verifierDodoOublie(forcer = false) {
+    const d = dodoEnCours;
+    // (les parents règlent ce cas depuis leur page Sommeil, pour ne pas le demander deux fois)
+    if (!d || !dodoOublie(d.quand) || !moi) return false;
+    if (!forcer && dejaDemande === d.id) return false;
+    dejaDemande = d.id;
+    const r = await demanderReveilOublie(d.quand);
+    if (!r) return true;
+    try {
+      if (r.effacer) {
+        await api("garde_evenements", `?id=eq.${d.id}`, { method: "DELETE" });
+        toast("🗑️ Dodo effacé");
+      } else {
+        await api("garde_evenements", `?id=eq.${d.id}`, { method: "PATCH", body: JSON.stringify({ fin: r.fin.toISOString() }) });
+        toast(`☀️ Réveil noté à ${fmtHeure(r.fin)}`);
+      }
+      dodoEnCours = null;
+      await charger();
+    } catch (e) {
+      afficherErreur("Impossible d'enregistrer. Réessaie.");
+    }
+    return true;
+  }
+
+  // Un repas pendant un dodo : Noah est réveillé, on arrête le dodo à cette heure-là
+  async function finirDodoAvantRepas() {
+    if (!dodoEnCours || dodoOublie(dodoEnCours.quand)) return false;
+    try {
+      await api("garde_evenements", `?id=eq.${dodoEnCours.id}`, { method: "PATCH", body: JSON.stringify({ fin: new Date().toISOString() }) });
+      dodoEnCours = null;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function basculerDodo() {
+    if (dodoEnCours && (await verifierDodoOublie(true))) return;
     if (!dodoEnCours) return ajouter({ type: "sommeil" }, "🌙 Dodo lancé");
     try {
       await api("garde_evenements", `?id=eq.${dodoEnCours.id}`, {
@@ -427,9 +476,10 @@
     $("g-note-saved").textContent = "Pense à enregistrer 👇";
   });
   $("g-note-btn").addEventListener("click", enregistrerNote);
-  $("g-repas-btn").addEventListener("click", () => {
+  $("g-repas-btn").addEventListener("click", async () => {
     const ml = $("g-ml").value ? Number($("g-ml").value) : null;
-    ajouter({ type: "repas", ml, lait: $("g-lait").value }, "🍼 Biberon noté");
+    const reveille = await finirDodoAvantRepas();
+    ajouter({ type: "repas", ml, lait: $("g-lait").value }, reveille ? "🍼 Biberon noté · ☀️ dodo terminé" : "🍼 Biberon noté");
   });
   document.querySelectorAll("#page-garde [data-couche]").forEach((b) =>
     b.addEventListener("click", () => {

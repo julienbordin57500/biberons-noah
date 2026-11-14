@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "40";
+const VERSION_APPLI = "41";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -655,3 +655,59 @@ setTimeout(verifierMiseAJour, 3000);
     this.addEventListener("close", debloquer, { once: true });
   };
 })();
+
+// Une ligne recopiée depuis la garde se modifie à la source (garde_evenements) :
+// sinon la prochaine modification des grands-parents effacerait la correction des parents.
+// « champs » : { colonne du carnet: colonne de la garde }
+async function modifierLigne(table, ligne, maj, champs = {}) {
+  if (!ligne.garde_id) return api(table, `?id=eq.${ligne.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+  const source = {};
+  const reste = {};
+  Object.entries(maj).forEach(([k, v]) => (k in champs ? (source[champs[k]] = v) : (reste[k] = v)));
+  if (Object.keys(source).length) await api("garde_evenements", `?id=eq.${ligne.garde_id}`, { method: "PATCH", body: JSON.stringify(source) });
+  if (Object.keys(reste).length) await api(table, `?id=eq.${ligne.id}`, { method: "PATCH", body: JSON.stringify(reste) });
+}
+const CHAMPS_GARDE = {
+  biberons: { pris_le: "quand", quantite_ml: "ml", lait: "lait" },
+  couches: { change_le: "quand", pipi: "pipi", caca: "caca" },
+  sommeils: { debut: "quand", fin: "fin" },
+};
+
+// ---------- Dodo oublié ----------
+// Un dodo de plus de 12 h, c'est presque sûrement un réveil qu'on a oublié de noter.
+const DODO_OUBLIE_MS = 12 * 60 * 60 * 1000;
+const dodoOublie = (debut) => Date.now() - new Date(debut).getTime() > DODO_OUBLIE_MS;
+// Grande fenêtre simple : « À quelle heure s'est-il réveillé ? » ou « Je ne sais plus, effacer ».
+// Renvoie { fin: Date }, { effacer: true } ou null (plus tard).
+function demanderReveilOublie(debut) {
+  const d0 = new Date(debut);
+  const dlg = $("oubli-dialog");
+  const jour = d0.toDateString() === new Date().toDateString() ? "aujourd'hui" : d0.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  $("oubli-texte").textContent = `Le dodo commencé ${jour} à ${fmtHeure(d0)} n'a pas été arrêté. À quelle heure Noah s'est-il réveillé ?`;
+  // Proposition : 1 h après l'endormissement
+  const propose = new Date(d0.getTime() + 60 * 60 * 1000);
+  const remplir = (sel, max, valeur) => {
+    sel.replaceChildren(...Array.from({ length: max }, (_, i) => new Option(pad(i), pad(i))));
+    sel.value = pad(valeur);
+  };
+  remplir($("oubli-h"), 24, propose.getHours());
+  remplir($("oubli-m"), 60, Math.floor(propose.getMinutes() / 5) * 5);
+  $("oubli-erreur").textContent = "";
+  return new Promise((ok) => {
+    const fermer = (r) => {
+      dlg.close();
+      ok(r);
+    };
+    $("oubli-ok").onclick = () => {
+      const fin = new Date(d0);
+      fin.setHours(Number($("oubli-h").value), Number($("oubli-m").value), 0, 0);
+      if (fin <= d0) fin.setDate(fin.getDate() + 1); // ex. endormi à 23:00, réveillé à 01:30
+      if (fin > new Date()) return ($("oubli-erreur").textContent = "Cette heure est dans le futur : vérifie.");
+      if (fin - d0 > DODO_OUBLIE_MS) return ($("oubli-erreur").textContent = "Ça ferait plus de 12 h de dodo : vérifie l'heure.");
+      fermer({ fin });
+    };
+    $("oubli-effacer").onclick = () => fermer({ effacer: true });
+    $("oubli-plus-tard").onclick = () => fermer(null);
+    dlg.showModal();
+  });
+}

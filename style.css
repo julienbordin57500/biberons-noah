@@ -1191,3 +1191,14 @@ dialog.sheet::backdrop { touch-action: none; }
   font: inherit; font-size: .95rem; font-weight: 800; color: var(--ink); background: var(--card);
   border: 0; border-radius: 999px; padding: 6px 14px; min-height: 36px; cursor: pointer;
 }
+
+/* Réveil oublié : grande fenêtre simple */
+.oubli { display: flex; flex-direction: column; gap: 10px; }
+.oubli p { margin: 0; }
+.oubli-heure { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 1.4rem; font-weight: 700; }
+.oubli-heure select { font: inherit; font-size: 1.4rem; padding: 6px 10px; border-radius: 12px; border: 2px solid var(--card-border); background: var(--chip); color: var(--ink); }
+.oubli .link { align-self: center; }
+.g-alerte-dodo { margin: 6px 0 0; padding: 8px 10px; border-radius: 12px; background: color-mix(in srgb, var(--wake) 30%, transparent); font-weight: 600; text-align: center; }
+.g-alerte-dodo[hidden] { display: none; }
+#oubli-erreur { color: var(--late); text-align: center; font-weight: 600; }
+#oubli-erreur:empty { display: none; }

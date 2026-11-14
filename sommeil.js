@@ -6,6 +6,7 @@
   let sommeils = []; // dodos qui touchent les dernières 24 h (y compris celui en cours)
   let enCours = null; // dodo sans heure de réveil
   let dernierFini = null; // pour « réveillé depuis »
+  let demandeOubli = null; // dodo oublié déjà signalé pendant cette ouverture
 
   async function charger() {
     if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
@@ -13,6 +14,11 @@
       const depuis = encodeURIComponent(ilYa24h());
       sommeils = await api(TABLE, `?select=${COLONNES}&or=(fin.is.null,fin.gte.${depuis})&order=debut.desc`);
       enCours = sommeils.find((s) => !s.fin) || null;
+      // Réveil oublié (dodo de plus de 12 h) : on le demande une fois à l'ouverture
+      if (enCours && dodoOublie(enCours.debut) && demandeOubli !== enCours.id) {
+        demandeOubli = enCours.id;
+        setTimeout(() => reglerDodoOublie(enCours).catch(() => afficherErreur("Impossible d'enregistrer. Réessaie.")), 0);
+      }
       dernierFini =
         sommeils.filter((s) => s.fin).sort((a, b) => new Date(b.fin) - new Date(a.fin))[0] ||
         (await api(TABLE, `?select=${COLONNES}&fin=not.is.null&order=fin.desc&limit=1`))[0] ||
@@ -29,12 +35,17 @@
     btn.disabled = true;
     const quand = heureChoisie("sleep-heure");
     try {
+      // Dodo lancé il y a plus de 12 h : réveil oublié, on demande l'heure (ou on l'efface)
+      if (enCours && dodoOublie(enCours.debut) && !$("sleep-heure").value) {
+        await reglerDodoOublie(enCours);
+        return;
+      }
       if (enCours) {
         if (quand <= new Date(enCours.debut)) {
           afficherErreur("L'heure du réveil doit être après l'heure d'endormissement.");
           return;
         }
-        await api(TABLE, `?id=eq.${enCours.id}`, { method: "PATCH", body: JSON.stringify({ fin: quand.toISOString() }) });
+        await modifierLigne(TABLE, enCours, { fin: quand.toISOString() }, CHAMPS_GARDE.sommeils);
         toast(`☀️ Bon réveil ! Dodo de ${fmtMinutes(quand - new Date(enCours.debut))}`);
       } else {
         const id = await ajouterLigne(TABLE, { debut: quand.toISOString() });
@@ -53,6 +64,15 @@
     }
   }
 
+  async function reglerDodoOublie(s) {
+    const r = await demanderReveilOublie(s.debut);
+    if (!r) return;
+    if (r.effacer) await api(s.garde_id ? "garde_evenements" : TABLE, `?id=eq.${s.garde_id || s.id}`, { method: "DELETE" });
+    else await modifierLigne(TABLE, s, { fin: r.fin.toISOString() }, CHAMPS_GARDE.sommeils);
+    toast(r.effacer ? "🗑️ Dodo effacé" : `☀️ Réveil noté à ${fmtHeure(r.fin)}`);
+    await rechargerTout();
+  }
+
   async function modifier(s) {
     const champs = [{ cle: "debut", label: "Endormi à", type: "time", valeur: hhmm(s.debut) }];
     if (s.fin) champs.push({ cle: "fin", label: "Réveillé à", type: "time", valeur: hhmm(s.fin) });
@@ -69,7 +89,7 @@
       maj.fin = fin.toISOString();
     }
     try {
-      await api(TABLE, `?id=eq.${s.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      await modifierLigne(TABLE, s, maj, CHAMPS_GARDE.sommeils);
       toast("✏️ Dodo modifié");
       afficherErreur(null);
       await charger();

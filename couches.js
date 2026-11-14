@@ -108,7 +108,7 @@
       caca_texture: v.caca ? v.caca_texture : null,
     };
     try {
-      await api(TABLE, `?id=eq.${c.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      await modifierLigne(TABLE, c, maj, CHAMPS_GARDE.couches);
       toast("✏️ Couche modifiée");
       await charger();
     } catch (e) {

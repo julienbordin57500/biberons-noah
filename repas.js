@@ -138,7 +138,7 @@
       maj.lait = v.lait;
     }
     try {
-      await api(TABLE, `?id=eq.${r.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      await modifierLigne(TABLE, r, maj, CHAMPS_GARDE.biberons);
       toast("✏️ Repas modifié");
       await charger();
     } catch (e) {
