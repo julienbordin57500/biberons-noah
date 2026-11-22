@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=44">
+  <link rel="stylesheet" href="style.css?v=45">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -331,7 +331,8 @@
         </section>
 
         <section class="card add-card">
-          <div class="mode" role="tablist" aria-label="Type de repas">
+          <!-- Plus d'allaitement : seul le biberon est proposé (les anciens allaitements restent dans l'historique) -->
+          <div class="mode" role="tablist" aria-label="Type de repas" hidden>
             <button type="button" class="mode-btn" role="tab" data-mode="biberon">
               <span class="emoji" aria-hidden="true">🍼</span><span>Biberon</span>
             </button>
@@ -853,22 +854,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=44"></script>
+  <script src="scene.js?v=45"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=44"></script>
-  <script src="auth.js?v=44"></script>
-  <script src="repas.js?v=44"></script>
-  <script src="couches.js?v=44"></script>
-  <script src="sommeil.js?v=44"></script>
-  <script src="sante.js?v=44"></script>
-  <script src="medicaments.js?v=44"></script>
-  <script src="resume.js?v=44"></script>
-  <script src="sons.js?v=44"></script>
-  <script src="garde.js?v=44"></script>
-  <script src="graphiques.js?v=44"></script>
-  <script src="fetes.js?v=44"></script>
-  <script src="notifs.js?v=44"></script>
-  <script src="tuto.js?v=44"></script>
-  <script src="pages.js?v=44"></script>
+  <script src="commun.js?v=45"></script>
+  <script src="auth.js?v=45"></script>
+  <script src="repas.js?v=45"></script>
+  <script src="couches.js?v=45"></script>
+  <script src="sommeil.js?v=45"></script>
+  <script src="sante.js?v=45"></script>
+  <script src="medicaments.js?v=45"></script>
+  <script src="resume.js?v=45"></script>
+  <script src="sons.js?v=45"></script>
+  <script src="garde.js?v=45"></script>
+  <script src="graphiques.js?v=45"></script>
+  <script src="fetes.js?v=45"></script>
+  <script src="notifs.js?v=45"></script>
+  <script src="tuto.js?v=45"></script>
+  <script src="pages.js?v=45"></script>
 </body>
 </html>

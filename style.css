@@ -1268,3 +1268,4 @@ dialog.sheet::backdrop { touch-action: none; }
   font: inherit; font-size: 1.15rem; font-weight: 800; line-height: 1; color: var(--ink);
   background: var(--chip); border: 2px solid var(--card-border); cursor: pointer;
 }
+.mode[hidden], #page-repas .detail[hidden] { display: none; }

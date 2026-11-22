@@ -27,8 +27,8 @@
     cote: lire("cote", null, (v) => v === null || COTES.includes(v)),
     duree: lire("duree", null, (v) => v === null || DUREES.includes(v)),
   };
-  // La nuit (23 h – 7 h), on propose l'allaitement par défaut
-  let mode = estLaNuit() ? "allaitement" : "biberon";
+  // Plus d'allaitement (arrêté) : seul le biberon est proposé à l'ajout
+  let mode = "biberon";
 
   async function charger() {
     if (!estParent()) return; // réservé aux parents (la famille n'y a pas accès)
@@ -224,6 +224,7 @@
     $(`repas-${prefix}-count`).textContent = liste.length;
     $(`repas-${prefix}-bib`).textContent = `🍼 ${bib.length}` + (ml ? ` · ${ml} ml` : "");
     $(`repas-${prefix}-all`).textContent = `🤱 ${all.length}` + (min ? ` · ${min} min` : "");
+    $(`repas-${prefix}-all`).hidden = !all.length; // plus d'allaitement : on ne montre pas « 🤱 0 »
   }
 
   function rendreMode() {

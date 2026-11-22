@@ -432,7 +432,7 @@
     L.push("🍼 REPAS");
     L.push(`• ${v1(s.repasJour)} repas par jour${evol(s.repasJour, a?.repasJour)}`);
     const pl = (x, mot) => `${v1(x)} ${mot}${x >= 1.95 ? "s" : ""}`;
-    L.push(`• dont ${pl(s.bibJour, "biberon")} et ${pl(s.allJour, "allaitement")} par jour`);
+    if (s.allJour) L.push(`• dont ${pl(s.bibJour, "biberon")} et ${pl(s.allJour, "allaitement")} par jour`);
     if (s.mlJour) L.push(`• ${Math.round(s.mlJour)} ml de lait au biberon par jour${evol(s.mlJour, a?.mlJour, " ml", (x) => Math.round(x))}`);
     if (s.bibMoyen) L.push(`• biberon moyen : ${Math.round(s.bibMoyen)} ml`);
     if (s.plusGrosBib) L.push(`• plus gros biberon : ${s.plusGrosBib} ml`);
