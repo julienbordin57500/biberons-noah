@@ -1,3 +1,8 @@
+/* Les couleurs du ciel peuvent glisser de l'une à l'autre (aube, coucher de soleil…) */
+@property --sky-top { syntax: "<color>"; inherits: true; initial-value: #ffd27a; }
+@property --sky-bottom { syntax: "<color>"; inherits: true; initial-value: #ffeec9; }
+@property --sun { syntax: "<color>"; inherits: true; initial-value: #ffb627; }
+:root { transition: --sky-top 4s ease, --sky-bottom 4s ease, --sun 4s ease; }
 :root {
   --sky-top: #ffd27a;
   --sky-bottom: #ffeec9;
@@ -1352,4 +1357,76 @@ html:root.nuit-douce {
   --late: #e08068;
   --shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
   color-scheme: dark;
+}
+
+/* ---------- Le ciel suit l'heure (téléphone en mode clair) ---------- */
+@media (prefers-color-scheme: light) {
+  html:root.ciel-aube { --sky-top: #f7b9b0; --sky-bottom: #ffe9d6; --sun: #ffc46b; }
+  html:root.ciel-couchant { --sky-top: #f2934f; --sky-bottom: #ffd9a8; --sun: #ff9a3c; }
+  html:root.ciel-crepuscule { --sky-top: #9c6384; --sky-bottom: #f4b07a; --sun: #ffb36b; }
+}
+
+/* ---------- Lucioles (mode nuit doux) : derrière les cartes, jamais sur les boutons ---------- */
+.lucioles { position: absolute; inset: 0; display: none; }
+html:root.nuit-douce .lucioles { display: block; }
+.lucioles i {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%; opacity: 0;
+  background: #ffdc85; box-shadow: 0 0 6px 2px rgba(255, 205, 110, .5);
+  animation: luciole 11s ease-in-out infinite;
+}
+.lucioles i:nth-child(1) { left: 8%; top: 18%; animation-delay: 0s; }
+.lucioles i:nth-child(2) { left: 22%; top: 34%; animation-delay: 3.5s; animation-duration: 13s; }
+.lucioles i:nth-child(3) { left: 41%; top: 12%; animation-delay: 6s; }
+.lucioles i:nth-child(4) { left: 63%; top: 28%; animation-delay: 1.8s; animation-duration: 14s; }
+.lucioles i:nth-child(5) { left: 80%; top: 15%; animation-delay: 8s; }
+.lucioles i:nth-child(6) { left: 92%; top: 42%; animation-delay: 4.6s; animation-duration: 12s; }
+.lucioles i:nth-child(7) { left: 4%; top: 58%; animation-delay: 9.5s; }
+.lucioles i:nth-child(8) { left: 95%; top: 70%; animation-delay: 2.6s; animation-duration: 15s; }
+@keyframes luciole {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: .9; }
+  45% { opacity: .25; transform: translate(14px, -16px); }
+  70% { opacity: .85; }
+  100% { opacity: 0; transform: translate(-10px, -34px); }
+}
+
+/* ---------- Le lion cligne des yeux, et bâille le soir ---------- */
+.lion .eyes-open { transform-origin: 50px 50px; animation: cligne 6s infinite 1s; }
+.lion .baille { opacity: 0; transform-box: fill-box; transform-origin: center top; }
+.soir .lion .baille { animation: baille 18s ease-in-out infinite 4s; }
+.soir .lion .sourire { animation: sourire-cache 18s ease-in-out infinite 4s; }
+@keyframes baille { 0%, 80%, 100% { opacity: 0; transform: scaleY(.2); } 84%, 93% { opacity: 1; transform: scaleY(1); } }
+@keyframes sourire-cache { 0%, 79%, 100% { opacity: 1; } 82%, 95% { opacity: 0; } }
+
+/* ---------- Onglet choisi : l'icône fait un petit saut ---------- */
+.tab-emoji { display: inline-block; }
+.tab[aria-selected="true"] .tab-emoji { animation: saut-onglet .5s cubic-bezier(.3, .7, .4, 1.6); }
+@keyframes saut-onglet { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-7px) scale(1.15); } 100% { transform: translateY(0) scale(1); } }
+
+/* ---------- Cartes qui arrivent en douceur ---------- */
+.arrive { animation: arrive .45s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes arrive { from { opacity: .35; transform: translateY(14px); } }
+
+/* ---------- Liste vide : un petit animal qui respire ---------- */
+.empty[data-animal] { text-align: center; padding: 10px 0 4px; }
+.empty[data-animal]::before {
+  content: attr(data-animal); display: block; font-size: 2.6rem; line-height: 1.2; margin-bottom: 4px;
+  animation: respire 3.5s ease-in-out infinite;
+}
+@keyframes respire { 50% { transform: scale(1.08) rotate(-3deg); } }
+
+/* ---------- Graphique : aujourd'hui ressort, les barres poussent depuis le bas ---------- */
+.chart-col:not(.today):not(.actif) .chart-bar { opacity: .6; }
+.pousse .chart-bar { transform-box: fill-box; transform-origin: bottom; animation: pousse .7s cubic-bezier(.3, .8, .4, 1.15) both; }
+.pousse .chart-col[data-i="1"] .chart-bar { animation-delay: .05s; }
+.pousse .chart-col[data-i="2"] .chart-bar { animation-delay: .1s; }
+.pousse .chart-col[data-i="3"] .chart-bar { animation-delay: .15s; }
+.pousse .chart-col[data-i="4"] .chart-bar { animation-delay: .2s; }
+.pousse .chart-col[data-i="5"] .chart-bar { animation-delay: .25s; }
+.pousse .chart-col[data-i="6"] .chart-bar { animation-delay: .3s; }
+@keyframes pousse { from { transform: scaleY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lucioles, .soir .lion .baille { display: none; }
+  .lion .eyes-open, .tab-emoji, .arrive, .empty[data-animal]::before, .pousse .chart-bar { animation: none !important; }
 }

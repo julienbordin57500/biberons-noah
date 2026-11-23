@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "46";
+const VERSION_APPLI = "47";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -453,13 +453,72 @@ const rechargerTout = () => Promise.all(rubriques.map((r) => r.charger()));
 
 // La nuit, pour l'appli : de 23 h à 7 h
 const estLaNuit = (d = new Date()) => d.getHours() >= 23 || d.getHours() < 7;
-// Mode nuit doux de 22 h à 6 h : couleurs sombres et chaudes (vérifié chaque minute)
+// Le décor suit l'heure (vérifié chaque minute) :
+// aube rosée 6 h – 9 h, coucher de soleil 17 h – 20 h, crépuscule 20 h – 22 h,
+// mode nuit doux 22 h – 6 h (couleurs sombres et chaudes), le lion bâille de 19 h à 23 h
 function majNuitDouce() {
   const h = new Date().getHours();
-  document.documentElement.classList.toggle("nuit-douce", h >= 22 || h < 6);
+  const c = document.documentElement.classList;
+  c.toggle("nuit-douce", h >= 22 || h < 6);
+  c.toggle("ciel-aube", h >= 6 && h < 9);
+  c.toggle("ciel-couchant", h >= 17 && h < 20);
+  c.toggle("ciel-crepuscule", h >= 20 && h < 22);
+  c.toggle("soir", h >= 19 && h < 23);
 }
 majNuitDouce();
 setInterval(majNuitDouce, 60 * 1000);
+
+// Les totaux (nombre de repas, de couches…) défilent jusqu'à leur nouvelle valeur
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const connus = new WeakMap();
+  const enCours = new WeakSet();
+  function defiler(el, de, a) {
+    enCours.add(el);
+    const debut = performance.now();
+    const duree = Math.min(900, 250 + Math.abs(a - de) * 60);
+    (function image(t) {
+      const p = Math.min(1, (t - debut) / duree);
+      const v = Math.round(de + (a - de) * (1 - Math.pow(1 - p, 3)));
+      el.textContent = String(v);
+      if (p < 1) requestAnimationFrame(image);
+      else {
+        el.textContent = String(a);
+        connus.set(el, a);
+        queueMicrotask(() => enCours.delete(el));
+      }
+    })(debut);
+  }
+  const obs = new MutationObserver((changes) => {
+    new Set(changes.map((m) => (m.target.nodeType === 3 ? m.target.parentElement : m.target))).forEach((el) => {
+      if (!el || enCours.has(el)) return;
+      const n = Number(el.textContent);
+      const avant = connus.get(el) ?? 0;
+      if (!Number.isInteger(n) || n === avant) return connus.set(el, n);
+      el.textContent = String(avant); // repart de l'ancienne valeur
+      defiler(el, avant, n);
+    });
+  });
+  document.querySelectorAll('[id$="-count"]').forEach((el) => {
+    connus.set(el, 0);
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+})();
+
+// En arrivant sur une page, ses cartes glissent doucement en place l'une après l'autre
+let derniereVue = null;
+window.addEventListener("page-vue", (e) => {
+  if (e.detail === derniereVue) return;
+  derniereVue = e.detail;
+  const page = $(e.detail);
+  if (!page || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  [...page.querySelectorAll(":scope > section, :scope > .card")].filter((c) => !c.hidden).slice(0, 8).forEach((c, i) => {
+    c.classList.remove("arrive");
+    void c.offsetWidth;
+    c.style.animationDelay = `${i * 60}ms`;
+    c.classList.add("arrive");
+  });
+});
 async function demarrerRafraichissement() {
   await connexionPrete; // fourni par auth.js
   const toutCharger = () => {

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=46">
+  <link rel="stylesheet" href="style.css?v=47">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -24,6 +24,7 @@
     <div class="login-sky" aria-hidden="true">
       <div class="login-sun"></div>
       <div class="stars"></div>
+    <div class="lucioles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <svg class="cloud lc1" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
       <svg class="cloud lc2" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
     </div>
@@ -266,7 +267,8 @@
             <g class="eyes-open"><circle cx="40" cy="50" r="3.6" class="ink"/><circle cx="60" cy="50" r="3.6" class="ink"/></g>
             <path class="eyes-closed ink-stroke" d="M35 50 q5 4 10 0 M55 50 q5 4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/>
             <ellipse cx="50" cy="62" rx="6" ry="4.5" class="ink"/>
-            <path d="M42 70 q8 6 16 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke"/>
+            <path d="M42 70 q8 6 16 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke sourire"/>
+            <ellipse cx="50" cy="73" rx="5" ry="6.5" class="ink baille"/>
             <circle cx="33" cy="62" r="4" class="cheek"/><circle cx="67" cy="62" r="4" class="cheek"/>
           </svg>
         </div>
@@ -380,7 +382,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="repas-list"></ul>
-          <p class="empty" id="repas-empty" hidden>Aucun repas sur les dernières 24 heures.</p>
+          <p class="empty" id="repas-empty" data-animal="🦒" hidden>Pas encore de repas sur les dernières 24 heures.</p>
         </section>
       </div>
 
@@ -449,7 +451,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="couche-list"></ul>
-          <p class="empty" id="couche-empty" hidden>Aucune couche sur les dernières 24 heures.</p>
+          <p class="empty" id="couche-empty" data-animal="🐘" hidden>Pas encore de couche sur les dernières 24 heures.</p>
         </section>
       </div>
 
@@ -499,7 +501,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="sleep-list"></ul>
-          <p class="empty" id="sleep-empty" hidden>Aucun dodo sur les dernières 24 heures.</p>
+          <p class="empty" id="sleep-empty" data-animal="🦁" hidden>Pas encore de dodo : Noah se repose bientôt 💤</p>
         </section>
       </div>
 
@@ -855,22 +857,22 @@
   </dialog>
 
 
-  <script src="scene.js?v=46"></script>
+  <script src="scene.js?v=47"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="commun.js?v=46"></script>
-  <script src="auth.js?v=46"></script>
-  <script src="repas.js?v=46"></script>
-  <script src="couches.js?v=46"></script>
-  <script src="sommeil.js?v=46"></script>
-  <script src="sante.js?v=46"></script>
-  <script src="medicaments.js?v=46"></script>
-  <script src="resume.js?v=46"></script>
-  <script src="sons.js?v=46"></script>
-  <script src="garde.js?v=46"></script>
-  <script src="graphiques.js?v=46"></script>
-  <script src="fetes.js?v=46"></script>
-  <script src="notifs.js?v=46"></script>
-  <script src="tuto.js?v=46"></script>
-  <script src="pages.js?v=46"></script>
+  <script src="commun.js?v=47"></script>
+  <script src="auth.js?v=47"></script>
+  <script src="repas.js?v=47"></script>
+  <script src="couches.js?v=47"></script>
+  <script src="sommeil.js?v=47"></script>
+  <script src="sante.js?v=47"></script>
+  <script src="medicaments.js?v=47"></script>
+  <script src="resume.js?v=47"></script>
+  <script src="sons.js?v=47"></script>
+  <script src="garde.js?v=47"></script>
+  <script src="graphiques.js?v=47"></script>
+  <script src="fetes.js?v=47"></script>
+  <script src="notifs.js?v=47"></script>
+  <script src="tuto.js?v=47"></script>
+  <script src="pages.js?v=47"></script>
 </body>
 </html>
