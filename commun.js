@@ -8,7 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "45";
+const VERSION_APPLI = "46";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -322,10 +322,56 @@ function demanderDoublon(message) {
 // Même chose notée il y a moins de 5 minutes (et l'heure n'a pas été changée à la main)
 const recemment = (date) => Math.abs(Date.now() - new Date(date).getTime()) < 5 * 60000;
 
+// C'est noté : petite vibration (Android ; l'iPhone ne le permet pas), rebond et coche verte
 function animerBouton(btn) {
+  if (!btn) return;
+  try {
+    navigator.vibrate?.(35);
+  } catch (e) {}
   btn.classList.remove("pop");
   void btn.offsetWidth;
   btn.classList.add("pop");
+  btn.querySelector(".coche-ok")?.remove();
+  const coche = document.createElement("span");
+  coche.className = "coche-ok";
+  coche.setAttribute("aria-hidden", "true");
+  coche.textContent = "✓";
+  btn.append(coche);
+  setTimeout(() => coche.remove(), 1100);
+}
+
+// Listes du jour : un petit titre « ☀️ Matin », « 🌤️ Après-midi », « 🌆 Soirée », « 🌙 Nuit »
+// chaque fois qu'on change de moment (la nuit de 22 h à 6 h compte pour un seul bloc)
+const MOMENTS = [
+  [6, "☀️ Matin"],
+  [12, "🌤️ Après-midi"],
+  [18, "🌆 Soirée"],
+  [22, "🌙 Nuit"],
+];
+function avecMoments(liste, dateDe, creerLigne) {
+  const noeuds = [];
+  let avant = null;
+  liste.forEach((x) => {
+    const d = new Date(dateDe(x));
+    const h = d.getHours();
+    // La nuit après minuit appartient à la soirée de la veille
+    const jour = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (h < 6 ? 1 : 0));
+    const i = h < 6 ? 3 : MOMENTS.findLastIndex(([debut]) => h >= debut);
+    const cle = `${jour.toDateString()}-${i}`;
+    if (cle !== avant) {
+      const li = document.createElement("li");
+      li.className = "h-moment";
+      li.setAttribute("aria-hidden", "true");
+      const hier = new Date(minuit().getTime() - 86400000).toDateString() === jour.toDateString();
+      const aujourdhui = minuit().toDateString() === jour.toDateString();
+      // La nuit qui a commencé hier soir, c'est « cette nuit »
+      li.textContent = i === 3 && hier ? "🌙 Cette nuit" : MOMENTS[i][1] + (aujourdhui ? "" : " · hier");
+      noeuds.push(li);
+      avant = cle;
+    }
+    noeuds.push(creerLigne(x));
+  });
+  return noeuds;
 }
 
 // Bouton ✕ : deux appuis pour supprimer, pour éviter les erreurs
@@ -407,6 +453,13 @@ const rechargerTout = () => Promise.all(rubriques.map((r) => r.charger()));
 
 // La nuit, pour l'appli : de 23 h à 7 h
 const estLaNuit = (d = new Date()) => d.getHours() >= 23 || d.getHours() < 7;
+// Mode nuit doux de 22 h à 6 h : couleurs sombres et chaudes (vérifié chaque minute)
+function majNuitDouce() {
+  const h = new Date().getHours();
+  document.documentElement.classList.toggle("nuit-douce", h >= 22 || h < 6);
+}
+majNuitDouce();
+setInterval(majNuitDouce, 60 * 1000);
 async function demarrerRafraichissement() {
   await connexionPrete; // fourni par auth.js
   const toutCharger = () => {

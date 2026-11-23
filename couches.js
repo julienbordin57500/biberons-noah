@@ -170,7 +170,7 @@
     remplirStat("today", couches.filter((c) => new Date(c.change_le) >= debutJour));
     remplirStat("day", couches);
 
-    $("couche-list").replaceChildren(...couches.map(ligneHistorique));
+    $("couche-list").replaceChildren(...avecMoments(couches, (x) => x.change_le, ligneHistorique));
     $("couche-empty").hidden = couches.length > 0;
     contenuChange();
   }

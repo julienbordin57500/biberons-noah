@@ -157,7 +157,7 @@
     tick();
     rendreStats();
 
-    $("sleep-list").replaceChildren(...sommeils.map(ligneHistorique));
+    $("sleep-list").replaceChildren(...avecMoments(sommeils, (x) => x.debut, ligneHistorique));
     $("sleep-empty").hidden = sommeils.length > 0;
     contenuChange();
   }

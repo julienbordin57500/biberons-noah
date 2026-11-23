@@ -41,10 +41,35 @@
         dernier = d || null;
       }
       afficherErreur(null);
+      reprendreDerniereQuantite();
     } catch (e) {
       afficherErreur("Impossible de charger les données. Vérifie la connexion internet.");
     }
     rendre();
+  }
+
+  // Le compteur de ml démarre sur la quantité du dernier biberon (noté par n'importe qui,
+  // garde comprise) : une seule fois par nouveau biberon, pour ne pas défaire un réglage en cours
+  function reprendreDerniereQuantite() {
+    const bib = repas.find((r) => r.type !== "allaitement" && QUANTITES.includes(r.quantite_ml));
+    if (!bib || bib.id === lire("quantite-de", null, (v) => typeof v === "number")) return;
+    ecrire("quantite-de", bib.id);
+    if (bib.quantite_ml !== choix.quantite) majQuantite(bib.quantite_ml);
+  }
+
+  // « Prochain biberon vers 15:40 » : dernier repas + écart habituel (médiane des dernières 24 h)
+  function prochainRepas() {
+    if (!dernier) return null;
+    const heures = repas.map((r) => new Date(r.pris_le).getTime());
+    const ecarts = heures
+      .slice(1)
+      .map((h, i) => heures[i] - h)
+      .filter((e) => e >= 45 * 60000 && e <= 6 * 3600000)
+      .sort((a, b) => a - b);
+    if (ecarts.length < 2) return null;
+    const milieu = ecarts.length >> 1;
+    const habituel = ecarts.length % 2 ? ecarts[milieu] : (ecarts[milieu - 1] + ecarts[milieu]) / 2;
+    return new Date(new Date(dernier.pris_le).getTime() + Math.round(habituel / 300000) * 300000);
   }
 
   async function ajouter() {
@@ -174,6 +199,10 @@
     const ecart = Date.now() - new Date(dernier.pris_le).getTime();
     el.textContent = fmtDuree(ecart);
     couleurMinuteur(el, ecart, WARN_MS, LATE_MS);
+    const p = $("repas-prochain");
+    const prochain = repasDeNuit() ? null : prochainRepas();
+    p.hidden = !prochain;
+    if (prochain) p.textContent = prochain > Date.now() ? `Prochain biberon vers ${fmtHeure(prochain)}` : `Prochain biberon : c'était prévu vers ${fmtHeure(prochain)}`;
   }
 
   function rendre() {
@@ -197,7 +226,7 @@
     remplirStat("today", repas.filter((r) => new Date(r.pris_le) >= debutJour));
     remplirStat("day", repas);
 
-    $("repas-list").replaceChildren(...repas.map(ligneHistorique));
+    $("repas-list").replaceChildren(...avecMoments(repas, (x) => x.pris_le, ligneHistorique));
     $("repas-empty").hidden = repas.length > 0;
     contenuChange();
   }

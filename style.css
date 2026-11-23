@@ -206,6 +206,8 @@ body {
   :root:not([data-theme="light"]) .sun-face .cheek { opacity: 0; }
 }
 :root[data-theme="dark"] .stars { opacity: 1; }
+html:root.nuit-douce .stars { opacity: .55; }
+html:root.nuit-douce .sun-face .cheek { opacity: 0; }
 .stars {
   background-image:
     radial-gradient(2px 2px at 12% 20%, #fff 50%, transparent 51%),
@@ -269,6 +271,12 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 
 /* Minuteur */
 .timer-card { text-align: center; padding: 20px 18px; }
+/* « Prochain biberon vers 15:40 » : petite pastille discrète sous le chrono */
+.prochain {
+  display: inline-block; margin: 10px 0 0; padding: 4px 12px; border-radius: 999px;
+  background: var(--chip); color: var(--ink-soft); font-size: .92rem; font-weight: 600;
+}
+.prochain[hidden] { display: none; }
 .timer {
   margin: 0; font-size: clamp(3rem, 15vw, 4.4rem); font-weight: 700; line-height: 1.05;
   font-variant-numeric: tabular-nums; color: var(--good); transition: color .4s;
@@ -338,6 +346,14 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
   padding: 10px 0; border-top: 2px dashed var(--card-border);
 }
 .history li:first-child { border-top: 0; }
+/* Petit titre de moment de la journée (Matin, Après-midi…) : remplace le pointillé */
+.history li.h-moment {
+  display: flex; align-items: center; gap: 8px; padding: 12px 0 2px; border-top: 0;
+  font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft);
+}
+.history li.h-moment::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: var(--card-border); }
+.history li.h-moment:first-child { padding-top: 2px; }
+.history li.h-moment + li { border-top: 0; }
 .history .h-time { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 4.2ch; }
 .history .h-emoji { font-size: 1.4rem; width: 1.6rem; text-align: center; flex: none; }
 .history .h-info { flex: 1; display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
@@ -927,14 +943,23 @@ body { overscroll-behavior-y: none; }
 .chip:active, .mode-btn:active, .who-btn:active, .g-btn:active, .day-arrow:active, .med-add:active, .pill:active { transform: scale(.95); }
 .del:active { transform: scale(.88); }
 .add-btn { position: relative; overflow: hidden; transition: transform .12s, box-shadow .12s, background .25s; }
-/* Reflet discret sur les gros boutons */
-.add-btn::after {
-  content: ""; position: absolute; inset: 0 auto 0 -60%; width: 40%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .28), transparent);
-  transform: skewX(-20deg); animation: reflet 5s ease-in-out infinite 2s; pointer-events: none;
+/* C'est noté : le bouton rebondit et une coche verte apparaît une seconde */
+.g-tuile { position: relative; }
+.add-btn.pop, .g-tuile.pop { animation: rebond-ok .45s cubic-bezier(.3, .7, .4, 1.5); }
+@keyframes rebond-ok { 35% { transform: scale(1.05); } 65% { transform: scale(.98); } }
+.coche-ok {
+  position: absolute; top: 6px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .95rem; font-weight: 800; line-height: 1;
+  background: var(--good); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, .2);
+  pointer-events: none; animation: coche-ok 1s ease forwards;
 }
-@keyframes reflet { 0%, 70% { left: -60%; } 100% { left: 130%; } }
-.add-btn:disabled::after { animation: none; }
+@keyframes coche-ok {
+  0% { opacity: 0; transform: scale(.3); }
+  25% { opacity: 1; transform: scale(1.15); }
+  40%, 75% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.8); }
+}
+@media (prefers-reduced-motion: reduce) { .add-btn.pop, .g-tuile.pop, .coche-ok { animation-duration: .01s; } }
 
 /* Pastilles choisies : petit rebond */
 .chip[aria-checked="true"], .mode-btn[aria-selected="true"], .mode-btn.toggle[aria-pressed="true"] { animation: choisi .3s cubic-bezier(.3, .7, .4, 1.6); }
@@ -1269,3 +1294,62 @@ dialog.sheet::backdrop { touch-action: none; }
   background: var(--chip); border: 2px solid var(--card-border); cursor: pointer;
 }
 .mode[hidden], #page-repas .detail[hidden] { display: none; }
+
+/* Mode nuit doux (22 h – 6 h, quel que soit le réglage du téléphone) :
+   tons sombres et chauds, texte moins blanc, pour ne pas s'éblouir au biberon de nuit */
+html:root.nuit-douce {
+  --sky-top: #120c0a;
+  --sky-bottom: #2a1a12;
+  --sun: #d9c79a;
+  --sun-face: #6e5f44;
+  --cloud: #3a2a22;
+  --hill-back: #2e1f17;
+  --hill-front: #22160f;
+  --acacia: #2a2a1c;
+  --trunk: #20150f;
+  --giraffe: #8f6f45;
+  --giraffe-spot: #573a22;
+  --giraffe-dark: #775b36;
+  --muzzle: #a68c63;
+  --elephant: #6c6670;
+  --elephant-dark: #57525c;
+  --ear-in: #87686c;
+  --meerkat: #806446;
+  --meerkat-belly: #9c8562;
+  --pond: #2f3d52;
+  --pond-shine: #6f7f94;
+  --bird-body: #4f6a82;
+  --bird-belly: #85739a;
+  --bird-wing: #3a5068;
+  --bird-wing-back: #2e3f52;
+  --bird2-body: #946748;
+  --bird2-wing: #744f37;
+  --bird2-wing-back: #5b3e2b;
+  --sleep: #a99bd8;
+  --wake: #d9aa4f;
+  --couche: #6aa8a4;
+  --sante: #d9786f;
+  --chart-repas: #c07a42;
+  --chart-sommeil: #9488cf;
+  --garde: #c99558;
+  --milk: #d99550;
+  --breast: #c98aa5;
+
+  --card: rgba(36, 24, 18, 0.93);
+  --card-border: #4a3426;
+  --ink: #ead2b4;
+  --ink-soft: #a88c70;
+  --accent: #d48c4a;
+  --accent-ink: #1e1208;
+  --chip: #33241a;
+  --chip-on: #c9a052;
+  --chip-on-ink: #1e1208;
+  --mane: #9c5c2a;
+  --lion: #c99a52;
+  --cheek: #b87a62;
+  --good: #8fb866;
+  --warn: #d9a548;
+  --late: #e08068;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}

@@ -360,6 +360,7 @@
         method: "POST",
         body: JSON.stringify({ quand: new Date().toISOString(), gardien: moi.nom, ...ligne }),
       });
+      animerBouton($({ repas: "g-t-biberon", couche: "g-t-couche", sommeil: "g-t-dodo" }[ligne.type]));
       toast(msg);
       afficherErreur(null);
       await charger();
